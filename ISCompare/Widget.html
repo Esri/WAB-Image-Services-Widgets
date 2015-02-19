@@ -1,0 +1,14 @@
+<div>
+    <select id="compare" data-dojo-type="dijit/form/Select" style="height:12px;">
+        <option value="Transparency">Transparency</option>
+        <option value="Swipe">Swipe</option>
+    </select>
+    <div id="primaryOpacity" data-dojo-attach-point="transparency" style="width:180px;display:inline-block;position: relative;top: 15px;" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="value:0,minimum: 0,maximum:1,intermediateChanges:true,showButtons:true">
+        <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration" style="height:5px;"></div>
+        <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration" style="height:1em;font-size:75%;color:gray;">
+            <li>0%</li>
+            <li>50%</li>
+            <li>100%</li>
+        </ol>
+    </div>
+</div>

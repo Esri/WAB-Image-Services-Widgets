@@ -1,0 +1,31 @@
+<div>
+    <div data-dojo-attach-point="result" style="display:none;">
+        <input id="resultShow" data-dojo-type="dijit/form/CheckBox" checked/> <div style="width:60px;display:inline-block;"><label for="resultShow">Result</label></div>
+    </div>
+    <div>
+        <br/>
+        <input id="primaryShow" data-dojo-type="dijit/form/CheckBox" checked/>
+        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'primaryShow',position:['below']">
+            Primary
+        </div>
+        <select id="imageView" data-dojo-type="dijit/form/Select" style="width:130px;height:12px;">
+        </select>
+        <button data-dojo-type="dijit/form/Button" type="button" id="secondaryBtn"><img src="widgets/ISLayers/images/down.png" height="15"/></button>
+        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'secondaryBtn',position:['below']">
+            Copy primary to secondary
+        </div>
+    </div>
+    <div>
+        <br/>
+        <input id="secondaryShow" data-dojo-type="dijit/form/CheckBox" checked/>
+        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'secondaryShow',position:['below']">
+            Secondary
+        </div>
+        <input id="secondary" data-dojo-type="dijit/form/TextBox" disabled style="width:130px;height:22px;"/>
+        <button data-dojo-type="dijit/form/Button" type="button" id="toggleLayers"><img src="widgets/ISLayers/images/toggle.png" height="15"/></button>
+        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'toggleLayers',position:['below']">
+            Swap primary and secondary
+        </div>
+    </div>
+    <br/>
+</div>

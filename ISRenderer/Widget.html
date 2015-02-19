@@ -1,0 +1,75 @@
+<div>
+    <div>
+        <br/>
+        <select id="service_functions" data-dojo-type="dijit/form/Select" style="width:80px;height:12px;">
+        </select>
+        <div data-dojo-attach-point="stretchDiv" style="display:inline">
+            <div data-dojo-type="dijit/form/DropDownButton">
+                <span><img src="widgets/ISRenderer/images/props.png" height="15"/></span>
+                <div data-dojo-type="dijit/TooltipDialog">
+                    <h4>Stretch Parameters</h4>
+                    <hr>
+                    <br />
+                    <img src="widgets/ISRenderer/images/red.png" height="12" width="12" >  <div style="width:10px;display:inline-block">R</div> 
+                    <select data-dojo-type="dijit/form/Select" id="Red" style="width:20px;height:12px;position: relative;top: -2px;;">
+                    </select>
+                    <img src="widgets/ISRenderer/images/green.png" height="12" width="12" style="margin-left: 10px;">  <div style="width:10px;display:inline-block;">G</div>
+                    <select data-dojo-type="dijit/form/Select" id="Green" style="width:20px;height:12px;position: relative;top: -2px;">
+                    </select>
+                    <img src="widgets/ISRenderer/images/blue.png" height="12" width="12" style="margin-left: 10px;">  <div style="width:10px;display:inline-block;">B</div>
+                    <select data-dojo-type="dijit/form/Select" id="Blue" style="width:20px;height:12px;position: relative;top: -2px;">
+                    </select>
+                    <br/>
+                    <br/>
+                    <div style="width:80px;display:inline-block;"><label for="StretchType">Stretch Type</label></div>:
+                    <select id="StretchType" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
+                        <option value=5>Minimum and Maximum</option>
+                        <option value=3>Standard Deviation</option>
+                        <option value=6>Percent Clip</option>
+                    </select>
+
+                    <input id="DRA" data-dojo-type="dijit/form/CheckBox" style="margin-left:10px;"/> <label for="DRA">DRA</label>
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'DRA',position:['below']">
+                        Dynamic Range Adjustment updates enhancement based on current view
+                    </div>
+                    <br/>
+                    <br/>
+                    <div style="width:80px;display:inline-block;"><label for="Gamma">Gamma</label></div>:
+                    <div style="width:150px;display:inline-block;position: relative;top: 8px;" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="value:0,minimum:-10,maximum:10,intermediateChanges:true,showButtons:true" id="Gamma">
+                        <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration" style="height:1em;font-size:75%;color:gray;">
+                            <li>0.1</li>
+                            <li>10</li>
+                        </ol>
+                    </div><div data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:0.1,max:10}, value:1" id="Gamma_label" style="width:55px;height:30px;position: relative;top: -4px;"></div>
+                    <div data-dojo-attach-point="StdDev">
+                        <br/>      
+                        <br/>
+                        <div style="width:80px;display:inline-block;"><label for="NumberOfStandardDeviations"># of Std. Dev.</label></div>:
+                        <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0}, value:2" id="NumberOfStandardDeviations" style="width:65px;height:25px;"></div>
+                    </div>
+                    <div data-dojo-attach-point="PercentClip">
+                        <br/>
+                        <br/>
+                        <div style="width:80px;display:inline-block;"><label for="MaxPercent">Exclude top</label></div>:
+                        <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:100}, value:2" id="MaxPercent" style="width:65px;height:25px;"></div>
+                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'MaxPercent',position:['below']">
+                            Exclude top x percentage of histogram
+                        </div>
+                        <div style="width:90px;display:inline-block;"> <label for="MinPercent">Exclude bottom</label></div>:
+                        <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:100}, value:2" id="MinPercent" style="width:65px;height:25px;"></div>
+                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'MinPercent',position:['below']">
+                            Exclude bottom x percentage of histogram
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display:inline-block;">
+            <button data-dojo-type="dijit/form/Button" type="button" id="idapply">Apply</button>
+            <div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

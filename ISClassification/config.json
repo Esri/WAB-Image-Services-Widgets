@@ -1,0 +1,32 @@
+{
+   "nlcdData" : [
+  { "id": 10, "value": "10", "name": "Water", "color": "#5475A8" },
+  { "id": 11, "value": "11", "name": "Open Water", "color": "#5475A8" },
+  { "id": 12, "value": "12", "name": "Perennial Ice/Snow", "color": "#ffffff" },
+  { "id": 20, "value": "20", "name": " Developed", "color": "#E8D1D1" },
+  { "id": 21, "value": "21", "name": "Developed, Open Space", "color": "#E8D1D1" },
+  { "id": 22, "value": "22", "name": "Developed, Low Intensity", "color": "#E29E8C" },
+  { "id": 23, "value": "23", "name": "Developed, Medium Intensity", "color": "#ff0000" },
+  { "id": 24, "value": "24", "name": "Developed High Intensity", "color": "#B50000" },
+  { "id": 30, "value": "30", "name": " Barren", "color": "#D2CDC0" },
+  { "id": 31, "value": "31", "name": "Barren Land (Rock/Sand/Clay)", "color": "#D2CDC0" },
+  { "id": 40, "value": "40", "name": "Forest", "color": "#85C77E" },
+  { "id": 41, "value": "41", "name": "Deciduous Forest", "color": "#85C77E" },
+  { "id": 42, "value": "42", "name": "Evergreen Forest", "color": "#38814E" },
+  { "id": 43, "value": "43", "name": "Mixed Forest", "color": "#D4E7B0" },
+  { "id": 50, "value": "50", "name": " Shrubland", "color": "#AF963C" },
+  { "id": 51, "value": "51", "name": "Dwarf Scrub", "color": "#AF963C" },
+  { "id": 52, "value": "52", "name": "Shrub/Scrub", "color": "#DCCA8F" },
+  { "id": 70, "value": "70", "name": " Herbaceous", "color": "#FDE9AA" },
+  { "id": 71, "value": "71", "name": "Grassland/Herbaceous", "color": "#FDE9AA" },
+  { "id": 72, "value": "72", "name": "Sedge/Herbaceous", "color": "#D1D182" },
+  { "id": 73, "value": "73", "name": "Lichens", "color": "#A3CC51" },
+  { "id": 74, "value": "74", "name": "Moss", "color": "#82BA9E" },
+  { "id": 80, "value": "80", "name": "Planted/Cultivated", "color": "#FBF65D" },
+  { "id": 81, "value": "81", "name": "Pasture/Hay", "color": "#FBF65D" },
+  { "id": 82, "value": "82", "name": "Cultivated Crops", "color": "#CA9146" },
+  { "id": 90, "value": "90", "name": "Wetlands", "color": "#C8E6F8" },
+  { "id": 91, "value": "91", "name": "Woody Wetlands", "color": "#C8E6F8" },
+  { "id": 95, "value": "95", "name": "Emergent Herbaceous Wetlands", "color": "#64B3D5" }
+]
+}

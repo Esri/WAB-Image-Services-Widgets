@@ -1,0 +1,19 @@
+@import "http://js.arcgis.com/3.9/js/dojo/dojox/grid/resources/claroGrid.css";
+
+#grid {
+  width: 43em;
+  height: 20em;
+}
+
+.dojoxGrid table {
+  margin: 0;
+}
+
+.disabled {
+  color: #808080;
+}
+
+#title {
+  font-size: 8pt;
+  padding-left: 10px;
+}

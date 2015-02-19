@@ -1,0 +1,8 @@
+#chartDialog_underlay {
+    visibility: hidden;
+}
+
+circle {
+    fill : red;
+    fill-opacity: 0.7;
+}

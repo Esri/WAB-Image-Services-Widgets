@@ -1,0 +1,23 @@
+<div>
+    <input id="panRadio" data-dojo-type="dijit/form/RadioButton" name="tools" value="0" checked="checked" type="radio" data-dojo-attach-point="panRadio" />
+    <label for="panRadio">Pan</label>
+    <input id="drawRadio" data-dojo-type="dijit/form/RadioButton" name="tools" value="2" type="radio" data-dojo-attach-point="drawRadio" />
+    <label for="drawRadio">Draw</label>
+    <input id="editRadio" data-dojo-type="dijit/form/RadioButton" name="tools" value="3" type="radio" disabled data-dojo-attach-point="editRadio" />
+    <label for="editRadio">Edit</label>
+    <br/>
+    <br/>
+    <div data-dojo-attach-point="gridNode" style="width: 300px; height: 300px"></div>
+    <br>
+    <button data-dojo-type="dijit/form/Button" type="button" disabled data-dojo-attach-point="removeBtn" data-dojo-attach-event="onClick:_onRemoveClick">Remove</button>
+    <button data-dojo-type="dijit/form/Button" type="button" disabled data-dojo-attach-point="classifyBtn" data-dojo-attach-event="onClick:_onClassifyClick">Classify</button>
+    <button data-dojo-type="dijit/form/Button" type="button" disabled data-dojo-attach-point="unclassifyBtn" data-dojo-attach-event="onClick:_onUnclassifyClick">Un-classify</button>
+    <div data-dojo-attach-point="selectClassDialog" data-dojo-type="dijit/Dialog" title="Select a class">
+        <select data-dojo-attach-point="classCombo" data-dojo-type="dijit/form/ComboBox">
+        </select>
+        <button data-dojo-type="dijit/form/Button" data-dojo-attach-event="onClick:_onAddTrainingClick" type="button">Ok</button>
+        <button data-dojo-type="dijit/form/Button" data-dojo-attach-event="onClick:_onCancelTrainingClick" type="button">Cancel</button>
+        <div data-dojo-attach-point="selInfoNode"></div>
+    </div>
+    <div data-dojo-attach-point="infoNode"></div>
+</div>

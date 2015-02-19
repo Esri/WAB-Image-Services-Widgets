@@ -1,0 +1,52 @@
+<div>
+    <div>
+        <div style="width:55px;display:inline-block;"><label for="mosaicMethod">Order by</label></div>:
+        <select id="mosaicMethod" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
+            <option value='esriMosaicNone'>Only Scale</option>
+            <option value="esriMosaicAttribute">An attribute</option>
+            <option value="esriMosaicCenter">Image center closest to center</option>
+            <option value="esriMosaicNorthwest">Fixed order w/ most NW on top</option>
+            <option value="esriMosaicNadir">Sensor location closest to center</option>
+            <option value="esriMosaicSeamline">Defined Seamlines</option>
+            <option value="esriMosaicLockRaster">A list of images</option>
+        </select>
+        <div data-dojo-type="dijit/form/DropDownButton">
+            <span><img src="widgets/ISDisplayOrder/images/props.png" height="15"/></span>
+            <div data-dojo-type="dijit/TooltipDialog">
+                <div data-dojo-attach-point="notseamline">
+                    <br/>
+                    <input id="ascending" data-dojo-type="dijit/form/CheckBox" /> <label for="ascending">Reverse the order</label>
+                </div>
+                <div>
+                    <br/>
+                    <div style="width:100px;display:inline-block;"><label for="mosaicOperation">Mosaic Operation</label></div>:
+                    <select id="mosaicOperation" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
+                        <option value='MT_FIRST'>Only highest priority</option>
+                        <option value="MT_BLEND">Blend pixel values</option>
+                        <option value="MT_MIN">Minimum of pixel values</option>
+                        <option value="MT_MAX">Maximum of pixel values</option>
+                        <option value="MT_MEAN">Average of pixel values</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div data-dojo-attach-point="attribute">
+            <br/>
+            <div style="width:55px;display:inline-block;"><label for="sortField">Attribute</label></div>:
+            <select id="sortField" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
+            </select>
+            <div style="display:inline-block;"><label for="sortValue"> Priority</label></div>:
+            <div data-dojo-type="dijit/form/TextBox" id="sortValue" style="width:35px;height:30px;"></div>
+        </div>
+        <div data-dojo-attach-point="lockraster">
+            <br/>
+            <div style="width:60px;display:inline-block;"><label for="lockRasterIds">Image IDs</label></div>:
+            <input id="lockRasterIds" style="width:100px;height:30px;" data-dojo-type="dijit/form/TextBox" />
+        </div>
+        <div>
+            <button data-dojo-type="dijit/form/Button" type="button" id="mrapply">Apply</button>
+        </div>
+    </div>
+</div>
+
+

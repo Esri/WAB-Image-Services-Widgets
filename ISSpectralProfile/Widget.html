@@ -1,0 +1,16 @@
+<div>
+    <label for="type">Type : </label><select id="type" data-dojo-type="dijit/form/Select">
+        <option value="nonTemporal">Current Image</option>
+        <option value="temporal">Overlapping Images</option>
+        <option value="NDVI">Vegetation Health(NDVI)</option>
+    </select>
+    <br /><br/>
+    <label>Draw Point</label>
+    <div data-dojo-attach-point="drawBox" data-dojo-type="jimu/dijit/DrawBox" data-dojo-props='types:["point"],showClear:true' style="margin-top:5px;"></div>
+    <div data-dojo-type="dijit/Dialog" id="chartDialog" title="Spectral Profile" style="background-color: white;">
+        <div>
+            <div id="chartNode" style="float:left;width: 900px; height: 400px;"></div>
+            <div id="legend" style="float:right;"></div>
+        </div>
+    </div>
+</div>

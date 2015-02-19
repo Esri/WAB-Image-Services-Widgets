@@ -1,0 +1,42 @@
+<div>
+    <input data-dojo-type="dijit/form/CheckBox" id="timeFilter"/> <label for="timeFilter">Time Filter</label>
+    <div data-dojo-attach-point="filterDiv" style="display:none;">
+        <div>
+            <br/>
+            Date(s): 
+            <div data-dojo-attach-point="dateRange" style="display:inline-block"></div>
+            [<div data-dojo-attach-point="imageCount" style="display:inline-block"></div>]
+        </div>
+        <div>
+            <br/>
+            <div  style="float:right;display:inline-block;">
+                <button data-dojo-type="dijit/form/Button" type="button" id="refreshTimesliderBtn"><img src="widgets/ISTimeFilter/images/refresh.png" height="15"/></button>
+                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'refreshTimesliderBtn',position:['below']">
+                    Refresh query based on current extent’
+                </div>
+            </div>
+            <div data-dojo-attach-point='timeSliderDiv'>
+            </div> 
+        </div>
+        <div>
+            <br/>
+            Show: 
+            <select id="show" data-dojo-type="dijit/form/Select" style="width:50px;height:12px;">
+                <option value="image">Image</option>
+                <option value="footprint">Footprint</option>
+            </select>
+            &nbsp;Age: 
+            <input id="subtractValue" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:31}, value:0" style="width:60px;height:28px;"/>
+            <select id="subtractDateString" data-dojo-type="dijit/form/Select" style="width:50px;height:12px;">
+                <option value="days" selected>Day(s)</option>
+                <option value="weeks" selected>Week(s)</option>
+                <option value="months">Month(s)</option>
+                <option value="years">Year(s)</option>
+            </select> 
+        </div>
+    </div>
+    <div>
+        <br/>
+        <div data-dojo-attach-point="errorDiv" style="color:red;"></div>
+    </div>
+</div>

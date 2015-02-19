@@ -1,0 +1,17 @@
+{
+  "name": "ISClassification",
+  "label" : "IS Classification",
+  "platform": "HTML",
+  "version": "",
+  "author": "Esri R&D Center Beijing",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasLocale" : false,
+    "hasSettingPage" : false,
+    "hasSettingUIFile" : false,
+    "hasSettingLocale" : false,
+    "hasSettingStyle" : false
+  }
+}
