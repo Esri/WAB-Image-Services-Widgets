@@ -92,54 +92,22 @@ define([
                 clearDateRange: function() {
                     html.set(this.secondaryDate, '');
                 },
-                changeDateRange: function() {
-                    this.previousPrimary = this.primaryLayer;
-                    if (this.map.getLayer("resultLayer")) {
-                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                        this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
-                    } else {
-                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
-                        this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                    }
-
-                    if (this.previousPrimary != this.primaryLayer) {
-                        this.primaryLayer.on("visibility-change", lang.hitch(this, this.changeDateRange));
-                    }
-
-                    if (this.secondaryLayer && !this.primaryLayer.visible && this.secondaryLayer.visible) {
-
-                        var layersRequest = esriRequest({
-                            url: this.secondaryLayer.url,
-                            content: {f: "json"},
-                            handleAs: "json",
-                            callbackParamName: "callback"
-                        });
-
-                        layersRequest.then(lang.hitch(this, function(data) {
-                            var timeInfo = data.timeInfo;
-                            if (timeInfo) {
-                                var field = timeInfo.startTimeField;
-                                if (field) {
-                                    this.dateField = field;
-                                } else {
-                                    this.dateField = null;
-                                }
-                            } else {
-                                this.dateField = null;
-                            }
-
-                            if (this.dateField) {
+                secondarydate : function()
+                {
+                    if (this.dateField) {
                                 var layer = this.secondaryLayer;
-                                var query = new Query();
+                                var query1 = new Query();
                                 var e = this.map.extent;
                                 var polygonJson = {
                                     "rings": [[[e.xmin, e.ymin], [e.xmin, e.ymax], [e.xmax, e.ymax], [e.xmax, e.ymin], [e.xmin, e.ymin]]],
                                     "spatialReference": new SpatialReference(e.spatialReference)
                                 };
 //                        query.geometry = new Extent(e.xmin, e.ymin, e.xmax, e.ymax, new SpatialReference(e.spatialReference));
-                                query.geometry = new Polygon(polygonJson);
-                                query.outFields = ["*"];
-                                var queryVisible = layer.queryVisibleRasters(query);
+                                query1.geometry = new Polygon(polygonJson);
+                               // query1.outFields = ["*"];
+                               query1.outFields=[this.dateField];
+                                query1.returnGeometry = false;
+                                var queryVisible = layer.queryVisibleRasters(query1);
                                 queryVisible.then(lang.hitch(this, function(result) {
                                     var dates = [];
                                     for (var i = 0; i < result.length; i++) {
@@ -171,11 +139,54 @@ define([
                             } else {
                                 html.set(this.secondaryDate, '');
                             }
-
-                        }));
-
-
+                },
+                changeDateRange: function() {
+                    this.previousPrimary = this.primaryLayer;
+                    if (this.map.getLayer("resultLayer")) {
+                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                        this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
                     } else {
+                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                        this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                    }
+
+                    if (this.previousPrimary != this.primaryLayer) {
+                        this.primaryLayer.on("visibility-change", lang.hitch(this, this.changeDateRange));
+                    }
+
+                    if (this.secondaryLayer && !this.primaryLayer.visible && this.secondaryLayer.visible) {
+                                if (this.secondaryLayer.timeInfo && this.secondaryLayer.timeInfo.startTimeField) {
+                                var timeInfo = this.secondaryLayer.timeInfo;
+                                var field = timeInfo.startTimeField;
+                                if (field) {
+                                    this.dateField = field;
+                                } else {
+                                    this.dateField = null;
+                                }
+                                this.secondarydate();
+                            } else {
+                               var layersRequest1 = esriRequest({
+                            url: this.secondaryLayer.url,
+                            content: {f: "json"},
+                            handleAs: "json",
+                            callbackParamName: "callback"
+                        });
+                        layersRequest1.then(lang.hitch(this, function(data) {
+                            var timeInfo = data.timeInfo;
+                            if (timeInfo) {
+                           var field = timeInfo.startTimeField;
+                                if (field) {
+                                    this.dateField = field;
+                                } else {
+                                    this.dateField = null;
+                                }
+                       }else {
+                       this.dateField= null;
+                            }
+                            this.secondarydate();
+                            }));
+                        }
+                        } else {
                         html.set(this.secondaryDate, '');
                     }
                 }

@@ -73,6 +73,8 @@ define([
                 secondaryLayer: null,
                 layerSwipe: null,
                 layerList: null,
+                flagval: false,
+                handlerercd: null,
                 startup: function () {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingil" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
@@ -81,23 +83,30 @@ define([
                 postCreate: function () {
                     this.populateServices();
                     this.refreshData();
+
                     if (this.resultLayer) {
                         registry.byId("resultShow").set("checked", this.resultLayer.visible);
                     }
                     if (this.primaryLayer) {
                         registry.byId("primaryShow").set("checked", this.primaryLayer.visible);
+
                     }
                     if (this.secondaryLayer) {
+
+
                         registry.byId("secondaryShow").set("checked", this.secondaryLayer.visible);
+
                     }
 
                     domConstruct.place("<div id='swipewidget'></div>", "map", "after");
                     registry.byId("imageView").on("change", lang.hitch(this, this.createLayer));
-                    registry.byId("secondaryBtn").on("click", lang.hitch(this, this.makeSecondary));
+                    registry.byId("secondary").on("change", lang.hitch(this, this.makeSecondary));
+                    registry.byId("secondaryBtn").on("click", lang.hitch(this, this.makeSecondary1));
                     registry.byId("toggleLayers").on("click", lang.hitch(this, this.toggleLayers));
                     registry.byId("primaryShow").on("change", lang.hitch(this, this.primaryVisibility));
                     registry.byId("secondaryShow").on("change", lang.hitch(this, this.secondaryVisibility));
                     registry.byId("resultShow").on("change", lang.hitch(this, this.resultVisibility));
+
                     if (this.map) {
                         this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
@@ -120,8 +129,10 @@ define([
                             domStyle.set(this.result, "display", "none");
                             this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                             this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+
                         }
                     }
+
                 },
                 populateServices: function () {
                     if (this.map.webMapResponse) {
@@ -129,32 +140,45 @@ define([
                     }
                     this.layerList = [];
                     registry.byId("imageView").removeOption(registry.byId('imageView').getOptions());
+                    registry.byId("secondary").removeOption(registry.byId('secondary').getOptions());
                     for (var i = 0; i < mainLayers.length; i++) {
                         this.layerList[i] = mainLayers[mainLayers.length - i - 1].layerObject;
                         this.layerList[i].title = mainLayers[mainLayers.length - i - 1].title;
                         registry.byId("imageView").addOption({label: this.layerList[i].title, value: "" + i + ""});
-
+                        registry.byId("secondary").addOption({label: this.layerList[i].title, value: "" + i + ""});
                     }
 
                     if (this.config.webmapId) {
                         var getItem = arcgisUtils.getItem(this.config.webmapId);
+
                         getItem.then(lang.hitch(this, function (response) {
-                            for (var i = 0; i < response.itemData.operationalLayers.length; i++) {
+                            var j = 0;
+                            for (var i = response.itemData.operationalLayers.length - 1; i >= 0; i--) {
+
+
                                 this.layerList.push(response.itemData.operationalLayers[i]);
-                                registry.byId("imageView").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (i + mainLayers.length) + ""});
+                                registry.byId("imageView").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + mainLayers.length) + ""});
+                                registry.byId("secondary").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + mainLayers.length) + ""});
+                                j++;
                             }
                         }));
                     }
 
 
+
                     if (!this.secondaryLayerIndex) {
-                        registry.byId("secondary").set("value", this.layerList[1].title);
-                        this.secondaryLayerIndex = 1;
+                        //registry.byId("secondary").set("value", this.layerList[1].title);
+
+                        {
+                            registry.byId("secondary").attr('value', "1");
+                            this.secondaryLayerIndex = 1;
+                        }
                     }
                 },
                 createLayer: function () {
                     if (this.primaryLayer) {
                         this.map.removeLayer(this.primaryLayer);
+
                     }
 
                     this.primaryLayerIndex = registry.byId("imageView").get("value");
@@ -243,12 +267,18 @@ define([
 
                     this.toggle = false;
                 },
-                makeSecondary: function () {
+                makeSecondary1: function ()
+                {
+                    this.flagval = true;
+
                     if (this.secondaryLayer) {
+
                         this.map.removeLayer(this.secondaryLayer);
                     }
+
                     this.secondaryLayerIndex = registry.byId("imageView").get("value");
-                    registry.byId("secondary").set("value", this.layerList[this.secondaryLayerIndex].title);
+                    ;
+                    registry.byId("secondary").attr("value", "" + this.secondaryLayerIndex + "");
 
                     var params = new ImageServiceParameters();
 
@@ -295,22 +325,79 @@ define([
                             this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                         }));
                     }
+
+
+                },
+                makeSecondary: function () {
+                    if (this.flagval)
+                    {
+
+                        this.flagval = false;
+                    }
+                    else
+                    {
+                        if (this.secondaryLayer) {
+                            this.map.removeLayer(this.secondaryLayer);
+
+                        }
+
+                        this.secondaryLayerIndex = registry.byId("secondary").get("value");
+
+
+
+
+                        var secondLayer = new ArcGISImageServiceLayer(
+                                this.layerList[this.secondaryLayerIndex].url,
+                                {
+                                    id: "secondaryLayer",
+                                    // imageServiceParameters: params,
+                                    // opacity: this.primaryLayer.opacity,
+                                    visible: registry.byId("secondaryShow").get("checked"),
+                                    infoTemplate: this.layerList[this.secondaryLayerIndex].url.infoTemplate
+                                });
+
+                        if (this.resultLayer) {
+                            this.map.addLayer(secondLayer, this.map.layerIds.length - 2);
+                            this.map.on("layer-add-result", lang.hitch(this, function () {
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+                            }));
+                        } else {
+                            this.map.addLayer(secondLayer, this.map.layerIds.length - 1);
+                            this.map.on("layer-add-result", lang.hitch(this, function () {
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            }));
+                        }
+                        //}
+                        // this.toggle = false;
+                    }
                 },
                 toggleLayers: function () {
                     if (registry.byId("secondary").get("value")) {
                         this.toggle = true;
                         var indextemp = this.secondaryLayerIndex;
                         this.secondaryBackup = this.secondaryLayer;
-                        this.makeSecondary();
+                        var indextemp1 = this.primaryLayerIndex;
+                        this.primaryBackup = this.primaryLayer;
+
                         if (indextemp != registry.byId("imageView").get("value")) {
+
                             registry.byId("imageView").set("value", "" + indextemp + "");
                         } else {
                             this.createLayer();
+
+                        }
+                        if (indextemp1 != registry.byId("secondary").get("value")) {
+                            registry.byId("secondary").set("value", "" + indextemp1 + "");
+
+                        } else {
+
+                            this.makeSecondary1();
                         }
                     }
                 },
                 primaryVisibility: function () {
                     if (registry.byId("primaryShow").get("checked")) {
+
                         this.primaryLayer.show();
                     } else {
                         this.primaryLayer.hide();
@@ -318,7 +405,10 @@ define([
                 },
                 secondaryVisibility: function () {
                     if (registry.byId("secondaryShow").get("checked")) {
+
                         this.secondaryLayer.show();
+
+
                     } else {
                         this.secondaryLayer.hide();
                     }

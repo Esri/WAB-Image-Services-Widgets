@@ -28,14 +28,15 @@ define([
     "dojo/dom-construct",
     "dijit/registry",
     "esri/toolbars/draw",
+    "dojo/html",
     "dijit/Tooltip"
 ],
-        function(
+        function (
                 declare, connect, array, lang,
                 BaseWidget, _TemplatedMixin, _WidgetsInTemplateMixin,
                 template,
                 Select, ToggleButton,
-                dom, domAttr, domConstruct, registry, Draw) {
+                dom, domAttr, domConstruct, registry, Draw, html) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISMensuration',
@@ -99,30 +100,30 @@ define([
 //                        value: "esriDecimeters",
 //                        label: "Decimeters"
 //                    }],
-                     _UNITS: [ {
+                _UNITS: [{
                         value: "esriFeet",
                         label: "Feet"
-                    },  {
+                    }, {
                         value: "esriMeters",
                         label: "Meters",
                         selected: true
                     }],
-                constructor: function(srcRefNode) {
+                constructor: function (srcRefNode) {
 
                     this.domNode = srcRefNode;
 
                 },
-                postCreate: function() {
+                postCreate: function () {
                     if (this.map) {
                         this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
-                onOpen: function() {
+                onOpen: function () {
                     this.refreshData();
                 },
-                refreshData: function() {
+                refreshData: function () {
                     if (this.map.layerIds) {
                         if (this.map.getLayer("resultLayer")) {
                             this.imageService = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
@@ -133,7 +134,7 @@ define([
                         this._buttonSet(this.imageService);
                     }
                 },
-                startup: function() {
+                startup: function () {
                     var _self = this;
 
                     if (!_self.map) {
@@ -144,7 +145,7 @@ define([
                     if (this.map.loaded) {
                         _self._init();
                     } else {
-                        connect.connect(_self.map, "onLoad", function() {
+                        connect.connect(_self.map, "onLoad", function () {
                             _self._init()
                         });
                     }
@@ -152,7 +153,7 @@ define([
                     this.hideLoading();
                 },
                 //Initialization code here (called by startup)
-                _init: function() {
+                _init: function () {
                     var _self = this;
                     //Load the stylesheet
 
@@ -168,16 +169,16 @@ define([
                     _self.units = 'esriMeters';
 
                     //When we change the units, update the units and fire off a new mensuration request to update the result
-                    _self.unitsSelect.on("change", function(newValue) {
+                    _self.unitsSelect.on("change", function (newValue) {
                         _self.units = newValue;
                         _self.measureBuilding(null);
                     });
 
                     //Buttons - using the _MENSURATIONOPTIONS to simplify construction code with a for loop
-                    require(["dijit/form/Button"], function(Button) {
-                        array.forEach(_self._MENSURATIONOPTIONS, function(option) {
+                    require(["dijit/form/Button"], function (Button) {
+                        array.forEach(_self._MENSURATIONOPTIONS, function (option) {
                             new Button({
-                                onClick: lang.hitch(_self, function() {
+                                onClick: lang.hitch(_self, function () {
                                     _self.drawBuildingHeight(option.method);
                                 }),
                                 title: option.title,
@@ -187,7 +188,7 @@ define([
                     });
                 },
                 //Custom setter for the imageService variable to determine whether the service supports mensuration
-                _setImageServiceAttr: function(/*string (ID)*/serviceID) {
+                _setImageServiceAttr: function (/*string (ID)*/serviceID) {
                     var _self = this;
                     var service = null;
                     //Get the service from the map and find out if it's mensurable
@@ -196,7 +197,7 @@ define([
                         if (service.loaded === true) {
                             _self._buttonSet(service);
                         } else {
-                            service.on("load", function() {
+                            service.on("load", function () {
                                 _self._buttonSet(service);
                             });
                         }
@@ -206,11 +207,11 @@ define([
                 },
                 //Corresponding getter so that the get returns the id, which is what set expects
                 //In nearly every case you should be able to widget.set('attribute', widget.get('attribute'))
-                _getImageServiceAttr: function() {
+                _getImageServiceAttr: function () {
                     return (this.imageService.id)
                 },
                 //Detect whether the image service supports mensuration
-                _buttonSet: function(service) {
+                _buttonSet: function (service) {
                     var isNotMensurable = true;
                     if (service.hasOwnProperty('mensurationCapabilities')) {
                         isNotMensurable = (service.mensurationCapabilities.indexOf('Base-Top Height') < 0);
@@ -218,19 +219,26 @@ define([
 
                     //If the service doesn't support mensuration, disable the buttons
                     var buttons = registry.findWidgets(this.buttonContainer);
-                    array.forEach(buttons, function(button) {
+                    array.forEach(buttons, function (button) {
                         button.set('disabled', isNotMensurable);
                     });
+                    if (isNotMensurable)
+                    {
+                        html.set(this.errorms, "Mensuration is not available on this service.");
+                    } else
+                    {
+                        html.set(this.errorms, "");
+                    }
                 },
                 //Begin measurement- change the cursor and show the line being drawn
-                drawBuildingHeight: function(method) {
+                drawBuildingHeight: function (method) {
                     this.resetHeights();
                     this.measureMethod = method;
                     this.measureLine = null;
                     this.map.setMapCursor('crosshair');
                     this.drawToolbar.activate(esri.toolbars.Draw.LINE);
                 },
-                measureBuilding: function(result) {
+                measureBuilding: function (result) {
                     var _self = this;
                     this.drawToolbar.deactivate();
                     var imageServiceLayer = this.imageService.url;
@@ -243,7 +251,7 @@ define([
                     var fromPoint = _self.measureLine.getPoint(0, 0);
                     var toPoint = _self.measureLine.getPoint(0, 1);
                     domAttr.set('output.info', "innerHTML", 'Measuring building heights...');
-                    require(["dojo/json", "esri/request"], function(JSON, esriRequest) {
+                    require(["dojo/json", "esri/request"], function (JSON, esriRequest) {
                         var contentObj = {
                             fromGeometry: JSON.stringify(fromPoint.toJson()),
                             toGeometry: JSON.stringify(toPoint.toJson()),
@@ -263,7 +271,7 @@ define([
                         });
                     });
                 },
-                onResult: function(response) {
+                onResult: function (response) {
                     domAttr.set('output.info', "innerHTML", '');
                     // ANALYSIS RESULTS - MEASUREMENTS //
                     var measurement = response.height;
@@ -273,7 +281,7 @@ define([
                         places: 2
                     };
                     // UPDATE MEASUREMENT UI //
-                    require(['dojo/number'], function(number) {
+                    require(['dojo/number'], function (number) {
                         domAttr.set('output.MensurationHeight', "innerHTML", number.format(Math.abs(measurement.value), numFormat));
                         domAttr.set('output.HeightUncertainty', "innerHTML", number.format(measurement.uncertainty, numFormat));
                     });
@@ -281,20 +289,20 @@ define([
                     this.map.setMapCursor('default');
 
                 },
-                onResultError: function(error) {
+                onResultError: function (error) {
                     domAttr.set('output.info', "innerHTML", error.message);
                     this.map.setMapCursor('default');
                 },
-                resetHeights: function() {
+                resetHeights: function () {
                     // RESET MEASUREMENT UI //
                     domAttr.set('output.MensurationHeight', "innerHTML", '0.00');
                     domAttr.set('output.HeightUncertainty', "innerHTML", '0.00');
                     domAttr.set('output.info', "innerHTML", '');
                 },
-                showLoading: function() {
+                showLoading: function () {
                     esri.show(dom.byId("loadingim"));
                 },
-                hideLoading: function() {
+                hideLoading: function () {
                     esri.hide(dom.byId("loadingim"));
                 }
             });

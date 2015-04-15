@@ -26,6 +26,7 @@ define([
     "dojo/dom",
     "esri/layers/RasterFunction",
     "esri/layers/MosaicRule",
+    "dojo/html",
     "esri/layers/ArcGISImageServiceLayer",
     "esri/layers/ImageServiceParameters",
     "dojo/dom-construct",
@@ -43,7 +44,7 @@ define([
     "dijit/form/NumberTextBox"
 
 ],
-        function(
+        function (
                 declare,
                 _WidgetsInTemplateMixin,
                 template,
@@ -56,6 +57,7 @@ define([
                 dom,
                 RasterFunction,
                 MosaicRule,
+                html,
                 ArcGISImageServiceLayer,
                 ImageServiceParameters,
                 domConstruct, LayerSwipe, HorizontalSlider, HorizontalRule, HorizontalRuleLabels) {
@@ -70,72 +72,100 @@ define([
                 secondaryLayer: null,
                 layerSwipe: null,
                 layerList: null,
-                startup: function() {
+                startup: function () {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingicd" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
-                onOpen: function() {
+                onOpen: function () {
                     this.refreshData();
                 },
-                refreshData: function() {
+                refreshData: function () {
                     if (this.map.layerIds) {
-                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                        if (this.map.getLayer("resultLayer"))
+                        {
+
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+
+                        }
+                        else
+                        {
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                            this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+
+                        }
+                        if (this.secondaryLayer !== undefined && this.primaryLayer !== undefined) {
+                            if ((this.primaryLayer.mosaicRule !== null) && (this.primaryLayer.mosaicRule.lockRasterIds !== null) && (this.secondaryLayer.mosaicRule !== null) && (this.secondaryLayer.mosaicRule.lockRasterIds !== null))
+                            {
+                                dojo.style(dojo.byId("cd"), "display", "block");
+                                html.set(this.chooseraster, "");
+                            }
+                            else
+                            {
+                                dojo.style(dojo.byId("cd"), "display", "none");
+                                html.set(this.chooseraster, "First use time slider to select an image for both primary and secondary images");
+                            }
+
+                        }
+                        else
+                        {
+                            dojo.style(dojo.byId("cd"), "display", "none");
+                            html.set(this.chooseraster, "First use time slider to select an image for both primary and secondary images");
+                        }
                     }
                 },
-                postCreate: function() {
+                postCreate: function () {
                     registry.byId("icdapply").on("click", lang.hitch(this, this.detectChange));
+
                     if (this.map) {
                         this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
-                detectChange: function() {
-                    var rrule = new RasterFunction();
-                    rrule.rasterFunction = "Arithmetic";
-                    rrule.outputPixelType = "U8";
+                detectChange: function () {
 
+                    if (this.map.getLayer("resultLayer"))
+                    {
+                        this.map.removeLayer(this.map.getLayer('resultLayer'));
+                        this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                        this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+
+                    }
+
+                    dojo.style(dojo.byId("cd"), "display", "block");
+                    html.set(this.chooseraster, "");
                     var raster1 = new RasterFunction();
-                    raster1.rasterFunction = "NDVI";
+                    raster1.functionName = "Grayscale";
                     var args1 = {};
-                    args1.Raster = "$" + registry.byId("raster1").get("value");
-                    args1.VisibleBandID = 4;
-                    args1.InfraredBandID = 5;
-                    raster1.rasterFunctionArguments = args1;
+                    args1.Raster = "$" + this.primaryLayer.mosaicRule.lockRasterIds;
+                    //args1.VisibleBandID = 4;
+                    // args1.InfraredBandID = 5;
+                    args1.ConversionParameters = [0.299, 0.387, 0.314];
+                    raster1.functionArguments = args1;
 
                     var raster2 = new RasterFunction();
-                    raster2.rasterFunction = "NDVI";
+                    raster2.functionName = "Grayscale";
                     var args2 = {};
-                    args2.Raster = "$" + registry.byId("raster2").get("value");
-                    args2.VisibleBandID = 4;
-                    args2.InfraredBandID = 5;
-                    raster2.rasterFunctionArguments = args2;
-
-                    var argmain = {};
-                    argmain.Raster = raster1;
-                    argmain.Raster2 = raster2;
-                    argmain.Operation = "2";
-                    argmain.ExtentType = 0;
-                    argmain.CellsizeType = 1;
-                    rrule.rasterFunctionArguments = argmain;
-
-                    var mainRule = new RasterFunction();
-                    mainRule.functionName = "Remap";
+                    args2.Raster = "$" + this.secondaryLayer.mosaicRule.lockRasterIds;
+                    args2.ConversionParameters = [0.299, 0.387, 0.314];
+                    //args2.VisibleBandID = 4;
+                    // args2.InfraredBandID = 5;
+                    raster2.functionArguments = args2;
+                    var raster3 = new RasterFunction();
+                    raster3.functionName = "Arithmetic";
+                    raster3.OutputPixelType = "U8";
                     var args = {};
-                    args.Raster = rrule;
-                    args.InputRanges = [0, 1, 10, 255];
-                    args.OutputValues = [0, 255];
-                    mainRule.arguments = args;
-                    mainRule.variableName = "Raster";
-
-                    var mrule = new MosaicRule();
-                    mrule.method = MosaicRule.METHOD_LOCKRASTER;
-                    mrule.lockRasterIds = [registry.byId("raster1").get("value"), registry.byId("raster2").get("value")];
-
+                    args.Raster = raster1;
+                    args.Raster2 = raster2;
+                    args.Operation = "2";
+                    args.ExtentType = 0;
+                    args.CellsizeType = 1;
+                    raster3.functionArguments = args;
                     var params = new ImageServiceParameters();
-                    params.mosaicRule = mrule;
-                    params.renderingRule = mainRule;
+
+                    params.renderingRule = raster3;
 
                     var elevationProfileLayer = new ArcGISImageServiceLayer(
                             this.primaryLayer.url,
@@ -144,11 +174,13 @@ define([
                                 imageServiceParameters: params
                             });
                     this.map.addLayer(elevationProfileLayer);
+
+
                 },
-                showLoading: function() {
+                showLoading: function () {
                     esri.show(dom.byId("loadingicd"));
                 },
-                hideLoading: function() {
+                hideLoading: function () {
                     esri.hide(dom.byId("loadingicd"));
                 }
             });

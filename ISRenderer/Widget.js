@@ -169,20 +169,35 @@ define([
                     this.imageServiceLayer.refresh();
                 },
                 populateServiceFunctions: function() {
-                    var request = esriRequest({
+                    console.log(this.imageServiceLayer);
+                    if(this.imageServiceLayer.rasterFunctionInfos)
+                    {
+                    var  data = this.imageServiceLayer.rasterFunctionInfos;
+                    this.rendererRR(data);
+                    }
+                    else
+                    {
+                     var request = esriRequest({
                         url: this.imageServiceLayer.url,
                         content: {
                             f: "json"
                         },
                         handleAs: "json",
                         callbackParamName: "callback"
-                    });
-
+                    });   
                     request.then(lang.hitch(this, function(data) {
+                         this.rendererRR(data);
+                    }),function(error) {
+                      console.log("Request failed");
+                    });
+                    }},
+                rendererRR : function(data){
+                
                         registry.byId("service_functions").removeOption(registry.byId('service_functions').getOptions());
-                        if (data.rasterFunctionInfos) {
-                            for (var i = 0; i < data.rasterFunctionInfos.length; i++) {
-                                registry.byId("service_functions").addOption({label: data.rasterFunctionInfos[i].name, value: data.rasterFunctionInfos[i].name});
+                     
+                        if (this.imageServiceLayer) {
+                            for (var i = 0; i < data.length; i++) {
+                                registry.byId("service_functions").addOption({label: data[i].name, value: data[i].name});
                             }
                         }
                         registry.byId("service_functions").addOption({label: "Stretch", value: "Stretch"});
@@ -209,9 +224,7 @@ define([
                             }
                         }
                         this.checkStretchDiv();
-                    }), function(error) {
-                        console.log("Request failed");
-                    });
+                  
                 },
                 checkStretchDiv: function() {
                     if (registry.byId("service_functions").get("value") == "Stretch") {

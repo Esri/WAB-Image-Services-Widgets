@@ -44,7 +44,7 @@ define([
     "dijit/TooltipDialog"
 
 ],
-        function(
+        function (
                 declare,
                 _WidgetsInTemplateMixin,
                 template,
@@ -72,15 +72,15 @@ define([
                 secondaryLayer: null,
                 layerSwipe: null,
                 layerList: null,
-                startup: function() {
+                startup: function () {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingic" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
-                onOpen: function() {
+                onOpen: function () {
                     this.refreshData();
                 },
-                refreshData: function() {
+                refreshData: function () {
                     if (this.map.layerIds) {
                         for (var i = 1; i < this.map.layerIds.length; i++) {
                             var layer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - i]);
@@ -92,8 +92,8 @@ define([
                         registry.byId("primaryOpacity").set("value", 1 - this.primaryLayer.opacity);
                     }
                 },
-                postCreate: function() {
-                    
+                postCreate: function () {
+
                     registry.byId("primaryOpacity").on("change", lang.hitch(this, this.changePrimaryOpacity));
                     registry.byId("compare").on("change", lang.hitch(this, this.setSwipe));
                     if (this.map) {
@@ -101,11 +101,11 @@ define([
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
-                },            
-                changePrimaryOpacity: function() {
+                },
+                changePrimaryOpacity: function () {
                     this.primaryLayer.setOpacity(1 - registry.byId("primaryOpacity").get("value"));
                 },
-                setSwipe: function() {
+                setSwipe: function () {
                     domConstruct.place("<div id='swipewidget'></div>", "map", "after");// earlier the widget was created in the postCreate method but now it is created every time the setSwipe function is called 
                     if (registry.byId("compare").get("value") == "Swipe") {
                         registry.byId("primaryOpacity").set("value", 0);
@@ -122,17 +122,10 @@ define([
                         registry.byId("primaryOpacity").set("value", 0);
                     }
                 },
-                // updateSwipe function is never used in this code. it can be removed
-//                updateSwipe: function() { 
-//                    if (this.layerSwipe) {
-//                        this.layerSwipe.destroy();
-//                        this.setSwipe();
-//                    }
-//                },
-                showLoading: function() {
+                showLoading: function () {
                     esri.show(dom.byId("loadingic"));
                 },
-                hideLoading: function() {
+                hideLoading: function () {
                     esri.hide(dom.byId("loadingic"));
                 }
             });

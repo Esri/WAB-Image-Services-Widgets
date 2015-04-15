@@ -100,6 +100,31 @@ define([
                 onOpen: function() {
                     this.refreshData();
                 },
+                checktime : function(currentVersion, timeInfo)
+                {
+                    if (currentVersion >= 10.21) {
+                                if (timeInfo) {
+                                    var field = timeInfo.startTimeField;
+                                   if (field) {
+                                        this.dateField = field;
+                                        registry.byId("timeFilter").set("disabled", false);
+                                        html.set(this.errorDiv, "");
+                                    } else {
+                                        registry.byId("timeFilter").set("checked", false);
+                                        registry.byId("timeFilter").set("disabled", true);
+                                        html.set(this.errorDiv, "TimeInfo is absent");
+                                    }
+                                } else {
+                                    registry.byId("timeFilter").set("checked", false);
+                                    registry.byId("timeFilter").set("disabled", true);
+                                    html.set(this.errorDiv, "TimeInfo is absent");
+                                }
+                            } else {
+                                registry.byId("timeFilter").set("checked", false);
+                                registry.byId("timeFilter").set("disabled", true);
+                                html.set(this.errorDiv, "Services pre 10.2.1 not supported");
+                            }
+                },
                 refreshData: function() {
                     if (this.map.layerIds) {
                         this.prevPrimary = this.primaryLayer;
@@ -133,39 +158,29 @@ define([
                             }
                         }
 
-                        var layersRequest = esriRequest({
+                    
+                             var currentVersion = this.primaryLayer.currentVersion;
+                            
+                           if(this.primaryLayer.timeInfo && this.primaryLayer.currentVersion)
+                           {
+                               var timeInfo = this.primaryLayer.timeInfo;
+                               var currentVersion = this.primaryLayer.currentVersion;
+                               this.checktime(currentVersion, timeInfo);
+                           }
+                           else {
+                               var layersRequest = esriRequest({
                             url: this.primaryLayer.url,
                             content: {f: "json"},
                             handleAs: "json",
                             callbackParamName: "callback"
                         });
-
                         layersRequest.then(lang.hitch(this, function(data) {
-                            var currentVersion = data.currentVersion;
                             var timeInfo = data.timeInfo;
-                            if (currentVersion >= 10.21) {
-                                if (timeInfo) {
-                                    var field = timeInfo.startTimeField;
-                                    if (field) {
-                                        this.dateField = field;
-                                        registry.byId("timeFilter").set("disabled", false);
-                                        html.set(this.errorDiv, "");
-                                    } else {
-                                        registry.byId("timeFilter").set("checked", false);
-                                        registry.byId("timeFilter").set("disabled", true);
-                                        html.set(this.errorDiv, "TimeInfo is absent");
-                                    }
-                                } else {
-                                    registry.byId("timeFilter").set("checked", false);
-                                    registry.byId("timeFilter").set("disabled", true);
-                                    html.set(this.errorDiv, "TimeInfo is absent");
-                                }
-                            } else {
-                                registry.byId("timeFilter").set("checked", false);
-                                registry.byId("timeFilter").set("disabled", true);
-                                html.set(this.errorDiv, "Services pre 10.2.1 not supported");
-                            }
+                            var currentVersion = data.currentVersion;
+                            this.checktime(currentVersion, timeInfo);
                         }));
+                           }
+                       
 
                         if (!this.slider) {
                             this.timeSliderShow();

@@ -6,3 +6,8 @@ circle {
     fill : red;
     fill-opacity: 0.7;
 }
+
+.claro .dijitTooltip
+{
+    overflow: hidden;
+}
