@@ -1,4 +1,4 @@
-# WAB-Imagery-Widgets
+# WAB-Image Services-Widgets
 
 These are custom widgets to be used in Web App Builder, dealing specifically with Image Services. 
 
