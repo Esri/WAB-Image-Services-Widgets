@@ -1,0 +1,97 @@
+{
+  "name": "FoldableWrapperTheme",
+  "label": "Foldable Wrapper Theme",
+  "panels": [
+    {
+      "name": "FoldablePanel",
+      "description": "This is foldable panel"
+    },
+    {
+      "name": "SimplePanel",
+      "description": "this is simple panel"
+    }
+  ],
+  "styles": [
+    {
+      "name": "default",
+      "description": "this is default style",
+      "styleColor": "#596679"
+    },
+    {
+      "name": "black",
+      "description": "this is black style",
+      "styleColor": "#000000"
+    },
+    {
+      "name": "green",
+      "description": "this is green style",
+      "styleColor": "#2aaa8a"
+    },
+    {
+      "name": "cyan",
+      "description": "this is cyan style",
+      "styleColor": "#b1d3d4"
+    },
+    {
+      "name": "blue",
+      "description": "this is cyan style",
+      "styleColor": "#0080C0"
+    },
+    {
+      "name": "red",
+      "description": "this is cyan style",
+      "styleColor": "#cc0000"
+    },
+    {
+      "name": "yellowgreen",
+      "description": "this is cyan style",
+      "styleColor": "yellowgreen"
+    },
+    {
+      "name": "orange",
+      "description": "this is cyan style",
+      "styleColor": "orange"
+    },
+    {
+      "name": "coral",
+      "description": "this is cyan style",
+      "styleColor": "coral"
+    },{
+      "name": "pink",
+      "description": "this is cyan style",
+      "styleColor": "#904f93"
+    },
+    {
+      "name": "lime",
+      "description": "this is cyan style",
+      "styleColor": "lime"
+    },
+    {
+      "name": "yellow",
+      "description": "this is cyan style",
+      "styleColor": "#ffff00"
+    }
+    
+  ],
+  "layouts": [
+    {
+      "name": "default",
+      "description": "this is default layout"
+    },
+    {
+      "name": "layout1",
+      "description": "this is layout1"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "HeaderController",
+      "description": "this is theme widget controller"
+    }
+  ],
+  "version": "0.0.1",
+  "author": "Esri R&D Center Beijing",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0"
+}
