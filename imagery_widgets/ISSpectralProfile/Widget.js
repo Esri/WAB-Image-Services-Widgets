@@ -115,6 +115,83 @@ define([
 
                         this.minValue = this.primaryLayer.minValues[0];
                         this.maxValue = this.primaryLayer.maxValues[0];
+                         if(this.minValue === undefined || this.maxValue === undefined)
+                    {
+                        this.pixeltype = this.primaryLayer.pixelType;
+                        switch(this.pixeltype)
+                        {
+                            case 'U8' :
+                            {
+                                this.minValue = 0;
+                            this.maxValue = 255;
+                            break;
+                            }
+                            case 'U16' :
+                            {
+                                this.minValue = 0;
+                            this.maxValue = 65535;
+                            break;
+                            }
+                            case 'S8' :
+                            {
+                            this.minValue = -128;
+                            this.maxValue = 127;
+                            
+                            break;    
+                            }
+                            case 'S16':
+                            {
+                                this.minValue = -32768;
+                            this.maxValue = 32767;
+                            
+                            break;
+                            }
+                            case 'U4':
+                            {
+                              this.minValue = 0;
+                            this.maxValue = 16;
+                            
+                            break;
+                            }
+                            case 'U2':
+                            {
+                               this.minValue = 0;
+                            this.maxValue = 4;
+                            
+                            break;
+                            }
+                            case 'U1':
+                            {
+                               this.minValue = 0;
+                            this.maxValue = 1;
+                            
+                            break;
+                            }
+                            case 'U32':
+                            {
+                                this.minValue = 0;
+                            this.maxValue = 4294967295;
+                            
+                            break;
+                            }
+                            case 'S32' :
+                            {
+                                this.minValue = -2147483648;
+                            this.maxValue = 2147483647;
+                            
+                            break;
+                            }
+                            case 'F32':
+                                {
+                                this.minValue = -3.402823466e+38;
+                                this.maxValue = 3.402823466e+38;
+                                
+                                break;
+                               }
+                                
+                        }
+                    
+                    }
                         if (this.primaryLayer !== this.prevprimaryLayer) {
                             var layersRequest = esriRequest({
                                 url: this.primaryLayer.url + "/1/info/keyProperties",
