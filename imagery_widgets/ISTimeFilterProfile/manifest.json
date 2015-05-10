@@ -1,0 +1,17 @@
+{
+  "name": "ISTimeFilterProfile",
+  "label": "ISTimeFilterProfile",
+  "platform": "HTML",
+  "version": "",
+  "author": "Esri R&D Center Beijing",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasLocale" : false,
+    "hasSettingPage" : true,
+    "hasSettingUIFile" : true,
+    "hasSettingLocale" : true,
+    "hasSettingStyle" : true
+  }
+}

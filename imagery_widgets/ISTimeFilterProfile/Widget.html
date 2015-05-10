@@ -1,0 +1,55 @@
+<div>
+    <div style="display: block;">
+        <input data-dojo-type="dijit/form/CheckBox"  id="timeFilter1"/> <label for="timeFilter1">Time Filter</label>
+    </div>
+    <br />
+    <br />
+    <div data-dojo-attach-point="filterDiv1" style="display:none;">
+        <div>
+            Current Date: 
+            <div data-dojo-attach-point="dateRange" style="display:inline-block"></div>
+            <div data-dojo-attach-point="imageCount" style="display:none;"></div>
+        </div>
+        <div>
+            <br />
+            <div  style="float:right;display:inline-block;">
+                <button data-dojo-type="dijit/form/Button" type="button" id="refreshTimesliderBtn1"><img src="widgets/ISTimeFilterProfile/images/refresh.png" height="15"/></button>
+                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'refreshTimesliderBtn1',position:['below']">
+                    Refresh available dates based on current extent
+                </div>
+            </div>
+            <div data-dojo-attach-point='timeSliderDiv'>
+            </div>
+             
+ 
+          
+        </div>
+        <div style="display: none;">
+            Show: 
+            <select id="show1" data-dojo-type="dijit/form/Select" style="width:50px;height:12px;">
+                <option value="image">Image</option>
+                <option value="footprint">Footprint</option>
+            </select>
+            &nbsp;Age: 
+            <input id="subtractValue1" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:31}, value:0" style="width:60px;height:28px;"/>
+            
+        </div>
+    </div>
+    <div>
+   <br />
+        <div data-dojo-attach-point="errorDiv1" style="color:red;"></div>
+    </div>
+        
+    <div data-dojo-attach-point="temporalpro1" style="color: #0080C0;">
+    </div>
+    <div data-dojo-type="dijit/Dialog" id="timeDialog" title="Temporal Profile" style="background-color: white; width: 900px;height: 400px;">
+        
+    <div id="chartshow">
+         <div data-dojo-attach-point="pointgraph" style="color: #0080C0;"></div>
+        <div id="chartNode3"></div>
+        <div id="legend3" style="/*float:right;*/"></div>
+       <!-- <div style="float: left;color: #0080C0;">Pick Point on map to reset location.</div>-->
+      
+    </div>
+    </div>
+</div>
