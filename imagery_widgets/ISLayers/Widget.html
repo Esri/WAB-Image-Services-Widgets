@@ -1,11 +1,30 @@
 <div>
     <div data-dojo-attach-point="result" style="display:none;">
-        <input id="resultShow" data-dojo-type="dijit/form/CheckBox" checked/> <div style="width:60px;display:inline-block;"><label for="resultShow">Result</label></div>
-       <!-- <button data-dojo-type="dijit/form/Button" type="button" id="icreset">Reset</button>-->
+
+        <input id="resultShow" data-dojo-type="dijit/form/CheckBox" checked/> <div style="width:130px;display:inline-block;"><label for="resultShow">Result</label></div>
+        <button data-dojo-type="dijit/form/Button" type="button" id="saveIconBtn"><img src="widgets/ISLayers/images/save.png" height="15"/></button>
+        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'saveIconBtn',position:['below']">
+            Save the Result layer in the layer list
+        </div>
+    </div>
+    <div data-dojo-type="dijit/Dialog" id="saveDialog" title="Save Layer" style="background-color: white;">
+        <div id="saveDialogContent" style="display: block;">
+            <label for="saveName" style="color: #0080C0;">Enter the name: </label> <input id="saveName" data-dojo-type="dijit/form/TextBox" />
+            <button data-dojo-type="dijit/form/Button" type="button" id="saveBtn">Save</button>
+            <br />
+            <br />
+            <div data-dojo-attach-point="saveDialogText" style="color: #0080C0;"></div>
+        </div>
+        <div id="overWrite" style="display: none;">
+            <div style ="color: #0080C0;">Name already exists in the Layer list. Do you want to overwrite it?</div>
+            <button data-dojo-type="dijit/form/Button" type="button" id="yes">Yes</button>
+            <button data-dojo-type="dijit/form/Button" type="button" id="no">No</button>
+        </div>
+
     </div>
     <div>
         <br/>
-        <input id="primaryShow" data-dojo-type="dijit/form/CheckBox" checked />
+        <input id="primaryShow" data-dojo-type="dijit/form/CheckBox" />
         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'primaryShow',position:['below']">
             Primary
         </div>
@@ -18,18 +37,18 @@
     </div>
     <div>
         <br/>
-        <input id="secondaryShow" data-dojo-type="dijit/form/CheckBox" checked />
+        <input id="secondaryShow" data-dojo-type="dijit/form/CheckBox" />
         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'secondaryShow',position:['below']">
             Secondary
         </div>
         <select id="secondary" data-dojo-type="dijit/form/Select" style="width:130px;height:12px;">
         </select>
-        <!--<input id="secondary" data-dojo-type="dijit/form/TextBox" disabled style="width:130px;height:22px;"/>-->
+
         <button data-dojo-type="dijit/form/Button" type="button" id="toggleLayers"><img src="widgets/ISLayers/images/toggle.png" height="15"/></button>
         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'toggleLayers',position:['below']">
             Swap primary and secondary
         </div>
     </div>
-    
-      <br/>
+
+    <br/>
 </div>
