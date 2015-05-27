@@ -118,7 +118,7 @@ define([
                 this.map.on("update-end", lang.hitch(this, this.hideLoading));
               }
             },
-            addgraphics: function (evt) {
+            addGraphics: function (evt) {
               this.map.graphics.add(new Graphic(
                       evt.mapPoint, new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 0, 0]))
                       ));
@@ -127,7 +127,7 @@ define([
               domStyle.set("loadingTimeProfile", "display", "block");
               this.refreshData();
               this.clicktemporalProfile = this.map.on("click", lang.hitch(this, this.temporalProfile));
-              this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
+              this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addGraphics));
               domStyle.set("loadingTimeProfile", "display", "none");
             },
             onClose: function () {
@@ -580,7 +580,7 @@ define([
                   this.chart.render();
                   this.legend.refresh();
                 }
-                this.chart.connectToPlot("default", lang.hitch(this, this.clickdata));
+                this.chart.connectToPlot("default", lang.hitch(this, this.clickData));
                 html.set(this.pointOnGraph, strings.pointOnGraph);
                 domStyle.set("sliderRules", "display", "none");
                 domStyle.set("sliderLabels", "display", "none");
@@ -590,7 +590,7 @@ define([
                 domStyle.set(dom.byId("loadingTimeProfile"), "display", "none");
               }));
             },
-            clickdata: function (evt) {
+            clickData: function (evt) {
               var eventType = evt.type;
               if (eventType === "onclick") {
                 this.datesClicked = (evt.x - 1);
@@ -621,7 +621,7 @@ define([
 
                 if (this.graphicOnMap == null)
                 {
-                  this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
+                  this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addGraphics));
                 }
                 if (this.clicktemporalProfile === null)
                 {
