@@ -25,6 +25,7 @@ define([
   "dojo/_base/lang",
   "dojo/dom",
   'dojo/dom-construct',
+  "esri/request",
   "esri/layers/RasterFunction",
   "esri/layers/MosaicRule",
   "esri/layers/ArcGISImageServiceLayer",
@@ -33,7 +34,9 @@ define([
   "dojo/dom-style",
   "dojo/html",
   "dojo/i18n!./nls/strings",
+  "esri/arcgis/Portal",
   "esri/dijit/PopupTemplate",
+  "dojox/json/ref",
   "dijit/form/Select",
   "dijit/form/Button",
   "dijit/form/NumberSpinner",
@@ -55,11 +58,12 @@ define([
                 lang,
                 dom,
                 domConstruct,
+                esriRequest,
                 RasterFunction,
                 MosaicRule,
                 ArcGISImageServiceLayer,
                 ImageServiceParameters,
-                domConstruct, domStyle, html,strings, PopupTemplate) {
+                domConstruct, domStyle, html, strings, arcgisPortal, PopupTemplate) {
           var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
             templateString: template,
             name: 'ISLayers',
@@ -90,7 +94,7 @@ define([
               if (this.secondaryLayer) {
                 registry.byId("secondaryShow").set("checked", this.secondaryLayer.visible);
               }
-              
+
               domConstruct.place("<div id='swipewidget'></div>", "map", "after");
               registry.byId("imageView").on("change", lang.hitch(this, this.createLayer));
               registry.byId("secondary").on("change", lang.hitch(this, this.createSecondary));
@@ -99,10 +103,14 @@ define([
               registry.byId("primaryShow").on("change", lang.hitch(this, this.primaryVisibility));
               registry.byId("secondaryShow").on("change", lang.hitch(this, this.secondaryVisibility));
               registry.byId("resultShow").on("change", lang.hitch(this, this.resultVisibility));
-              registry.byId("saveIconBtn").on("click", lang.hitch(this, this.saveResultLayer));
+              //registry.byId("saveIconBtn").on("click", lang.hitch(this, this.saveResultLayer));
+              registry.byId("saveIconBtn").on("click", lang.hitch(this, this.selectSaveORAdd));
               registry.byId('saveBtn').on("click", lang.hitch(this, this.saveResultLayerCheck));
               registry.byId('yes').on("click", lang.hitch(this, this.saveResultLayerName, true));
               registry.byId('no').on("click", lang.hitch(this, this.saveResultLayerName, false));
+              registry.byId("saveToArcGIS").on("click", lang.hitch(this, this.savingLayerToArcGIS));
+              registry.byId("addBtn").on("click", lang.hitch(this, this.saveResultLayer));
+              registry.byId("submitBtn").on("click", lang.hitch(this, this.savingLayerToArcGISContinues));
               if (this.map) {
                 this.map.on("update-end", lang.hitch(this, this.refreshData));
                 this.map.on("update-start", lang.hitch(this, this.showLoading));
@@ -112,8 +120,62 @@ define([
             onOpen: function () {
               this.refreshData();
             },
+            selectSaveORAdd: function () {
+              registry.byId("saveDialog").show();
+              domStyle.set("saveDialogContent", "display", "none");
+              domStyle.set("saveOrAdd", "display", "block");
+              domStyle.set("askingItemId", "display", "none");
+            },
+            savingLayerToArcGIS: function () {
+              registry.byId("saveDialog").show();
+              domStyle.set("saveDialogContent", "display", "none");
+              domStyle.set("saveOrAdd", "display", "none");
+              domStyle.set("askingItemId", "display", "block");
+            },
+            savingLayerToArcGISContinues: function () {
+              registry.byId("saveDialog").hide();
+              var resultLayerProperties = this.map.getLayer("resultLayer");
+              var extent = this.map.geographicExtent.xmin + "," + this.map.geographicExtent.ymin + "," + this.map.geographicExtent.xmax + "," + this.map.geographicExtent.ymax;
+              var spatialReference = this.map.extent.spatialReference.wkid;
+              var renderingRule = resultLayerProperties.renderingRule.toJson();
+              var itemData = {"operationalLayers": [{"id": resultLayerProperties.id, "layerType": "ArcGISImageServiceLayer", "url": resultLayerProperties.url, "visibility": true, "bandIds": [], "opacity": 1, "title": registry.byId("itemTitle").get("value"), "timeAnimation": false, "renderingRule": renderingRule}], "baseMap": {"baseMapLayers": [{"id": "defaultBasemap_0", "layerType": "ArcGISTiledMapServiceLayer", "opacity": 1, "visibility": true, "url": "http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"}], "title": "Topographic"}, "spatialReference": {"wkid": 102100, "latestWkid": 3857}, "version": "2.1"};
+              var json = dojox.json.ref.toJson(itemData);
+              var portal = new arcgisPortal.Portal("http://www.arcgis.com");
+              portal.signIn().then(lang.hitch(this, function (loggedInUser) {
+                var url = loggedInUser.userContentUrl;
+                var addItemRequest = esriRequest({
+                  url: url + "/addItem",
+                  content: {f: "json",
+                    title: registry.byId("itemTitle").get("value"),
+                    type: "Web Map",
+                    description: registry.byId("itemDescription").get("value"),
+                    tags: registry.byId("itemTags").get("value"),
+                    extent: extent,
+                    spatialReference: spatialReference
+                  },
+                  handleAs: "json",
+                  callbackParamName: "callback"
+                }, {usePost: true});
+                addItemRequest.then(lang.hitch(this, function (response) {
+                  var updateDataRequest = esriRequest({
+                    url: loggedInUser.userContentUrl + "/items/" + response.id + "/update",
+                    content: {f: "json",
+                      text: json,
+                      overwrite: true,
+                      type: "Web Map"},
+                    handleAs: "json",
+                    callbackParamName: "callback"
+                  }, {usePost: true});
+                  updateDataRequest.then(lang.hitch(this, function (response2) {
+                  }));
+                }));
+              }));
+            },
             saveResultLayer: function () {
               registry.byId("saveDialog").show();
+              domStyle.set("saveDialogContent", "display", "block");
+              domStyle.set("saveOrAdd", "display", "none");
+              domStyle.set("askingItemId", "display", "none");
               html.set(this.saveDialogText, "");
               if (this.map.getLayer("resultLayer")) {
                 this.saveResult = this.map.getLayer("resultLayer");
@@ -182,6 +244,7 @@ define([
                   this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                 }
+                
               }
             },
             populateServices: function () {
@@ -222,7 +285,7 @@ define([
                   }
                 }));
               }
-
+              
               if (!this.secondaryLayerIndex) {
                 registry.byId("secondary").set('value', "1");
                 this.secondaryLayerIndex = 1;

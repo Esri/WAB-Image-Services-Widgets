@@ -8,7 +8,27 @@
         </div>
     </div>
     <div data-dojo-type="dijit/Dialog" id="saveDialog" title="Save Layer" style="background-color: white;">
-        <div id="saveDialogContent" style="display: block;">
+        <div id="saveOrAdd" style="display: block;">
+            <div style="color : #0080C0;">Do you want to save the layer to ArcGIS Online or add to the layer list?</div>
+            <br />
+            <br />
+            <button data-dojo-type='dijit/form/Button' type='button' id='saveToArcGIS'>Save</button>
+            <button data-dojo-type="dijit/form/Button" type="button" id="addBtn">Add</button>
+        </div>
+        <div id="askingItemId" style="display: none;">
+            <table>
+                <tr><td><label for="itemTitle" style="color: #0080C0;width:100px;">Title: </label></td><td><input id="itemTitle" data-dojo-type="dijit/form/TextBox" /></td>
+            </tr>
+            <tr><td>
+                    <label for="itemDescription" style="color: #0080C0;width:100px;">Description: </label></td><td><input id="itemDescription" data-dojo-type="dijit/form/TextBox" /></td>
+            </tr>
+            <tr><td><label for="itemTags" style="color : #0080C0;width:100px;">Tags:  </label></td><td><input id="itemTags" data-dojo-type="dijit/form/TextBox" /></td>
+            </tr></table>
+            <br />
+            
+            <button id="submitBtn" data-dojo-type="dijit/form/Button" type="button" style="margin-left: 100px;">Submit</button>
+        </div>
+        <div id="saveDialogContent" style="display: none;">
             <label for="saveName" style="color: #0080C0;">Enter the name: </label> <input id="saveName" data-dojo-type="dijit/form/TextBox" />
             <button data-dojo-type="dijit/form/Button" type="button" id="saveBtn">Save</button>
             <br />
