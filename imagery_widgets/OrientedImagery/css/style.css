@@ -1,0 +1,86 @@
+#imageDialog_underlay {
+    visibility: hidden;
+}
+.claro .dijitDialog {
+  background: #fff;
+  border: 0 none;
+  -webkit-box-shadow: 0 -1px 1px rgba(0,0,0,0.15),0 3px 5px rgba(0,0,0,0.25);
+  box-shadow: 0 -1px 1px rgba(0,0,0,0.15),0 3px 5px rgba(0,0,0,0.25);
+}
+.claro .dijitDialogPaneContent {
+  background: #fff;
+  padding: 10px;
+  border-top: 0 none;
+  position: relative;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.claro .dijitDialogPaneActionBar {
+/* the bar at bottom with OK/Cancel buttons */
+  padding-top: 15px;
+  text-align: right;
+  position: relative;
+}
+.claro .dijitTooltipDialog .dijitDialogPaneActionBar {
+  margin: 15px -10px -5px;
+}
+.claro .dijitDialogPaneActionBar .dijitButton {
+  float: none;
+}
+.claro .dijitDialogTitleBar {
+/* outer container for the titlebar of the dialog */
+  background: #222;
+  border: 0 none;
+  border-bottom: 0 none;
+  padding: 7px 10px;
+  text-align: center;
+  line-height: 16px;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+.claro .dijitDialogTitle {
+/* typography and styling of the dialog title */
+  font-size: 12px;
+  color: #ccc;
+}
+.claro .dijitDialogCloseIcon {
+/* the default close icon for the dialog */
+  width: 20px;
+  height: 20px;
+  background: none;
+  color: white;
+  line-height: 20px;
+  text-align: center;
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-family: "landsat";
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  text-decoration: inherit;
+  vertical-align: middle;
+  opacity: 1;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=65)";
+  filter: alpha(opacity=65);
+}
+.claro .dijitDialogCloseIcon:before {
+  content: "X";
+}
+.claro .dijitDialogCloseIcon .closeText {
+  display: none;
+}
+.claro .dijitDialogCloseIconHover,
+.claro .dijitDialogCloseIconActive {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.claro .dijitDialogUnderlay {
+  background: #000;
+  opacity: 0.65;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=65)";
+  filter: alpha(opacity=65);
+}
