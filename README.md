@@ -2,9 +2,11 @@
 
 These are custom widgets to be used in Web App Builder, dealing specifically with Image Services. 
 
-[View live app here with IS Mensuration and IS Classification widgets](http://imageryworkflows.arcgis.com/SampleApp)
-[View live app here with timeFilter, IS Change Detection and IS Split Tool](http://imageryworkflows.arcgis.com/Sample_App)
-[View live app here with IS Compare, IS Display Order, IS Parameters, IS Renderer and IS Spectral Profile](http://imageryworkflows.arcgis.com/SampleAppwithimagerywidgets)
+### [View live app here with IS Mensuration and IS Classification widgets](http://imageryworkflows.arcgis.com/SampleApp)
+
+### [View live app here with timeFilter, IS Change Detection and IS Split Tool](http://imageryworkflows.arcgis.com/Sample_App)
+
+### [View live app here with IS Compare, IS Display Order, IS Parameters, IS Renderer and IS Spectral Profile](http://imageryworkflows.arcgis.com/SampleAppwithimagerywidgets)
 
 
 ## Features
