@@ -64,7 +64,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-A copy of the license is available in the repository's [License.txt](License.txt?raw=true) file.
+A copy of the license is available in the repository's [License.txt](License.txt?raw=true) file
 
 [](Esri Tags: WebApp Builder,ImageServices,Imagery)
 [](Esri Language: Javascript)
