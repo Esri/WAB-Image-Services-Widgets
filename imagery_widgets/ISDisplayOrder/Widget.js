@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Esri. All Rights Reserved.
+// Copyright (c) 2013 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ define([
     "dijit/form/HorizontalRuleLabels",
     "dijit/form/TextBox"
 ],
-        function (
+        function(
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
@@ -50,12 +50,12 @@ define([
                 layerInfos: [],
                 legend: null,
                 imageServiceLayer: null,
-                startup: function () {
+                startup: function() {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingido" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
-                postCreate: function () {
+                postCreate: function() {
                     registry.byId("mosaicMethod").on("change", lang.hitch(this, this.checkFields));
                     registry.byId("mrapply").on("click", lang.hitch(this, this.applyMosaic));
                     if (this.map) {
@@ -64,10 +64,10 @@ define([
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
-                onOpen: function () {
+                onOpen: function() {
                     this.refreshData();
                 },
-                refreshData: function () {
+                refreshData: function() {
                     if (this.map.layerIds) {
                         if (this.map.getLayer("resultLayer")) {
                             this.imageServiceLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
@@ -78,80 +78,78 @@ define([
                         this.checkFields();
                     }
                 },
-                populateAttributes: function () {
-
-                    if (this.imageServiceLayer.fields)
+                populateAttributes: function() {
+                  //  console.log(this.imageServiceLayer.fields);
+                    if(this.imageServiceLayer.fields)
                     {
                         registry.byId("sortField").removeOption(registry.byId('sortField').getOptions());
-
+                        
                         for (var i = 0; i < this.imageServiceLayer.fields.length; i++) {
                             registry.byId("sortField").addOption({label: this.imageServiceLayer.fields[i].name, value: this.imageServiceLayer.fields[i].name});
                         }
                         this.displaymosaic();
                     }
-                    else {
+                    else{
+                        
+                    
+                    var request = esriRequest({
+                        url: this.imageServiceLayer.url,
+                        content: {
+                            f: "json"
+                        },
+                        handleAs: "json",
+                        callbackParamName: "callback"
+                    });
 
+                   request.then(lang.hitch(this, function(data) {
+                        registry.byId("sortField").removeOption(registry.byId('sortField').getOptions());
+                        
+                        for (var i = 0; i < data.fields.length; i++) {
+                            registry.byId("sortField").addOption({label: data.fields[i].name, value: data.fields[i].name});
+                        }
+                        this.displaymosaic();
+                    }), function(error) {
+                     console.log("Request failed");
+                  });}},
+          displaymosaic : function(){
+                        if (this.imageServiceLayer.mosaicRule) {
+                            var mosaic = new MosaicRule(this.imageServiceLayer.mosaicRule);
+                            registry.byId("mosaicMethod").set("value", mosaic.method);
+                            registry.byId("mosaicOperation").set("value", mosaic.operation);
 
-                        var request = esriRequest({
-                            url: this.imageServiceLayer.url,
-                            content: {
-                                f: "json"
-                            },
-                            handleAs: "json",
-                            callbackParamName: "callback"
-                        });
-
-                        request.then(lang.hitch(this, function (data) {
-                            registry.byId("sortField").removeOption(registry.byId('sortField').getOptions());
-
-                            for (var i = 0; i < data.fields.length; i++) {
-                                registry.byId("sortField").addOption({label: data.fields[i].name, value: data.fields[i].name});
+                            if (mosaic.method != "esriMosaicSeamline") {
+                                registry.byId("ascending").set("checked", !mosaic.ascending);
+                            } else {
+                                registry.byId("ascending").set("checked", false);
                             }
-                            this.displaymosaic();
-                        }), function (error) {
-                            console.log("Request failed");
-                        });
-                    }
-                },
-                displaymosaic: function () {
-                    if (this.imageServiceLayer.mosaicRule) {
-                        var mosaic = new MosaicRule(this.imageServiceLayer.mosaicRule);
-                        registry.byId("mosaicMethod").set("value", mosaic.method);
-                        registry.byId("mosaicOperation").set("value", mosaic.operation);
 
-                        if (mosaic.method != "esriMosaicSeamline") {
-                            registry.byId("ascending").set("checked", !mosaic.ascending);
+                            if (mosaic.method == "esriMosaicAttribute") {
+                                registry.byId("sortField").set("value", mosaic.sortField);
+                                registry.byId("sortValue").set("value", mosaic.sortValue);
+                            }
+
+                            if (mosaic.method == "esriMosaicLockRaster") {
+                                registry.byId("lockRasterIds").set("value", mosaic.lockRasterIds.toString());
+                            }
                         } else {
-                            registry.byId("ascending").set("checked", false);
+                            registry.byId("mosaicMethod").set("value", 'esriMosaicNone');
                         }
-
-                        if (mosaic.method == "esriMosaicAttribute") {
-                            registry.byId("sortField").set("value", mosaic.sortField);
-                            registry.byId("sortValue").set("value", mosaic.sortValue);
-                        }
-
-                        if (mosaic.method == "esriMosaicLockRaster") {
-                            registry.byId("lockRasterIds").set("value", mosaic.lockRasterIds.toString());
-                        }
-                    } else {
-                        registry.byId("mosaicMethod").set("value", 'esriMosaicNone');
-                    }
-
+               
                 },
-                checkFields: function () {
+                checkFields: function() {
                     switch (registry.byId("mosaicMethod").get("value")) {
                         case "esriMosaicAttribute" :
-                        {
-                            domStyle.set(this.attribute, "display", "block");
-                            domStyle.set(this.lockraster, "display", "none");
-                            domStyle.set(this.notseamline, "display", "block");
-                            if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                            {
+                                domStyle.set(this.attribute, "display", "block");
+                                domStyle.set(this.lockraster, "display", "none");
+                                domStyle.set(this.notseamline, "display", "block");
+                                if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
+                                    registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                                }
+                                break;
                             }
-                            break;
-                        }
                         case "esriMosaicNone" :
 
                         case "esriMosaicCenter" :
@@ -159,52 +157,52 @@ define([
                         case "esriMosaicNorthwest" :
 
                         case "esriMosaicNadir" :
-                        {
-                            domStyle.set(this.attribute, "display", "none");
-                            domStyle.set(this.lockraster, "display", "none");
-                            domStyle.set(this.notseamline, "display", "block");
-                            if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                            {
+                                domStyle.set(this.attribute, "display", "none");
+                                domStyle.set(this.lockraster, "display", "none");
+                                domStyle.set(this.notseamline, "display", "block");
+                                if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
+                                    registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                                }
+                                break;
                             }
-                            break;
-                        }
 
                         case "esriMosaicSeamline" :
-                        {
-                            domStyle.set(this.attribute, "display", "none");
-                            domStyle.set(this.lockraster, "display", "none");
-                            domStyle.set(this.notseamline, "display", "none");
-                            registry.byId("mosaicOperation").removeOption(['OPERATION_MIN', 'OPERATION_MAX', 'OPERATION_MEAN']);
-                            break;
-                        }
-                        case "esriMosaicLockRaster" :
-                        {
-                            domStyle.set(this.attribute, "display", "none");
-                            domStyle.set(this.lockraster, "display", "block");
-                            domStyle.set(this.notseamline, "display", "block");
-                            if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                            {
+                                domStyle.set(this.attribute, "display", "none");
+                                domStyle.set(this.lockraster, "display", "none");
+                                domStyle.set(this.notseamline, "display", "none");
+                                registry.byId("mosaicOperation").removeOption(['OPERATION_MIN', 'OPERATION_MAX', 'OPERATION_MEAN']);
+                                break;
                             }
-                            break;
-                        }
+                        case "esriMosaicLockRaster" :
+                            {
+                                domStyle.set(this.attribute, "display", "none");
+                                domStyle.set(this.lockraster, "display", "block");
+                                domStyle.set(this.notseamline, "display", "block");
+                                if (!registry.byId("mosaicOperation").getOptions('OPERATION_MIN')) {
+                                    registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'OPERATION_MIN'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'OPERATION_MAX'});
+                                    registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'OPERATION_MEAN'});
+                                }
+                                break;
+                            }
                     }
                 },
-                applyMosaic: function () {
+                applyMosaic: function() {
                     var mr = new MosaicRule();
                     mr.method = registry.byId("mosaicMethod").get("value");
                     mr.operation = registry.byId("mosaicOperation").get("value");
                     switch (registry.byId("mosaicMethod").get("value")) {
                         case "esriMosaicAttribute" :
-                        {
-                            mr.ascending = !registry.byId("ascending").get("checked");
-                            mr.sortField = registry.byId("sortField").get("value");
-                            mr.sortValue = registry.byId("sortValue").get("value");
-                            break;
-                        }
+                            {
+                                mr.ascending = !registry.byId("ascending").get("checked");
+                                mr.sortField = registry.byId("sortField").get("value");
+                                mr.sortValue = registry.byId("sortValue").get("value");
+                                break;
+                            }
                         case "esriMosaicNone" :
 
                         case "esriMosaicCenter" :
@@ -212,33 +210,33 @@ define([
                         case "esriMosaicNorthwest" :
 
                         case "esriMosaicNadir" :
-                        {
-                            mr.ascending = !registry.byId("ascending").get("checked");
-                            break;
-                        }
+                            {
+                                mr.ascending = !registry.byId("ascending").get("checked");
+                                break;
+                            }
 
                         case "esriMosaicSeamline" :
-                        {
-                            break;
-                        }
-                        case "esriMosaicLockRaster" :
-                        {
-                            mr.ascending = !registry.byId("ascending").get("checked");
-                            var temp = registry.byId('lockRasterIds').get('value');
-                            var ids = temp.split(',');
-                            for (var x in ids) {
-                                ids[x] = parseInt(ids[x], 10);
+                            {
+                                break;
                             }
-                            mr.lockRasterIds = ids;
-                            break;
-                        }
+                        case "esriMosaicLockRaster" :
+                            {
+                                mr.ascending = !registry.byId("ascending").get("checked");
+                                var temp = registry.byId('lockRasterIds').get('value');
+                                var ids = temp.split(',');
+                                for (var x in ids) {
+                                    ids[x] = parseInt(ids[x], 10);
+                                }
+                                mr.lockRasterIds = ids;
+                                break;
+                            }
                     }
                     this.imageServiceLayer.setMosaicRule(mr);
                 },
-                showLoading: function () {
+                showLoading: function() {
                     esri.show(dom.byId("loadingido"));
                 },
-                hideLoading: function () {
+                hideLoading: function() {
                     esri.hide(dom.byId("loadingido"));
                 }
             });

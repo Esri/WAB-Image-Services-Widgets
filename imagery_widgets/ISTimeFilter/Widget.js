@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Esri. All Rights Reserved.
+// Copyright (c) 2013 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ define([
                 sliderValue: null,
                 featureIds: [],
                 responseAlert: true,
+                defaultMosaicRule : null,
                 startup: function() {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingts" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
@@ -145,7 +146,8 @@ define([
                                 this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                             }
                         }
-
+                            
+                            this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
                         if (!this.prevPrimary) {
                             this.mosaicBackup = this.primaryLayer.mosaicRule;
                             this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
@@ -157,7 +159,7 @@ define([
                                 this.mosaicBackup = this.primaryLayer.mosaicRule;
                             }
                         }
-
+                        
                     
                              var currentVersion = this.primaryLayer.currentVersion;
                             
@@ -199,17 +201,20 @@ define([
                     } else {
                         domStyle.set(this.filterDiv, "display", "none");
                         this.map.graphics.clear();
+                        
                         if (this.mosaicBackup) {
                             var mr = new MosaicRule(this.mosaicBackup);
                         } else {
-                            var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
+                            
+                            var mr = new MosaicRule(this.defaultMosaicRule);
+                            //var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
                         }
                         this.primaryLayer.setMosaicRule(mr);
                     }
                 },
                 timeSliderShow: function() {
                     if (this.primaryLayer && registry.byId("timeFilter").get("checked")) {
-                        var layer = this.primaryLayer;
+                        
                         var extent = new Extent(this.map.extent);
                         var xlength = (extent.xmax - extent.xmin) / 4;
                         var ylength = (extent.ymax - extent.ymin) / 4;
@@ -385,7 +390,8 @@ define([
                             if (this.mosaicBackup) {
                                 var mr = new MosaicRule(this.mosaicBackup);
                             } else {
-                                var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
+                                var mr = new MosaicRule(this.defaultMosaicRule);
+                                //var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
                             }
                             this.primaryLayer.setMosaicRule(mr);
                         }

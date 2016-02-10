@@ -2,13 +2,12 @@
   "name": "ISLayers",
   "label": "IS Layers",
   "platform": "HTML",
-  "version": "",
+  "version": "1.4",
   "author": "Esri R&D Center Beijing",
   "description": "",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
-    "hasLocale" : false,
-    "hasSettingLocale" : false
-  }
+    
+    }
 }

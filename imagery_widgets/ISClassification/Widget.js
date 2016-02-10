@@ -25,6 +25,7 @@ define([
     "dojox/grid/DataGrid",
     "dojo/text!./Widget.html",
     'dojo/dom-construct',
+    "esri/layers/RasterFunction",
     "esri/map",
     "esri/request",
     "esri/layers/ArcGISImageServiceLayer",
@@ -37,7 +38,8 @@ define([
     "esri/symbols/SimpleFillSymbol",
     "esri/tasks/geometry",
     "dojo/Stateful"
-], function(declare, lang, event, dojoColor, parser, dom, domStyle, registry, on, JSON, dojoRequest, BaseWidget, _TemplatedMixin, _WidgetsInTemplateMixin, Dialog, ComboBox, Button, RadioButton, DropDownButton, ColorPalette, memory, Observable, objectStore, dataGrid, template, domConstruct) {
+], function(declare, lang, event, dojoColor, parser, dom, domStyle, registry, on, JSON, dojoRequest, BaseWidget, _TemplatedMixin, _WidgetsInTemplateMixin, 
+Dialog, ComboBox, Button, RadioButton, DropDownButton, ColorPalette, memory, Observable, objectStore, dataGrid, template, domConstruct, RasterFunction) {
     var clazz = declare([BaseWidget, _TemplatedMixin, _WidgetsInTemplateMixin], {
         name: 'ISClassification',
         baseClass: 'jimu-widget-ISClassification',
@@ -444,6 +446,7 @@ define([
                             if (theWidget.imageServiceLayer.renderingRule) {
                                 var rf = theWidget.imageServiceLayer.renderingRule.toJson();
                                 //rf.rasterFunctionArguments = { Raster: "$$" };
+                                console.log(rf);
                                 return rf;
                             }
                             return "$$";
@@ -461,8 +464,11 @@ define([
                     theWidget._analyticLayer = alyr;
                     theWidget.map.addLayer(alyr);
                 }
+                console.log(rasterFunciton);
 
-                theWidget._analyticLayer._params.renderingRule = JSON.stringify(rasterFunciton);
+                theWidget._analyticLayer.setRenderingRule(new RasterFunction(rasterFunciton));
+                
+                
                 theWidget._analyticLayer.setVisibility(true);
 //                theWidget.imageServiceLayer.setVisibility(false);
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Esri. All Rights Reserved.
+// Copyright (c) 2013 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ define([
                 this.map.on("update-end", lang.hitch(this, this.hideLoading));
               }
             },
-            addGraphics: function (evt) {
+            addgraphics: function (evt) {
               this.map.graphics.add(new Graphic(
                       evt.mapPoint, new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 0, 0]))
                       ));
@@ -127,7 +127,7 @@ define([
               domStyle.set("loadingTimeProfile", "display", "block");
               this.refreshData();
               this.clicktemporalProfile = this.map.on("click", lang.hitch(this, this.temporalProfile));
-              this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addGraphics));
+              this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
               domStyle.set("loadingTimeProfile", "display", "none");
             },
             onClose: function () {
@@ -219,6 +219,7 @@ define([
                     this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   }
                 }
+                this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
                 this.minValue = this.primaryLayer.minValues[0];
                 this.maxValue = this.primaryLayer.maxValues[0];
                 if (this.minValue === undefined || this.maxValue === undefined) {
@@ -580,7 +581,7 @@ define([
                   this.chart.render();
                   this.legend.refresh();
                 }
-                this.chart.connectToPlot("default", lang.hitch(this, this.clickData));
+                this.chart.connectToPlot("default", lang.hitch(this, this.clickdata));
                 html.set(this.pointOnGraph, strings.pointOnGraph);
                 domStyle.set("sliderRules", "display", "none");
                 domStyle.set("sliderLabels", "display", "none");
@@ -590,7 +591,7 @@ define([
                 domStyle.set(dom.byId("loadingTimeProfile"), "display", "none");
               }));
             },
-            clickData: function (evt) {
+            clickdata: function (evt) {
               var eventType = evt.type;
               if (eventType === "onclick") {
                 this.datesClicked = (evt.x - 1);
@@ -621,7 +622,7 @@ define([
 
                 if (this.graphicOnMap == null)
                 {
-                  this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addGraphics));
+                  this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
                 }
                 if (this.clicktemporalProfile === null)
                 {
@@ -646,7 +647,8 @@ define([
                 if (this.mosaicBackup) {
                   var mr = new MosaicRule(this.mosaicBackup);
                 } else {
-                  var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
+                  var mr = new MosaicRule(this.defaultMosaicRule);
+                  //var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
                 }
                 this.primaryLayer.setMosaicRule(mr);
               }

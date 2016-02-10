@@ -1,6 +1,6 @@
 {
   "name": "ISTimeFilterProfile",
-  "label": "ISTimeFilterProfile",
+  "label": "IS TimeFilterProfile",
   "platform": "HTML",
   "version": "",
   "author": "Esri R&D Center Beijing",
@@ -8,10 +8,5 @@
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
-    "hasLocale" : false,
-    "hasSettingPage" : true,
-    "hasSettingUIFile" : true,
-    "hasSettingLocale" : true,
-    "hasSettingStyle" : true
-  }
+    }
 }
