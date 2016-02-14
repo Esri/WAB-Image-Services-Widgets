@@ -23,6 +23,7 @@ Widgets:
 *	Compare two layers using transparency or swipe (ISCompare)
 *	Perform change detection between two images using the ISChangeDetection Widget
 *	Display current date of primary and secondary layer (ISPrimaryAcquisitionDate,ISSecondaryAcquisitionDate)
+
 Theme: 
 * 	Use the foldable wrapper theme to size the widgets and remove unwanted ‘white’ space. 
 ## Instructions
