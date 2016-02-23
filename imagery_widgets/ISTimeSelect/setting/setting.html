@@ -1,0 +1,30 @@
+<div class="${baseClass}">
+  <div class="${baseClass}-section">
+    <span class="${baseClass}-label">${!nls.titleLabel}:</span>
+    <div class="${baseClass}-title" data-dojo-type="dijit/form/TextBox" data-dojo-attach-point="titleInput"></div>
+  </div>
+  <div class="${baseClass}-section">
+    <span class="${baseClass}-label">${!nls.selectImageServiceLayerLabel}:</span>
+    <span class="${baseClass}-layer-selector" data-dojo-attach-point="imageServiceLayerSelector"></span>
+  </div>
+  <div class="${baseClass}-section">
+    <span class="${baseClass}-label">${!nls.dateFieldLabel}:</span>
+    <div class="${baseClass}-date-field" data-dojo-attach-point="dateFieldsSelect" data-dojo-type="dijit/form/Select" data-dojo-props="labelAttr:'alias',style:{width:'350px'}"></div>
+  </div>
+  <div class="${baseClass}-section">
+    <span class="${baseClass}-label">${!nls.minZoomLevelLabel}:</span>
+    <div data-dojo-attach-point="zoomLevelInput" class="#{baseClass}-zoom-level-input" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="value:8,constraints:{min:0,max:23,places:0},style:{width:'350px'}"></div>
+  </div>
+    <div class="${baseClass}-section">
+        
+        <div data-dojo-attach-point="enableMosaicCheckBox" class="#{baseClass}-enable-mosaic-checkbox" data-dojo-type="dijit/form/CheckBox" style="margin-left: 180px;"></div>
+        <span class="${baseClass}-label1">${!nls.enableMosaicLabel}</span>
+    </div>
+  <div class="${baseClass}-section">
+    <span class="${baseClass}-label">${!nls.mosaicMethodLabel}:</span>
+    <select class="${baseClass}-date-field" data-dojo-attach-point="mosaicMethodSelect" data-dojo-type="dijit/form/Select" data-dojo-props="style:{width:'350px'}">
+      <option value="esriMosaicAttribute">${nls.optionMosaicAttribute}</option>
+      <option value="esriMosaicLockRaster">${nls.optionMosaicLockRaster}</option>
+    </select>
+  </div>
+</div>

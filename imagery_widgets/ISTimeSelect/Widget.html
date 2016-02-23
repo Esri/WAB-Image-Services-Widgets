@@ -1,0 +1,21 @@
+<div class="${baseClass}">
+  <div data-dojo-attach-point="containerNode" class="${baseClass}-container">
+    <div data-dojo-attach-point="titleNode" class="${baseClass}-title">${!config.title}</div>
+    <div class="${baseClass}-toolbar" data-dojo-type="dijit/Toolbar">
+      <div data-dojo-attach-point="prevBtn" class="${baseClass}-cell" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Select previous date'" data-dojo-attach-event="click:_onPreviousDate">&#x276e;</div>
+      <div data-dojo-attach-point="imageryDateSelect" class="${baseClass}-cell" id="imageDateValue" data-dojo-type="dijit/form/Select" data-dojo-props="style:{width:'200px'},disabled:true,sortByLabel:false,labelAttr:'displayDate'" data-dojo-attach-event="change:_onDateChange"></div>
+      <div data-dojo-attach-point="nextBtn" class="${baseClass}-cell" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true,title:'Select next date'" data-dojo-attach-event="click:_onNextDate">&#x276f;</div>
+      <!--<div data-dojo-attach-point="aboutBtn" class="${baseClass}-cell" data-dojo-type="dijit/form/Button" data-dojo-props="title:'${!nls.aboutLabel}',iconClass:'${baseClass}-about'" data-dojo-attach-event="click:_onAboutClick"></div>-->
+    </div>
+    <div id="mosaicMethodSelection" style="display: block;">
+        <br>
+         Mosaic Method:
+         <select id="imageMosaicSelect" data-dojo-type="dijit/form/Select" style="width:165px;">
+             <option value='esriMosaicAttribute'>Display all images sorted by selected date</option>
+             <option value='esriMosaicLockRaster'>Only display images for the selected date</option>
+         </select>
+         <br />
+    </div>
+    
+  </div>
+</div>

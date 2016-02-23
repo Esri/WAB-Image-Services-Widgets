@@ -1,0 +1,81 @@
+
+.ISTimeSelect {
+  /*...*/
+}
+
+.ISTimeSelect-container {
+  background-color : #fff;
+  border           : solid 1px #6eb5e3;
+  border-radius    : 3px;
+  box-shadow       : 1px 1px 3px #ddd;
+}
+
+.ISTimeSelect-title {
+  cursor     : move;
+  width      : 100%;
+  color      : #fff;
+  background : #6eb5e3;
+  padding    : 3px;
+  font-size  : larger;
+}
+
+.ISTimeSelect-toolbar {
+  display : table-row !important;
+  border  : none !important;
+}
+
+.ISTimeSelect-cell {
+  display        : table-cell !important;
+  vertical-align : middle !important;
+}
+
+/*
+.ISTimeSelect-about {
+  width      : 20px;
+  height     : 20px;
+  background : url(../images/info_32.png) no-repeat center / contain;
+}
+
+.ISTimeSelect-aboutDlg .dijitButtonText,
+.ISTimeSelect-aboutDlg .dijitDialogTitle {
+  color : #fff !important;
+}
+
+.ISTimeSelect-aboutDlg .dijitButtonNode,
+.ISTimeSelect-aboutDlg .dijitDialogTitleBar {
+  background : #6eb5e3 !important;
+  border     : none !important;
+}
+
+.ISTimeSelect-aboutDlg .dijitButtonDisabled .dijitButtonNode {
+  background : #d3d3d3 !important;
+}
+
+.ISTimeSelect-aboutDlg .about-content {
+  min-height : 200px;
+  overflow   : auto;
+}
+
+.ISTimeSelect-aboutDlg .item-node {
+  max-height : 600px;
+  margin     : 25px;
+  padding    : 10px;
+  border     : solid 1px #ddd;
+}
+
+.ISTimeSelect-aboutDlg .item-thumb {
+  float  : left;
+  height : 100px;
+  margin : 10px;
+  border : solid 1px #6eb5e3;
+}
+
+.ISTimeSelect-aboutDlg .item-desc {
+  color     : #666;
+  font-size : smaller;
+}
+*/
+
+.layer-chooser-node {
+  min-height : 250px;
+}

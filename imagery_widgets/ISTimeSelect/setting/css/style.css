@@ -1,0 +1,32 @@
+
+.ISTimeSelectSetting {
+  overflow : hidden;
+}
+
+.ISTimeSelectSetting-section {
+  margin  : 5px !important;
+  padding : 10px !important;
+  border  : solid 1px #eee !important;
+}
+
+.ISTimeSelectSetting-label {
+  display    : inline-block;
+  width      : 200px !important;
+  text-align : right;
+}
+.ISTimeSelectSetting-label1 {
+  display    : inline-block;
+  width      : 400px !important;
+  text-align : left;
+}
+.ISTimeSelectSetting-title{
+  width : 350px;
+}
+
+.ISTimeSelectSetting-layer-selector{
+  display : inline-block !important;
+}
+.ISTimeSelectSetting-enable-mosaic-checkbox{
+    display: inline-block !important;
+    margin-left: 200px;
+}
