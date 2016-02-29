@@ -20,7 +20,7 @@
           "bottom": 25
         }
       }, {
-        "uri": "widgets/Geocoder/Widget",
+        "uri": "widgets/Search/Widget",
         "position": {
           "left": 45,
           "top": 5
