@@ -112,10 +112,10 @@ define([
                                 query.geometry = new Polygon(polygonJson);
                                 query.outFields = [this.dateField];
                                 query.returnGeometry = false;
-                                var queryVisible = layer.queryVisibleRasters(query);
+                                var queryVisible = layer.queryVisibleRasters(query,{});
                                 queryVisible.then(lang.hitch(this, function(result) {
                                     var dates = [];
-                                    console.log(result);
+                                    
                                     for (var i = 0; i < result.length; i++) {
                                         if (result[i].attributes[this.dateField] && (array.indexOf(dates, result[i].attributes[this.dateField]) == -1)) {
                                             dates.push(result[i].attributes[this.dateField]);

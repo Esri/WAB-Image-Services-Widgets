@@ -1,4 +1,4 @@
-# WAB-Image Services-Widgets
+﻿# WAB-Image Services-Widgets
 
 These are custom widgets to be used in Web App Builder, dealing specifically with Image Services. 
 
@@ -17,7 +17,7 @@ Widgets:
 *	Provide a time slider/filter based on image intersecting the current extent (ISTimeFilter)
 *	Change the display order of imagery (ISDisplayOrder)
 *	Plot a spectral profile from multispectral imagery (ISSpectralProfile)
-*	Perform height measurements (ISMensuration)
+*	Display all images sorted by selected date based on image intersecting the current extent (ISTimeSelect).
 *	Change the parameters such as compression and sampling method (ISParameters)
 *	Set secondary layer to be used for comparisons and change (ISLayer)
 *	Compare two layers using transparency or swipe (ISCompare)
@@ -51,7 +51,7 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 Want to contribute. Create your own fork and update and let us know via email.  
 
 ## Licensing
-Copyright 2015 Esri
+Copyright 2016 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

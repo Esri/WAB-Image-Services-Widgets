@@ -107,7 +107,7 @@ define([
                                // query1.outFields = ["*"];
                                query1.outFields=[this.dateField];
                                 query1.returnGeometry = false;
-                                var queryVisible = layer.queryVisibleRasters(query1);
+                                var queryVisible = layer.queryVisibleRasters(query1,{});
                                 queryVisible.then(lang.hitch(this, function(result) {
                                     var dates = [];
                                     for (var i = 0; i < result.length; i++) {
