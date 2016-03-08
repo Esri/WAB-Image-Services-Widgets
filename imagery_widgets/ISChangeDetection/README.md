@@ -1,17 +1,8 @@
-## Legend ##
+## IS ChangeDetection ##
 ### Overview ###
-The legend widget displays a label and symbol for some or all of the layers in the map. If specified, the legend will respect scale dependencies and only display layers and sub layers that are currently visible in the map. The legend automatically updates if the visibility of a layer or sublayer changes.
-
-### Attributes ###
-* `legend`: An object of ArcGIS API for Javascript, see the params of [Legend Constructor](https://developers.arcgis.com/en/javascript/jsapi/legend-amd.html#legend1).
-
-Example:
-```
-{
-  "legend":{
-    "arrangement": 0,
-    "autoUpdate": true,
-    "respectCurrentMapScale": true
-  }
-}
-```
+IS ChangeDetection widget allows user to detect the difference between 2 rasters on the primary layer and secondary layer. The change is remapped to one color and the rest is remapped to another color. The result is shown as a new layer called “Result Layer”.
+For change detection widget to function, following workflow should be followed – 
+*	On the primary layer, go to the IS timeFilter widget and activate it. After activating select the scene for which you want to do change detection. 
+* Go back to the IS Layers widget and click on the ‘copy primary to secondary’ button. The current primary layer with the scene you selected becomes the secondary layer.
+*	Go back to the IS timeFilter widget and select the new scene for which the change detection will be performed.
+*	Open IS change detection widget. Choose the method and click on apply.
