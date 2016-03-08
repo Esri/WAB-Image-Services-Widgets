@@ -1,17 +1,3 @@
-## Legend ##
+## IS Compare ##
 ### Overview ###
-The legend widget displays a label and symbol for some or all of the layers in the map. If specified, the legend will respect scale dependencies and only display layers and sub layers that are currently visible in the map. The legend automatically updates if the visibility of a layer or sublayer changes.
-
-### Attributes ###
-* `legend`: An object of ArcGIS API for Javascript, see the params of [Legend Constructor](https://developers.arcgis.com/en/javascript/jsapi/legend-amd.html#legend1).
-
-Example:
-```
-{
-  "legend":{
-    "arrangement": 0,
-    "autoUpdate": true,
-    "respectCurrentMapScale": true
-  }
-}
-```
+The IS Compare widget sets transparency or swipe on the topmost imagery layer. This enables comparison between the topmost image layer and those below. Typically this would be between the primary and secondary layer, but if there is a results layer then this would be between the results layer and the primary layer.
