@@ -1,4 +1,4 @@
-## Legend ##
+## IS Layers ##
 ### Overview ###
 The ISLayers widget sets/changes the primary and secondary layer in the app. It allows users to turn on/off the primary and secondary layers. It also allows users to change the primary layer and the secondary layer to one of the services listed in the dropdown. The primary layer can be moved to replace the secondary level ,or the primary and secondary layers can be swapped. The result layer after doing change detection can be saved by clicking on save icon beside the result checkbox. The user can give any name to the layer and the layer would be added in the dropdown list of both the primary and secondary layer. The user can save the result layer as a web map on his/her ArcGIS Online account.
 
