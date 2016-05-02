@@ -9,8 +9,11 @@ define([
   "dojo/Deferred",
   "dijit/registry",
   "jimu/BaseWidget",
+  'dojo/text!./Widget.html',
   "dijit/_WidgetsInTemplateMixin",
   "dojo/dnd/Moveable",
+  "esri/layers/ImageServiceParameters",
+  "esri/layers/ArcGISImageServiceLayer",
   "dijit/ConfirmDialog",
   "put-selector/put",
   "dojo/store/Memory",
@@ -23,7 +26,7 @@ define([
   "dijit/form/Button",
   "dijit/form/Select"
 ], function (declare, lang, array, on, query, domClass, locale, Deferred,registry,
-             BaseWidget, _WidgetsInTemplateMixin, Moveable, ConfirmDialog, put, Memory,
+             BaseWidget,template, _WidgetsInTemplateMixin, Moveable, ImageServiceParameters,ArcGISImageServiceLayer,ConfirmDialog, put, Memory,
              MosaicRule, Query, QueryTask, mathUtils,domStyle) {
 
   /**
@@ -43,7 +46,7 @@ define([
     // IS CURRENT DATE FIRST/LAST //
     isOldest: true,
     isNewest: true,
-
+primaryLayer:  null,
     /**
      *
      */
@@ -51,6 +54,7 @@ define([
       this.inherited(arguments);
       
       registry.byId("imageMosaicSelect").on("change",lang.hitch(this, this.mosaicRuleApplied));
+      registry.byId("setSecondaryLayerBtnSelect").on("click", lang.hitch(this, this.setSecondaryLayerSelect));
       // MAKE MOVABLE //
       new Moveable(this.containerNode, {handle: this.titleNode});
 
@@ -110,7 +114,7 @@ define([
       // DO WE HAVE A VALID CONFIGURATION //
       if(this.hasValidConfig) {
         // HAS THE LAYER BEEN CREATED YET //
-        if(this.ISLayer == null) {
+        if(this.primaryLayer == null) {
           // ADD THE IMAGE SERVICE LAYER //
           this._configureImageServiceLayer().then(lang.hitch(this, function () {
             // GET IMAGERY DATES //
@@ -126,6 +130,7 @@ define([
     /**
      * WIDGET IS CLOSED
      */
+    
     onClose: function () {
       this.inherited(arguments);
     },
@@ -145,26 +150,30 @@ define([
          if (this.map.layerIds) {
                         if (this.map.getLayer("resultLayer")) {
                             this.resultLayer = this.map.getLayer("resultLayer");
-                            this.ISLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+                            this.primaryLayerPosition = this.map.layerIds.length - 2;
                             } else {
-                            this.ISLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
-                        }
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                            this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            this.primaryLayerPosition = this.map.layerIds.length - 1;
+                }
                     }
-                    console.log(this.ISLayer);
+                    
       //  this.ISLayer = this.map.getLayer(this.config.layerId);
-        if(this.ISLayer) {
+        if(this.primaryLayer) {
           // DEFAULT MOSAIC RULE //
-          this.defaultMosaicRule = this.ISLayer.defaultMosaicRule || lang.clone(this.ISLayer.mosaicRule);
+          this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule || lang.clone(this.primaryLayer.mosaicRule);
           // SET MAP WAIT CURSOR WHILE UPDATING LAYER //
-          this.ISLayer.on("update-start", lang.hitch(this.map, this.map.setMapCursor, "wait"));
-          this.ISLayer.on("update-end", lang.hitch(this.map, this.map.setMapCursor, "default"));
+          this.primaryLayer.on("update-start", lang.hitch(this.map, this.map.setMapCursor, "wait"));
+          this.primaryLayer.on("update-end", lang.hitch(this.map, this.map.setMapCursor, "default"));
           // MAP EXTENT CHANGE //
        //  this.map.on("extent-change", lang.hitch(this, this._mapExtentChange));
-          if(this.previousLayer !== this.ISLayer.url){
+          if(this.previousLayer !== this.primaryLayer.url){
               this.getImageryDates();
              
           }
-          this.previousLayer = this.ISLayer.url;
+          this.previousLayer = this.primaryLayer.url;
                 deferred.resolve();
         } else {
           console.warn("Can't find configured layer in this map: ", this.config);
@@ -204,8 +213,8 @@ define([
         // RESET DISPLAY MESSAGE //
         this.setDisplayMessage((!validZoomLevel) ? this.nls.zoomInToSelectDate : this.nls.noImageryAvailable);
         // USE DEFAULT MOSAIC RULE //
-        if(this.ISLayer && this.defaultMosaicRule) {
-          this.ISLayer.setMosaicRule(this.defaultMosaicRule);
+        if(this.primaryLayer && this.defaultMosaicRule) {
+          this.primaryLayer.setMosaicRule(this.defaultMosaicRule);
         }
       }
 
@@ -334,7 +343,7 @@ define([
         dateQuery.orderByFields = [this.config.dateField + " DESC"];
 
         // QUERY TASK //
-        var queryTask = new QueryTask(this.ISLayer.url);
+        var queryTask = new QueryTask(this.primaryLayer.url);
         this.getImageDatesHandle = queryTask.execute(dateQuery).then(lang.hitch(this, function (featureSet) {
           //console.info("getImageryDates: ", featureSet);
 
@@ -354,7 +363,7 @@ define([
           // CREATE UNIQUE LIST OF DATES WITH MATCHING LOCKRASTERIDS //
           array.forEach(featureSet.features, lang.hitch(this, function (feature) {
             // IMAGE ID //
-            var imageId = feature.attributes[this.ISLayer.objectIdField];
+            var imageId = feature.attributes[this.primaryLayer.objectIdField];
             // IMAGE DATE //
             var dateValue = feature.attributes[this.config.dateField];
 
@@ -415,6 +424,44 @@ define([
      * @param selectedDateText
      * @private
      */
+    setSecondaryLayerSelect: function(){
+       
+        if(this.primaryLayer){
+                      if(this.secondaryLayer)
+                          this.map.removeLayer(this.secondaryLayer);
+                      var params = new ImageServiceParameters();
+                       if (this.primaryLayer.mosaicRule) {
+                  params.mosaicRule = this.primaryLayer.mosaicRule;
+                }
+                if (this.primaryLayer.renderingRule) {
+                  params.renderingRule = this.primaryLayer.renderingRule;
+                }
+        
+            if (this.primaryLayer.bandIds) {
+                  params.bandIds = this.primaryLayer.bandIds;
+                }
+                if (this.primaryLayer.format) {
+                  params.format = this.primaryLayer.format;
+                }
+                if (this.primaryLayer.interpolation) {
+                  params.interpolation = this.primaryLayer.interpolation;
+                }
+                var popupInfo = "";
+                if (this.primaryLayer.popupInfo) {
+                  popupInfo = new PopupTemplate(this.primaryLayer.popupInfo);
+                }
+                var secondLayer = new ArcGISImageServiceLayer(
+                        this.primaryLayer.url,
+                        {
+                          id: "secondaryLayer",
+                          imageServiceParameters: params,
+                          visible: true,
+                          infoTemplate: popupInfo
+                        });
+                        
+              this.map.addLayer(secondLayer,this.primaryLayerPosition);
+                    }
+    },
     _onDateChange: function (selectedDateText) {
       var deferred = new Deferred();
 
@@ -479,7 +526,7 @@ else
           }
 
           // SET MOSAIC RULE //
-          this.ISLayer.setMosaicRule(newMosaicRule);
+          this.primaryLayer.setMosaicRule(newMosaicRule);
 
           // SELECTION INDEX //
           var selectionIndex = imageryDatesStore.index[selectedItem.id];

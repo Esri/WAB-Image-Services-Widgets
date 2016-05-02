@@ -40,6 +40,8 @@ define([
     "esri/Color",
     "esri/InfoTemplate",
     "dojo/dom-style",
+    "esri/layers/ArcGISImageServiceLayer",
+  "esri/layers/ImageServiceParameters",
     "esri/tasks/ImageServiceIdentifyTask",
     "esri/tasks/ImageServiceIdentifyParameters",
     "esri/geometry/Polygon",
@@ -65,7 +67,7 @@ define([
                 html,
                 dom,
                 MosaicRule,
-                Query, QueryTask, Extent, locale, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, array, Graphic, SimpleLineSymbol, SimpleFillSymbol, Color, InfoTemplate, domStyle, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest) {
+                Query, QueryTask, Extent, locale, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, array, Graphic, SimpleLineSymbol, SimpleFillSymbol, Color, InfoTemplate, domStyle,ArcGISImageServiceLayer, ImageServiceParameters, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISTimeFilter',
@@ -92,6 +94,7 @@ define([
                     registry.byId("refreshTimesliderBtn").on("click", lang.hitch(this, this.timeSliderRefresh));
                     registry.byId("show").on("change", lang.hitch(this, this.sliderChange));
                     registry.byId("timeFilter").on("change", lang.hitch(this, this.setFilterDiv));
+                    registry.byId("setSecondaryLayerBtn").on("click", lang.hitch(this, this.setSecondaryLayer));
                     if (this.map) {
                         this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
@@ -130,32 +133,40 @@ define([
                     if (this.map.layerIds) {
                         this.prevPrimary = this.primaryLayer;
                         if (this.map.getLayer("resultLayer")) {
-                            if (this.primaryLayer != this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]) && this.primaryLayer) {
+                            if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]) && this.primaryLayer) {
                                 this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+                                this.positionOfPrimaryLayer = this.map.layerIds.length - 2;
                                 registry.byId("timeFilter").set("checked", false);
 //                                this.timeSliderRefresh();
                             } else {
                                 this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+                                this.positionOfPrimaryLayer = this.map.layerIds.length - 2;
                             }
                         } else {
-                            if (this.primaryLayer != this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]) && this.primaryLayer) {
+                            if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]) && this.primaryLayer) {
                                 this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                                this.positionOfPrimaryLayer = this.map.layerIds.length - 1;
                                 registry.byId("timeFilter").set("checked", false);
 //                                this.timeSliderRefresh();
                             } else {
                                 this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                                this.positionOfPrimaryLayer = this.map.layerIds.length - 1;
                             }
                         }
-                            
+                          
                             this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
                         if (!this.prevPrimary) {
                             this.mosaicBackup = this.primaryLayer.mosaicRule;
                             this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
-                        } else if (this.prevPrimary.url != this.primaryLayer.url) {
+                        } else if (this.prevPrimary.url !== this.primaryLayer.url) {
                             this.mosaicBackup = this.primaryLayer.mosaicRule;
                             this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
-                        } else if (this.prevPrimary.url == this.primaryLayer.url && this.primaryLayer.mosaicRule) {
-                            if (this.primaryLayer.mosaicRule.method != "esriMosaicLockRaster") {
+                        } else if (this.prevPrimary.url === this.primaryLayer.url && this.primaryLayer.mosaicRule) {
+                            if (this.primaryLayer.mosaicRule.method !== "esriMosaicLockRaster") {
                                 this.mosaicBackup = this.primaryLayer.mosaicRule;
                             }
                         }
@@ -285,7 +296,7 @@ define([
                                 if (data.catalogItems.features[0]) {
                                     var maxVisible = data.catalogItems.features[0].attributes.OBJECTID;
                                     for (var z in this.orderedFeatures) {
-                                        if (this.orderedFeatures[z].attributes.OBJECTID == maxVisible) {
+                                        if (this.orderedFeatures[z].attributes.OBJECTID === maxVisible) {
                                             var index = z;
                                         }
                                     }
@@ -316,7 +327,7 @@ define([
                         this.featureIds = [];
                         var compareDate = new Date(aqDate);
                         var compareValue = registry.byId("subtractValue").get("value");
-                        if (compareValue != 0) {
+                        if (compareValue !== 0) {
                             switch (registry.byId("subtractDateString").get("value")) {
                                 case "days" :
                                     {
@@ -357,7 +368,7 @@ define([
 
                         if (this.primaryLayer.visible) {
                             for (var i = 0; i < featureSelect.length; i++) {
-                                if (registry.byId("show").get("value") == "footprint") {
+                                if (registry.byId("show").get("value") === "footprint") {
                                     var geometry = featureSelect[i].geometry;
                                     var sms = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 255, 255]), 2), new Color([0, 255, 255, 0.15]));
                                     var attr = featureSelect[i].attributes;
@@ -365,7 +376,7 @@ define([
                                     var infoTemplate = new InfoTemplate("Attributes", "${*}");
                                     var graphic = new Graphic(geometry, sms, attr, infoTemplate);
                                     this.map.graphics.add(graphic);
-                                    if (count == 19) {
+                                    if (count === 19) {
                                         if (this.responseAlert) {
                                             this.responseAlert = confirm("Number of footprints selected exceed 20. Only first 20 will be displayed. Press OK to warn again.");
                                         }
@@ -379,7 +390,7 @@ define([
 
                         html.set(this.imageCount, "" + count + "");
 
-                        if (registry.byId("show").get("value") == "image") {
+                        if (registry.byId("show").get("value") === "image") {
                             var mr = new MosaicRule();
                             mr.method = MosaicRule.METHOD_LOCKRASTER;
                             mr.ascending = true;
@@ -397,6 +408,45 @@ define([
                         }
                     }
                 },
+                setSecondaryLayer: function(){
+                  if(this.primaryLayer){
+                      if(this.secondaryLayer)
+                          this.map.removeLayer(this.secondaryLayer);
+                      var params = new ImageServiceParameters();
+                       if (this.primaryLayer.mosaicRule) {
+                  params.mosaicRule = this.primaryLayer.mosaicRule;
+                }
+                if (this.primaryLayer.renderingRule) {
+                  params.renderingRule = this.primaryLayer.renderingRule;
+                }
+                if (this.primaryLayer.bandIds) {
+                  params.bandIds = this.primaryLayer.bandIds;
+                }
+                if (this.primaryLayer.format) {
+                  params.format = this.primaryLayer.format;
+                }
+                if (this.primaryLayer.interpolation) {
+                  params.interpolation = this.primaryLayer.interpolation;
+                }
+                var popupInfo = "";
+                if (this.primaryLayer.popupInfo) {
+                  popupInfo = new PopupTemplate(this.primaryLayer.popupInfo);
+                }
+                var secondLayer = new ArcGISImageServiceLayer(
+                        this.primaryLayer.url,
+                        {
+                          id: "secondaryLayer",
+                          imageServiceParameters: params,
+                          visible: true,
+                          infoTemplate: popupInfo
+                        });
+              this.map.addLayer(secondLayer,this.positionOfPrimaryLayer);
+                    html.set(this.setSecondaryLayerUpdateUser,"Setting current scene as secondary layer.");
+                    setTimeout(lang.hitch(this, function(){
+                        html.set(this.setSecondaryLayerUpdateUser,"");
+                    }),3000);
+                    }
+                  },
                 timeSliderRefresh: function() {
                     if (this.slider) {
                         this.timeSliderHide();

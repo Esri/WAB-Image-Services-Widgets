@@ -243,9 +243,17 @@ define([
                   domStyle.set(this.result, "display", "none");
                   this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                  
                 }
                 
-              }
+                var selectOptions = registry.byId("secondary").getOptions();
+               for(var i in this.layerList){
+                if(this.secondaryLayer && this.secondaryLayer.visible && this.secondaryLayer.url === this.layerList[i].url){
+                    registry.byId("secondary").attr("value",selectOptions[i].value,false);
+                     registry.byId("secondaryShow").set("checked", this.secondaryLayer.visible);
+                     break;
+                }
+              }}
             },
             populateServices: function () {
               var mainLayers, getItem, j;
@@ -260,10 +268,11 @@ define([
               this.layerList = [];
               registry.byId("imageView").removeOption(registry.byId('imageView').getOptions());
               registry.byId("secondary").removeOption(registry.byId('secondary').getOptions());
-
+              
               for (var i = 0; i < mainLayers.length; i++) {
                 this.layerList[i] = mainLayers[mainLayers.length - i - 1].layerObject;
                 this.layerList[i].title = mainLayers[mainLayers.length - i - 1].title;
+                this.layerList[i].name = mainLayers[mainLayers.length - i - 1].name;
                 registry.byId("imageView").addOption({label: this.layerList[i].title, value: "" + i + ""});
                 registry.byId("secondary").addOption({label: this.layerList[i].title, value: "" + i + ""});
               }

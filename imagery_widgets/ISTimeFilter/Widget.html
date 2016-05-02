@@ -6,13 +6,17 @@
             Date(s): 
             <div data-dojo-attach-point="dateRange" style="display:inline-block"></div>
             [<div data-dojo-attach-point="imageCount" style="display:inline-block"></div>]
+            <button data-dojo-type="dijit/form/Button" id="setSecondaryLayerBtn" style="float: right;"><img src="widgets/ISTimeFilter/images/save.png" height="15" /></button>
+             <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'setSecondaryLayerBtn',position:['below']">
+                    Set the current scene as secondary layer.
+                </div>
         </div>
         <div>
             <br/>
             <div  style="float:right;display:inline-block;">
                 <button data-dojo-type="dijit/form/Button" type="button" id="refreshTimesliderBtn"><img src="widgets/ISTimeFilter/images/refresh.png" height="15"/></button>
                 <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'refreshTimesliderBtn',position:['below']">
-                    Refresh query based on current extent’
+                    Refresh query based on current extent.
                 </div>
             </div>
             <div data-dojo-attach-point='timeSliderDiv'>
@@ -38,5 +42,8 @@
     <div>
         <br/>
         <div data-dojo-attach-point="errorDiv" style="color:red;"></div>
+        <div data-dojo-attach-point="setSecondaryLayerUpdateUser" style="color: #0080C0;">
+            
+        </div>
     </div>
 </div>
