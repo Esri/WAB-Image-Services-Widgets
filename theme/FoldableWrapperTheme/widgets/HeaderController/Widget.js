@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Esri. All Rights Reserved.
+// Copyright © 2014 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,18 +19,13 @@ define([
     'dojo/_base/lang',
     'dojo/_base/array',
     'dojo/_base/html',
-    'dojo/topic',
     'dojo/aspect',
-    'dojo/Deferred',
     'dojo/query',
-    'dojo/NodeList-dom',
-    'dojo/NodeList-manipulate',
     'dojo/on',
+    'dojo/Deferred',
     'dojo/mouse',
-    'dojo/dom-attr',
     'dojo/dom-construct',
     'dojo/dom-geometry',
-    'dijit/registry',
     'jimu/BaseWidget',
     'jimu/PoolControllerMixin',
     'jimu/tokenUtils',
@@ -38,16 +33,17 @@ define([
     'jimu/portalUrlUtils',
     'jimu/utils',
     'jimu/dijit/Message',
-    './PopupTileNodes'
+    './PopupTileNodes',
+    'dojo/NodeList-manipulate'
   ],
-  function(declare, lang, array, html, topic, aspect, Deferred, query, nld, nlm, on, mouse, domAttr,
-    domConstruct, domGeometry, registry, BaseWidget, PoolControllerMixin, tokenUtils, portalUtils,
+  function(declare, lang, array, html, aspect, query, on, Deferred, mouse,
+    domConstruct, domGeometry, BaseWidget, PoolControllerMixin, tokenUtils, portalUtils,
     portalUrlUtils, utils, Message, PopupTileNodes) {
     /* global jimuConfig */
     /* jshint scripturl:true */
     var clazz = declare([BaseWidget, PoolControllerMixin], {
 
-      baseClass: 'jimu-widget-header-controller jimu-main-bgcolor',
+      baseClass: 'jimu-widget-header-controller jimu-main-background',
 
       maxIconCount: -1,
 
@@ -62,6 +58,8 @@ define([
 
       //the opened group/widget's id
       openedId: '',
+
+      moveTopOnActive: false,
 
       postCreate: function() {
         this.inherited(arguments);
@@ -82,18 +80,20 @@ define([
         //   html.setStyle(this.signInSectionNode, 'display', '');
         // }
 
-        html.setAttr(this.logoNode, 'src', this.appConfig.logo ? this.appConfig.logo : this.folderUrl + 'images/app-logo.png');
-        this.switchableElements.title.innerHTML = this.appConfig.title ? this.appConfig.title : '';
-        this.switchableElements.subtitle.innerHTML = this.appConfig.subtitle ? this.appConfig.subtitle : '';
+        if (this.appConfig && this.appConfig.logo) {
+          this.logoNode.src = this.appConfig.logo;
+          html.removeClass(this.logoNode, 'hide-logo');
+        } else {
+          this.logoNode.src = "";
+          html.addClass(this.logoNode, 'hide-logo');
+        }
+
+        this.switchableElements.title.innerHTML =
+          utils.sanitizeHTML(this.appConfig.title ? this.appConfig.title : '');
+        this.switchableElements.subtitle.innerHTML =
+          utils.sanitizeHTML(this.appConfig.subtitle ? this.appConfig.subtitle : '');
 
         this._createDynamicLinks(this.appConfig.links);
-        if (this.appConfig.about) {
-          html.setStyle(this.aboutNode, 'display', '');
-          this.aboutNode.visible = true;
-        } else {
-          html.setStyle(this.aboutNode, 'display', 'none');
-          this.aboutNode.visible = false;
-        }
 
         this._setElementsSize();
 
@@ -113,14 +113,14 @@ define([
 
       startup: function() {
         this.inherited(arguments);
-
-        this.timeoutHandle = setTimeout(lang.hitch(this, this.resize), 100);
+        this.resize();
+        // this.timeoutHandle = setTimeout(lang.hitch(this, this.resize), 100);
       },
 
       onAction: function(action, data) {
         /*jshint unused: false*/
         if (action === 'highLight' && data) {
-          var node = query('div[settingid="' + data.widgetId + '"]')[0];
+          var node = query('div[settingid="' + data.widgetId + '"]', this.domNode)[0];
           this._highLight(node);
         }
         if (action === 'removeHighLight') {
@@ -147,7 +147,6 @@ define([
           query('a', this.popupUserNameNode).html(credential.userId)
             .attr('href', this.appConfig.portalUrl + 'home/user.html');
         }
-
         this.resize();
       },
 
@@ -188,8 +187,24 @@ define([
       },
 
       resize: function() {
+        var headerNodeFloat = html.getStyle(this.headerNode, 'float');
+        var logoNodeFloat = html.getStyle(this.logoNode, 'float');
+        var titlesNodeFloat = html.getStyle(this.titlesNode, 'float');
+        var linksNodeFloat = html.getStyle(this.linksNode, 'float');
+        var allHasFloatStyle = (headerNodeFloat && headerNodeFloat !== 'none') &&
+          (logoNodeFloat && logoNodeFloat !== 'none') &&
+          (titlesNodeFloat && titlesNodeFloat !== 'none') &&
+          (linksNodeFloat && linksNodeFloat !== 'none');
+
+        if (allHasFloatStyle) {
+          this._resize();
+        } else {
+          setTimeout(lang.hitch(this, this.resize), 200);
+        }
+      },
+
+      _resize: function() {
         var box = html.getContentBox(this.domNode);
-        // console.log('header width:', box.w);
 
         //by default, we show all elements
         this._showSwitchableElements(['title', 'links', 'subtitle']);
@@ -201,7 +216,6 @@ define([
         this._createIconNodes(box);
 
         if (this.morePane) {
-          html.setStyle(this.morePane.domNode, utils.getPositionStyle(this._getMorePanelSize()));
           this.morePane.resize();
         }
         if (this.popupLinkNode) {
@@ -219,6 +233,14 @@ define([
         if (this.morePane) {
           this.morePane.destroy();
         }
+        if (this.moreIconPaneCoverNode) {
+          html.destroy(this.moreIconPaneCoverNode);
+          this.moreIconPaneCoverNode = null;
+        }
+        if (this.popupLinkNode && this.popupLinksVisible) {
+          this._hidePopupLink();
+        }
+        html.destroy(this.popupLinkNode);
         this.inherited(arguments);
       },
 
@@ -230,6 +252,7 @@ define([
           default:
             return;
         }
+        this.appConfig = appConfig;
         this.resize();
       },
 
@@ -245,16 +268,20 @@ define([
         if (ids.length === 0) {
           return;
         }
-        this.openedId = ids[0];
-        var config = this.getConfigById(this.openedId);
+        var config = this.getConfigById(ids[0]);
         if (!config) {
           return;
         }
+        this.openedId = ids[0];
         if (config.widgets && config.openType === 'openAll') {
           this._showIconContent(config);
         } else if (!config.widgets) {
           this._showIconContent(config);
         }
+      },
+
+      _onLogoLoad: function() {
+        this.resize();
       },
 
       _highLight: function(node) {
@@ -287,16 +314,24 @@ define([
 
 
       _onAttributeChange: function(appConfig, changedData) {
-        if (changedData.title !== undefined && changedData.title !== this.appConfig.title) {
-          this.titleNode.innerHTML = changedData.title;
+        /*jshint unused: false*/
+        if ('title' in changedData && changedData.title !== this.appConfig.title) {
+          this.titleNode.innerHTML =  utils.sanitizeHTML(changedData.title);
         }
-        if (changedData.subtitle !== undefined && changedData.subtitle !== this.appConfig.subtitle) {
-          this.subtitleNode.innerHTML = changedData.subtitle;
+        if ('subtitle' in changedData && changedData.subtitle !== this.appConfig.subtitle) {
+          this.subtitleNode.innerHTML = utils.sanitizeHTML(changedData.subtitle);
         }
-        if (changedData.logo) {
-          html.setAttr(this.logoNode, 'src', changedData.logo);
+        if ('logo' in changedData && changedData.logo !== this.appConfig.logo) {
+          if(changedData.logo){
+            html.setAttr(this.logoNode, 'src', changedData.logo);
+            html.removeClass(this.logoNode, 'hide-logo');
+          }else{
+            html.removeAttr(this.logoNode, 'src');
+            html.addClass(this.logoNode, 'hide-logo');
+          }
         }
-        if (changedData.links) {
+
+        if ('links' in changedData) {
           this._createDynamicLinks(changedData.links);
         }
       },
@@ -304,7 +339,7 @@ define([
       _setElementsSize: function() {
         html.setStyle(this.logoNode, {
           height: '30px',
-          minWidth: '30px',
+          // minWidth: '30px',
           marginTop: ((this.height - 30) / 2) + 'px'
         });
 
@@ -316,16 +351,18 @@ define([
           lineHeight: this.height + 'px'
         });
 
-        query('.link', this.domNode).style({
+        query('.jimu-link', this.domNode).style({
           lineHeight: this.height + 'px'
         });
       },
 
       _processGroupSetting: function() {
         function getOpenType(gLabel) {
-          for (var i = 0; i < this.config.groupSetting.length; i++) {
-            if (this.config.groupSetting[i].label === gLabel) {
-              return this.config.groupSetting[i].type;
+          if(this.config.groupSetting){
+            for (var i = 0; i < this.config.groupSetting.length; i++) {
+              if (this.config.groupSetting[i].label === gLabel) {
+                return this.config.groupSetting[i].type;
+              }
             }
           }
           //this is the default open type
@@ -337,13 +374,20 @@ define([
       },
 
       _createDynamicLinks: function(links) {
+        if (window.isRTL) {
+          var _links = [];
+          array.forEach(links, function(link) {
+            _links.unshift(link);
+          });
+          links = _links;
+        }
         html.empty(this.dynamicLinksNode);
         array.forEach(links, function(link) {
           html.create('a', {
             href: link.url,
             target: '_blank',
-            innerHTML: link.label,
-            'class': "link",
+            innerHTML: utils.sanitizeHTML(link.label),
+            'class': "jimu-link jimu-align-leading jimu-leading-margin1",
             style: {
               lineHeight: this.height + 'px'
             }
@@ -395,33 +439,50 @@ define([
       },
 
       _onLogoClick: function() {
-        return;
-        // if (!this.popupLinkNode) {
-        //   this.popupLinkNode = this._createPopupLinkNode();
-        //   this._switchSignin();
-        // }
+        // return;
+        if (this.popupLinkNode) {
+          html.destroy(this.popupLinkNode);
+          // this._switchSignin();
+        }
+        this.popupLinkNode = this._createPopupLinkNode();
 
-        // if (this.popupLinksVisible) {
-        //   this.popupLinksVisible = false;
-        //   this._hidePopupLink();
-        // } else {
-        //   this.popupLinksVisible = true;
-        //   this._showPopupLink();
-        // }
+        if (this.popupLinksVisible) {
+          this._hidePopupLink();
+        } else {
+          this._showPopupLink();
+        }
       },
 
       _hidePopupLink: function() {
         html.setStyle(this.popupLinkNode, 'display', 'none');
-        html.setStyle(jimuConfig.layoutId, {
-          left: 0
-        });
+
+        if (window.isRTL) {
+          html.setStyle(jimuConfig.layoutId, {
+            right: 0
+          });
+        } else {
+          html.setStyle(jimuConfig.layoutId, {
+            left: 0
+          });
+        }
+
+        this.popupLinksVisible = false;
       },
 
       _showPopupLink: function() {
         html.setStyle(this.popupLinkNode, 'display', '');
-        html.setStyle(jimuConfig.layoutId, {
-          left: html.getContentBox(this.popupLinkNode).w + 'px'
-        });
+
+        if (window.isRTL) {
+          html.setStyle(jimuConfig.layoutId, {
+            right: html.getContentBox(this.popupLinkNode).w + 'px'
+          });
+        } else {
+          html.setStyle(jimuConfig.layoutId, {
+            left: html.getContentBox(this.popupLinkNode).w + 'px'
+          });
+        }
+
+        this.popupLinksVisible = true;
       },
 
       _createPopupLinkNode: function() {
@@ -429,16 +490,26 @@ define([
         box = html.getContentBox(jimuConfig.mainPageId);
 
         node = html.create('div', {
-          'class': 'popup-links jimu-main-bgcolor',
+          'class': 'popup-links jimu-main-background',
           style: {
             position: 'absolute',
             zIndex: 100,
-            left: 0,
             top: 0,
-            bottom: 0,
-            right: '50px'
+            bottom: 0
           }
         }, jimuConfig.mainPageId);
+
+        if (window.isRTL) {
+          html.setStyle(node, {
+            right: 0,
+            left: '50px'
+          });
+        } else {
+          html.setStyle(node, {
+            left: 0,
+            right: '50px'
+          });
+        }
 
         titleNode = html.create('div', {
           'class': 'popup-title',
@@ -448,8 +519,8 @@ define([
           }
         }, node);
 
-        html.create('img', {
-          'class': 'logo',
+        var logoNode = html.create('img', {
+          'class': 'logo jimu-float-leading jimu-leading-margin1',
           src: this.appConfig.logo ? this.appConfig.logo : this.folderUrl + 'images/app-logo.png',
           style: {
             width: '30px',
@@ -458,33 +529,44 @@ define([
           }
         }, titleNode);
 
-        html.create('div', {
-          'class': 'title',
-          innerHTML: this.appConfig.title,
+        var textNode = html.create('div', {
+          'class': 'title jimu-float-leading jimu-leading-margin1 jimu-ellipsis',
+          innerHTML: utils.sanitizeHTML(this.appConfig.title),
           style: {
             lineHeight: this.height + 'px'
           }
         }, titleNode);
 
+        var titleWidth = 'auto';
+        try{
+          titleWidth = html.getMarginBox(titleNode).w -
+            html.getMarginBox(logoNode).w -
+            html.getMarginExtents(textNode).w + 'px';
+        } catch(err) {
+          console.error(err);
+          titleWidth = 'auto';
+        }
+        html.setStyle(textNode, 'width', titleWidth);
+
         array.forEach(this.appConfig.links, function(link) {
           this._createLinkNode(node, link, false);
         }, this);
 
-        this.popupSigninNode = this._createLinkNode(node, {
-          label: 'SignIn',
-          url: '#'
-        }, true);
-        this.popupUserNameNode = this._createLinkNode(node, {
-          label: '',
-          url: '#'
-        }, true);
-        this.popupSignoutNode = this._createLinkNode(node, {
-          label: 'SignOut',
-          url: '#'
-        }, true);
+        // this.popupSigninNode = this._createLinkNode(node, {
+        //   label: 'SignIn',
+        //   url: '#'
+        // }, true);
+        // this.popupUserNameNode = this._createLinkNode(node, {
+        //   label: '',
+        //   url: '#'
+        // }, true);
+        // this.popupSignoutNode = this._createLinkNode(node, {
+        //   label: 'SignOut',
+        //   url: '#'
+        // }, true);
 
-        this.own(on(this.popupSigninNode, 'click', lang.hitch(this, '_onSigninClick')));
-        this.own(on(this.popupSignoutNode, 'click', lang.hitch(this, '_onSignoutClick')));
+        // this.own(on(this.popupSigninNode, 'click', lang.hitch(this, '_onSigninClick')));
+        // this.own(on(this.popupSignoutNode, 'click', lang.hitch(this, '_onSignoutClick')));
 
         //empty
         this._createLinkNode(node, {
@@ -497,7 +579,7 @@ define([
       _createLinkNode: function(containerNode, link, isSign) {
         var node, lineNode, linkSectionNode, className;
 
-        node = html.place('<div class="link"></div>', containerNode);
+        node = html.place('<div class="jimu-link"></div>', containerNode);
 
         lineNode = html.place('<div class="line"></div>', node);
         if (isSign) {
@@ -508,8 +590,10 @@ define([
         linkSectionNode = html.place('<div class="' + className + '"></div>', node);
         html.create('a', {
           href: link.url,
+          'class': 'jimu-ellipsis',
           target: '_blank',
-          innerHTML: link.label,
+          innerHTML: utils.sanitizeHTML(link.label),
+          title: link.label,
           style: {
             lineHeight: '66px'
           }
@@ -535,18 +619,6 @@ define([
         }
       },
 
-      _onAboutClick: function() {
-        var widgetConfig = {
-          id: this.appConfig.about + '_1',
-          uri: this.appConfig.about,
-          label: 'About'
-        };
-        this.widgetManager.loadWidget(widgetConfig).then(lang.hitch(this, function(widget) {
-          html.place(widget.domNode, jimuConfig.mainPageId);
-          widget.startup();
-        }));
-      },
-
       _onUserNameClick: function() {
 
       },
@@ -554,7 +626,6 @@ define([
       _getHeaderSectionWidth: function() {
         var width;
         width = html.getMarginBox(this.headerNode).w;
-        // console.log('header width: ' + width, ', float: ' + html.getStyle(this.headerNode, 'float'));
         return width;
       },
 
@@ -562,6 +633,7 @@ define([
         var headSectionWidth = this._getHeaderSectionWidth();
         //the container width
         var containerWidth = box.w - headSectionWidth - this._getEmptyWidth(box);
+
         return containerWidth;
       },
 
@@ -576,15 +648,25 @@ define([
             containerWidth = this._getContainerWidth(box);
 
             if (containerWidth < this.iconWidth * 2) {
-              //hiden the title, subtitle, links
-              this._showSwitchableElements([]);
+              // hiden subtitle links
+              this._showSwitchableElements(['title']);
               containerWidth = this._getContainerWidth(box);
+
               if (containerWidth < this.iconWidth * 2) {
-                //all of the elements is hidden, but the it's still can hold two icons(too small screen???),
-                //use the empty space
-                //the emptyWidth may be negative
-                emptyWidth = emptyWidth - (this.iconWidth * 2 - containerWidth);
-                containerWidth = this.iconWidth * 2;
+                //hiden the title, subtitle, links
+                this._showSwitchableElements([]);
+                containerWidth = this._getContainerWidth(box);
+
+                if (containerWidth < this.iconWidth * 2) {
+                  //all of the elements is hidden,
+                  // but the it's still can hold two icons(too small screen???),
+                  //use the empty space
+                  //the emptyWidth may be negative
+
+                  emptyWidth = emptyWidth - (this.iconWidth * 2 - containerWidth);
+                  containerWidth = this.iconWidth * 2;
+                  this._getContainerWidth(box);
+                }
               }
             }
           } else {
@@ -592,7 +674,8 @@ define([
             this._showSwitchableElements([]);
             containerWidth = this._getContainerWidth(box);
             if (containerWidth < this.iconWidth * 2) {
-              //all of the elements is hidden, but the it's still can hold two icons(too small screen???),
+              //all of the elements is hidden,
+              // but the it's still can hold two icons(too small screen???),
               //use the empty space
               //the emptyWidth may be negative
               emptyWidth = emptyWidth - (this.iconWidth * 2 - containerWidth);
@@ -612,7 +695,7 @@ define([
       },
 
       _createIconNodes: function(box) {
-        html.empty(this.containerNode);
+        query('.icon-node', this.containerNode).remove();
         this._closeDropMenu();
 
         var i, iconConfig, allIconConfigs = this.getAllConfigs();
@@ -621,10 +704,13 @@ define([
 
         var ret = this._calcContainerAndEmptyWidth(box);
 
-        html.setStyle(this.containerNode, {
-          width: ret.containerWidth + 'px',
-          marginLeft: (ret.emptyWidth - 5) + 'px' //add some margein to avoid mess layout
-        });
+        var marginProperty = window.isRTL ? 'marginRight' : 'marginLeft';
+        var containerStyle = {
+          width: ret.containerWidth + 'px'
+        };
+        //add some margein to avoid mess layout
+        containerStyle[marginProperty] = (ret.emptyWidth - 5) + 'px';
+        html.setStyle(this.containerNode, containerStyle);
 
         this.maxIconCount = Math.floor(ret.containerWidth / this.iconWidth);
         if (this.maxIconCount >= allIconConfigs.length) {
@@ -636,7 +722,8 @@ define([
         }
         if (this.createMoreIcon) {
           this._createIconNode({
-            label: 'more'
+            label: this.nls.more,
+            name: '__more'
           });
         }
 
@@ -653,26 +740,38 @@ define([
         if (openAtStartNode && !this.openAtStartWidget) {
           this._onIconClick(openAtStartNode);
           this.openAtStartWidget = openAtStartNode.config.name;
-          this.openedId = openAtStartNode.config.id;
+        }
+
+        if(this.openedId && this.getConfigById(this.openedId) &&
+          this.getConfigById(this.openedId).inPanel === false){
+          var openedIconNode = this._getIconNodeById(this.openedId);
+          var openedWidget = this.widgetManager.getWidgetById(this.openedId);
+          if(openedIconNode && openedWidget){
+            this._setOffPanelWidgetPosition(openedIconNode, openedWidget);
+          }else{
+            this.widgetManager.closeWidget(this.openedId);
+            this.openedId = '';
+          }
         }
       },
 
       _createIconNode: function(iconConfig) {
         var node, iconUrl;
-        if (iconConfig.label === 'more') {
+        if (iconConfig.label === this.nls.more) {
           iconUrl = this.folderUrl + 'images/more_icon.png';
         } else {
           iconUrl = iconConfig.icon;
         }
 
         node = html.create('div', {
-          'class': 'icon-node',
+          'class': 'icon-node jimu-float-trailing',
           title: iconConfig.label,
           settingId: iconConfig.id,
           style: {
             width: this.height + 'px',
             height: this.height + 'px'
-          }
+          },
+          'data-widget-name': iconConfig.name
         }, this.containerNode);
 
         html.create('img', {
@@ -682,7 +781,7 @@ define([
           }
         }, node);
 
-        if (iconConfig.label === 'more') {
+        if (iconConfig.label === this.nls.more) {
           on(node, 'click', lang.hitch(this, this._showMorePane, iconConfig));
         } else {
           on(node, 'click', lang.hitch(this, function() {
@@ -694,17 +793,19 @@ define([
         //   this.openedId = iconConfig.id;
         //   this._switchNodeToOpen(this.openedId);
         // }
-        if (node.config.widgets && node.config.widgets.length > 1 && node.config.openType === 'dropDown') {
+        if (node.config.widgets && node.config.widgets.length > 1 &&
+          node.config.openType === 'dropDown') {
           this._createDropTriangle(node);
         }
 
         //set current open node
-        if (this.openedId === iconConfig.id) {
-          html.addClass(node, 'jimu-state-selected');
-          if (node.config.widgets && node.config.widgets.length > 1 && node.config.openType === 'dropDown') {
-            this._openDropMenu(node);
-          }
-        }
+        // if (this.openedId === iconConfig.id) {
+        //   html.addClass(node, 'jimu-state-selected');
+        //   if (node.config.widgets && node.config.widgets.length > 1 &&
+        //     node.config.openType === 'dropDown') {
+        //     this._openDropMenu(node);
+        //   }
+        // }
         return node;
       },
 
@@ -720,9 +821,11 @@ define([
       },
 
       _onIconClick: function(node) {
-        if (!node.config.widgets || node.config.widgets.length === 1 || node.config.openType === 'openAll') {
+        if (!node.config.widgets || node.config.widgets.length === 1 ||
+          node.config.openType === 'openAll') {
           //widget or group with 'openAll' open type
           if (this.openedId && this.openedId === node.config.id) {
+            this._switchNodeToClose(this.openedId);
             return;
           } else {
             if (this.openedId) {
@@ -732,14 +835,13 @@ define([
               }));
             } else {
               this._switchNodeToOpen(node.config.id);
+              console.log(node.config.id);
             }
           }
         } else {
-          if (this.openedId && this.openedId === node.config.id) {
-            this.openedId = '';
+          if(this.dropMenuNode){
             this._closeDropMenu();
-          } else {
-            this.openedId = node.config.id;
+          }else{
             this._openDropMenu(node);
           }
         }
@@ -754,7 +856,7 @@ define([
 
       _openDropMenu: function(pnode) {
         this.dropMenuNode = html.create('div', {
-          'class': 'jimu-drop-menu',
+          'class': 'jimu-drop-menu jimu-main-background',
           title: pnode.config.label,
           style: {
             position: 'absolute',
@@ -764,11 +866,11 @@ define([
 
         html.place(this.dropMenuNode, this.containerNode);
 
-        this._setDropMenuPosition(pnode);
-
         array.forEach(pnode.config.widgets, function(widgetConfig) {
           this._createDropMenuItem(widgetConfig);
         }, this);
+
+        this._setDropMenuPosition(pnode);
 
         if (this.morePane) {
           this.morePane.hide();
@@ -785,42 +887,90 @@ define([
         }, this.dropMenuNode);
 
         html.create('img', {
+          'class': 'jimu-float-leading',
           src: sconfig.icon
         }, node);
 
         html.create('div', {
-          'class': 'label',
-          innerHTML: sconfig.label
+          'class': 'label jimu-float-leading',
+          innerHTML: utils.sanitizeHTML(sconfig.label)
         }, node);
 
         this.own(on(node, 'click', lang.hitch(this, function() {
           this._closeDropMenu();
-          this._showIconContent(node.config);
+          if(this.openedId){
+            this._switchNodeToClose(this.openedId).then(lang.hitch(this, function() {
+              this._showIconContent(node.config);
+            }));
+          }else{
+            this._showIconContent(node.config);
+          }
         })));
         node.config = sconfig;
         return node;
       },
 
       _setDropMenuPosition: function(pnode) {
-        var position = {},
-          box = html.getMarginBox(pnode),
-          thisBox = html.getMarginBox(this.domNode);
-        position.right = thisBox.w - box.l - box.w;
-        position.top = this.height + 1;
+        var position = {};
+        var menuBox = html.getMarginBox(this.dropMenuNode);
+
+        position = this._getDropdownPosition(pnode, menuBox);
+        position.zIndex = 101;
         html.setStyle(this.dropMenuNode, utils.getPositionStyle(position));
+      },
+
+      _getDropdownPosition: function(pnode, sbox) {
+        var position = {},
+          pbox = html.getMarginBox(pnode),
+          thisBox = html.getMarginBox(this.domNode);
+
+        position.top = this.height + 1;
+
+        if (window.isRTL) {
+          if(pbox.l + pbox.w - sbox.w < 0){
+            position.right = 0;
+          }else{
+            position.right = pbox.l + pbox.w - sbox.w;
+          }
+        } else {
+          if(pbox.l + sbox.w > thisBox.w){
+            position.right = 0;
+          }else{
+            position.left = pbox.l;
+          }
+        }
+        return position;
       },
 
       _switchNodeToOpen: function(id) {
         var node = this._getIconNodeById(id);
         query('.icon-node', this.domNode).removeClass('jimu-state-selected');
         html.addClass(node, 'jimu-state-selected');
-        this._showIconContent(node.config);
+       console.log(node.config);
+          this._showIconContent(node.config);
+       
       },
 
       _switchNodeToClose: function(id) {
         query('.icon-node', this.domNode).removeClass('jimu-state-selected');
+        var iconJson = this.appConfig.getConfigElementById(id);
+        var def;
+        if(iconJson){
+          if(iconJson.inPanel === false){
+            this.widgetManager.closeWidget(id);
+            this.openedId = '';
+            def = new Deferred();
+            def.resolve();
+            return def;
+          }else{
+            return this.panelManager.closePanel(id + '_panel');
+          }
+        }else{
+          def = new Deferred();
+          def.resolve();
+          return def;
+        }
 
-        return this.panelManager.closePanel(id + '_panel');
       },
 
       _getIconNodeById: function(id) {
@@ -831,18 +981,44 @@ define([
         return node[0];
       },
 
-      _onPanelClose: function(id) {
-        query('.icon-node[settingId="' + id + '"]', this.domNode).removeClass('jimu-state-selected');
+      _unSelectIcon: function(id) {
+        query('.icon-node[settingId="' + id + '"]', this.domNode)
+          .removeClass('jimu-state-selected');
         this.openedId = '';
       },
 
       _showIconContent: function(iconConfig) {
-        this.panelManager.showPanel(iconConfig).then(lang.hitch(this, function(panel) {
-          this.openedId = iconConfig.id;
-          this.own(aspect.after(panel, 'onClose', lang.hitch(this, function() {
-            this._onPanelClose(iconConfig.id);
-          })));
-        }));
+        if(iconConfig.inPanel === false){
+          this.widgetManager.loadWidget(iconConfig).then(lang.hitch(this, function(widget) {
+            this.openedId = iconConfig.id;
+            var iconNode = this._getIconNodeById(iconConfig.id);
+
+            //we don't call widget.startup because getWidgetMarginBox has started widget
+            //widget.startup();
+
+            html.setStyle(widget.domNode, 'zIndex', 101);
+
+            this._setOffPanelWidgetPosition(iconNode, widget);
+            this.widgetManager.openWidget(widget);
+            // ST: Added to listen for out of panel widgets that can be closed
+            this.own(aspect.after(widget, 'onClose', lang.hitch(this, function() {
+              this._unSelectIcon(iconConfig.id);
+            })));
+          }));
+        }else{
+          this.panelManager.showPanel(iconConfig).then(lang.hitch(this, function(panel) {
+            this.openedId = iconConfig.id;
+            this.own(aspect.after(panel, 'onClose', lang.hitch(this, function() {
+              this._unSelectIcon(iconConfig.id);
+            })));
+          }));
+        }
+      },
+
+      _setOffPanelWidgetPosition: function(iconNode, widget){
+        var position = this._getDropdownPosition(iconNode,
+              this.widgetManager.getWidgetMarginBox(widget));
+        widget.setPosition(position, this.containerNode);
       },
 
       _showMorePane: function() {
@@ -868,7 +1044,6 @@ define([
         });
         this._createCoverNode();
         html.place(this.morePane.domNode, jimuConfig.mapId);
-        html.setStyle(this.morePane.domNode, utils.getPositionStyle(this._getMorePanelSize()));
         this.morePane.startup();
 
         aspect.after(this.morePane, 'onNodeClicked', lang.hitch(this, function(node) {
@@ -893,43 +1068,6 @@ define([
         this.moreIconPaneCoverNode = html.create('div', {
           'class': 'jimu-more-icon-cover'
         }, jimuConfig.layoutId);
-      },
-
-      _getMorePanelSize: function() {
-        var mapBox, minLen, position;
-        mapBox = html.getContentBox(jimuConfig.mapId);
-        minLen = Math.min(mapBox.w, mapBox.h);
-        if (minLen < 600) {
-          if (mapBox.w < mapBox.h) {
-            position = {
-              left: 20,
-              right: 20,
-              top: (mapBox.h - (mapBox.w - 40)) / 2,
-              height: mapBox.w - 40,
-              width: '',
-              bottom: ''
-            };
-          } else {
-            position = {
-              top: 20,
-              bottom: 20,
-              left: (mapBox.w - (mapBox.h - 40)) / 2,
-              width: mapBox.h - 40,
-              height: '',
-              right: ''
-            };
-          }
-        } else {
-          position = {
-            top: (mapBox.h - 560) / 2,
-            left: (mapBox.w - 560) / 2,
-            width: 560,
-            height: 560,
-            right: '',
-            bottom: ''
-          };
-        }
-        return position;
       }
     });
     return clazz;

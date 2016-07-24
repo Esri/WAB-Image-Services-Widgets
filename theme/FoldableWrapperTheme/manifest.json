@@ -1,22 +1,17 @@
 {
   "name": "FoldableWrapperTheme",
-  "platform":"HTML",
-  "label": "Foldable Wrapper Theme",
+  "platform": "HTML",
   "panels": [
     {
       "name": "FoldablePanel",
       "description": "This is foldable panel"
-    },
-    {
-      "name": "SimplePanel",
-      "description": "this is simple panel"
     }
   ],
   "styles": [
     {
       "name": "default",
       "description": "this is default style",
-      "styleColor": "#596679"
+      "styleColor": "#586679"
     },
     {
       "name": "black",
@@ -31,48 +26,28 @@
     {
       "name": "cyan",
       "description": "this is cyan style",
-      "styleColor": "#b1d3d4"
-    },
-    {
-      "name": "blue",
-      "description": "this is cyan style",
-      "styleColor": "#0080C0"
+      "styleColor": "#267030"
     },
     {
       "name": "red",
-      "description": "this is cyan style",
-      "styleColor": "#cc0000"
+      "description": "this is red style",
+      "styleColor": "#c93048"
     },
     {
-      "name": "yellowgreen",
-      "description": "this is cyan style",
-      "styleColor": "yellowgreen"
+      "name": "purple",
+      "description": "this is purple style",
+      "styleColor": "#aa6fad"
     },
     {
-      "name": "orange",
-      "description": "this is cyan style",
-      "styleColor": "orange"
-    },
-    {
-      "name": "coral",
-      "description": "this is cyan style",
-      "styleColor": "coral"
-    },{
-      "name": "pink",
-      "description": "this is cyan style",
-      "styleColor": "#904f93"
-    },
-    {
-      "name": "lime",
-      "description": "this is cyan style",
-      "styleColor": "lime"
+      "name": "blue",
+      "description": "this is blue style",
+      "styleColor": "#005fa2"
     },
     {
       "name": "yellow",
-      "description": "this is cyan style",
-      "styleColor": "#ffff00"
+      "description": "this is yellow style",
+      "styleColor": "#d07d0e"
     }
-    
   ],
   "layouts": [
     {
@@ -82,6 +57,18 @@
     {
       "name": "layout1",
       "description": "this is layout1"
+    },
+    {
+      "name": "layout2",
+      "description": "this is layout2"
+    },
+    {
+      "name": "layout3",
+      "description": "this is layout3"
+    },
+    {
+      "name": "layout4",
+      "description": "this is layout4"
     }
   ],
   "widgets": [
@@ -90,7 +77,8 @@
       "description": "this is theme widget controller"
     }
   ],
-  "version": "0.0.1",
+  "version": "2.0.1",
+  "wabVersion": "2.0.1",
   "author": "Esri R&D Center Beijing",
   "description": "",
   "copyright": "",

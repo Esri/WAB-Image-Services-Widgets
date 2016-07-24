@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Esri. All Rights Reserved.
+// Copyright © 2014 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,10 +68,11 @@ define([
       setConfig: function(config) {
         this.config = config;
         this.displayFieldsTable.clear();
-        if(this.appConfig.widgetPool.groups === undefined || this.appConfig.widgetPool.groups.length === 0){
+        if (this.appConfig.widgetPool.groups === undefined ||
+          this.appConfig.widgetPool.groups.length === 0) {
           html.setStyle(this.noGroupTip, 'display', 'block');
           html.setStyle(this.tableInfo, 'display', 'none');
-        }else{
+        } else {
           html.setStyle(this.noGroupTip, 'display', 'none');
           html.setStyle(this.tableInfo, 'display', 'block');
           var len = this.appConfig.widgetPool.groups.length;
