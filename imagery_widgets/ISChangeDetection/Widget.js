@@ -18,7 +18,6 @@ define([
   'dijit/_WidgetsInTemplateMixin',
   'dojo/text!./Widget.html',
   'jimu/BaseWidget',
-  "dojo/on",
   "dijit/registry",
   "dojo/_base/lang",
   "dojo/dom",
@@ -44,7 +43,6 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                on,
                 registry,
                 lang,
                 dom,
@@ -144,10 +142,10 @@ define([
               this.map.addLayer(changeDetectionLayer);
             },
             showLoading: function () {
-              esri.show(dom.byId("loadingChangeDetection"));
+             domStyle.set("loadingChangeDetection","display","block");
             },
             hideLoading: function () {
-              esri.hide(dom.byId("loadingChangeDetection"));
+              domStyle.set("loadingChangeDetection","display","none");
             }
           });
           clazz.hasLocale = false;

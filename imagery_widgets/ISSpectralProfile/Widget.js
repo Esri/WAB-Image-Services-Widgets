@@ -18,9 +18,6 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dojo/text!./Widget.html',
     'jimu/BaseWidget',
-    'esri/dijit/Legend',
-    "esri/arcgis/utils",
-    "dojo/on",
     "dijit/registry",
     "dojo/_base/lang",
     "dojo/dom",
@@ -32,15 +29,13 @@ define([
     "esri/geometry/Point",
     "dojox/charting/Chart",
     "dojox/charting/action2d/Tooltip",
-    "dojox/charting/themes/Chris",
+    "dojox/charting/themes/PrimaryColors",
     "dojox/charting/widget/SelectableLegend",
     "dojox/charting/action2d/Magnify",
     "dojo/date/locale",
-     "esri/SpatialReference",
-      "dojo/_base/connect",
      "esri/symbols/SimpleMarkerSymbol",
      "esri/symbols/SimpleLineSymbol",
-     "esri/Color",
+     "esri/Color", "esri/toolbars/draw",
     "dijit/Dialog",
     "dojox/charting/plot2d/Lines",
     "dojox/charting/plot2d/Markers",
@@ -63,14 +58,11 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                Legend,
-                arcgisUtils,
-                on,
                 registry,
                 lang,
                 dom,
                 domConstruct,
-                domStyle, esriRequest, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Point, Chart, Tooltip, theme, SelectableLegend, Magnify, locale,SpatialReference,connect,SimpleMarkerSymbol,SimpleLineSymbol,Color) {
+                domStyle, esriRequest, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Point, Chart, Tooltip, theme, SelectableLegend, Magnify, locale,SimpleMarkerSymbol,SimpleLineSymbol,Color, Draw) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISSpectralProfile',
@@ -87,22 +79,36 @@ define([
                 prevprimaryLayer : null,
                 startup: function() {
                     this.inherited(arguments);
-                    domConstruct.place('<img id="loadingsp" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
+                    domConstruct.place('<img id="loadingSpectralProfile" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
                 onOpen: function() {
-                     dojo.connect(this.map, 'onClick', lang.hitch(this, function (evt) {
-                    this.map.graphics.add(new esri.Graphic(
-                                evt.mapPoint,
-                                new esri.symbol.SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20,
-                                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                                                new Color([255, 0, 0]), 1),
-                                        new Color([255, 0, 0]))
-                                ));
-                    }));
-                    
+                   if (this.map) {
+                       this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
+                   } 
+                    this.toolbarSpectralProfile = new Draw(this.map);
+                    dojo.connect(this.toolbarSpectralProfile,"onDrawEnd",lang.hitch(this,this.addGraphic));
+                    this.toolbarSpectralProfile.activate(Draw.POINT);
                     this.refreshData();
-                    this.clickhandle = this.map.on("click", lang.hitch(this, this.spectralprofile));
+          
+                },
+                addGraphic: function(geometry){
+                     domStyle.set("loadingSpectralProfile","display","block");
+                    this.clear();
+                    for(var a in this.map.graphics.graphics){
+                        if(this.map.graphics.graphics[a].geometry && this.map.graphics.graphics[a].geometry.type==="point" && this.map.graphics.graphics[a].symbol && this.map.graphics.graphics[a].symbol.color.r===255){
+                            this.map.graphics.remove(this.map.graphics.graphics[a]);
+                            break;
+                        }
+                    }
+                    var symbol = new esri.symbol.SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20,
+                                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                                            new Color([255, 0, 0]), 1),
+                                    new Color([255, 0, 0, 0.35]));
+                    var graphic = new esri.Graphic(geometry, symbol);
+                    this.map.graphics.add(graphic);
+                    this.spectralprofile(geometry);
+                   
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
@@ -111,9 +117,10 @@ define([
                         } else {
                             this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                         }
-                      
+                      if(this.primaryLayer && this.primaryLayer.minValues && this.primaryLayer.maxValues) {
                         this.minValue = this.primaryLayer.minValues[0];
                         this.maxValue = this.primaryLayer.maxValues[0];
+                    }
                         if(this.primaryLayer !== this.prevprimaryLayer){
                         var layersRequest = esriRequest({
                             url: this.primaryLayer.url + "/1/info/keyProperties",
@@ -162,7 +169,7 @@ define([
                                         }
                             }
                             
-
+                           
                             this.bandPropMean = [];
                             this.bandPropMean = bandMean;
                         }), function(error) {
@@ -173,59 +180,55 @@ define([
                 },onClose : function()
                 {
                     this.clear();
-                  this.clickhandle.remove();
-                  this.clickhandle = null;
+                     for(var a in this.map.graphics.graphics){
+                        if(this.map.graphics.graphics[a].geometry && this.map.graphics.graphics[a].geometry.type==="point" && this.map.graphics.graphics[a].symbol && this.map.graphics.graphics[a].symbol.color.r===255){
+                            this.map.graphics.remove(this.map.graphics.graphics[a]);
+                            break;
+                        }
+                    }
+                    if(this.refreshHandler) {
+                  this.refreshHandler.remove();
+                  this.refreshHandler = null;
+              }
+                   this.toolbarSpectralProfile.deactivate();
                 },
                 postCreate: function() {
                     this.inherited(arguments);
                     registry.byId("type").on("change", lang.hitch(this, this.clear));
-                    if (this.map) {
-                       // this.drawBox.setMap(this.map);
-                       // this.drawBox.on("clear", lang.hitch(this, this.clear));
-                       // this.drawBox.on("IconSelected", lang.hitch(this, this.iconSelected));
-                       //this.own(on(this.drawBox, 'DrawEnd', lang.hitch(this, this.DrawEnd)));
-                       //this.clickhandle =  this.map.on("click", lang.hitch(this, this.spectralprofile));
-                        this.map.on("update-end", lang.hitch(this, this.refreshData));
-                        this.map.on("update-start", lang.hitch(this, this.showLoading));
-                        this.map.on("update-end", lang.hitch(this, this.hideLoading));
-                    }
+                   
                 },
                 clear: function() {
-                  // this.drawBox.drawLayer.clear();
-                  //this.map.graphics.clear();
                     registry.byId("chartDialog").hide();
                     if (this.chart) {
-                      this.map.graphics.clear();
-                        var series = this.chart.getSeriesOrder("default");
-                        for (var a in series) {
-                            this.chart.removeSeries(series[a]);
-                        }
-                        this.chart.removeAxis("x");
-                        this.count = 1;
-                        this.legend.refresh();
-                    }
+                       dojo.empty("chartNode");
+                   }
                 },
                 iconSelected: function() {
                     if (registry.byId("type").get("value") == "temporal" || registry.byId("type").get("value") == "NDVI") {
                         this.clear();
                     }
                 },
-                spectralprofile : function(evt2){
-                //DrawEnd: function(graphic, geotype, commontype) {
-                    //var point = new Point(graphic.geometry);
-                    
-                        registry.byId("chartDialog").hide();
+                spectralprofile : function(point){
+                       registry.byId("chartDialog").hide();
+                  if(this.primaryLayer.renderingRule) 
+                      var renderer = this.primaryLayer.renderingRule;
+                  else
+                      var renderer = "";
+                  if(this.primaryLayer.mosaicRule) 
+                      var mosaic = this.primaryLayer.mosaicRule;
+                  else
+                      var mosaic = "";                   
                   
-                                       //registry.byId("chartDialog").hide();
-                    var point = new Point(evt2.mapPoint.x,evt2.mapPoint.y,new SpatialReference({ wkid:evt2.mapPoint.spatialReference.wkid}));
-                    var normPoint = point.normalize();
                     var imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
                     var imageParams = new ImageServiceIdentifyParameters();
+                   
                     imageParams.geometry = point;
                     imageParams.pixelSizeX = this.primaryLayer.pixelSizeX;
                     imageParams.pixelSizeY = this.primaryLayer.pixelSizeY;
+                    imageParams.renderingRule = renderer;
+                    imageParams.mosaicRule = mosaic;
                     imageTask.execute(imageParams, lang.hitch(this, function(data) {
-                        if (registry.byId("type").get("value") == "nonTemporal") {
+                        if (registry.byId("type").get("value") === "nonTemporal") {
                             var values = data.properties.Values[0].split(' ');
                             for (var a in values) {
                                 if (values[a]) {
@@ -236,7 +239,10 @@ define([
                             }
                             var normalizedValues = [];
                             for (a in values) {
+                                if(this.maxValue && this.minValue)
                                 normalizedValues[a] = (values[a] - this.minValue) / (this.maxValue - this.minValue);
+                            else
+                                normalizedValues[a] = values[a];
                             }
                             this.chartData = [];
                             for (a in normalizedValues) {
@@ -244,13 +250,13 @@ define([
                                         {tooltip: normalizedValues[a].toFixed(4),
                                             y: normalizedValues[a]});
                             }
-                        } else if (registry.byId("type").get("value") == "temporal") {
+                        } else if (registry.byId("type").get("value") === "temporal") {
                             var items = data.catalogItems.features;
                             var props = data.properties.Values;
                             var itemInfo = [];
 
                             for (var a in items) {
-                                if (items[a].attributes.Category == 1) {
+                                if (items[a].attributes.Category === 1) {
                                     var plot = props[a].split(' ');
                                     for (var k in plot) {
                                         if (plot[k]) {
@@ -261,7 +267,10 @@ define([
                                     }
                                     var normalizedValues = [];
                                     for (var j in plot) {
+                                        if(this.minValue && this.maxValue)
                                         var calc = (plot[j] - this.minValue) / (this.maxValue - this.minValue);
+                                        else
+                                            var calc = plot[j];
                                         normalizedValues.push(
                                                 {y: calc,
                                                     tooltip: calc.toFixed(4) + ", " + (locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"}))});
@@ -280,14 +289,14 @@ define([
                             });
 
                             this.temporalData = byDate;
-                        } else if (registry.byId("type").get("value") == "NDVI") {
+                        } else if (registry.byId("type").get("value") === "NDVI") {
                             var items = data.catalogItems.features;
                             var props = data.properties.Values;
                             var itemInfo = [];
                             var itemInfo1 = [];
                             var itemInfo2 = [];
                             for (var a in items) {
-                                if (items[a].attributes.Category == 1) {
+                                if (items[a].attributes.Category === 1) {
                                     var plot = props[a].split(' ');
                                     for (var k in plot) {
                                         if (plot[k]) {
@@ -299,24 +308,23 @@ define([
                                     var normalizedValues = [];
                                     var normalizedValues1 = [];
                                     var normalizedValues2 = [];
-//                                      if (this.sensorName == "Landsat 8") {
-//                                        var nir = plot[4];
-//                                        var red = plot[3];
-//                                    } else if (this.sensorName == "Landsat-7-ETM+") {
-//                                        var nir = plot[3];
-//                                        var red = plot[2];
-//                                    }
+                                 if(this.nirIndex && this.redIndex){
                                     var nir = plot[this.nirIndex];
                                     var red = plot[this.redIndex];
-                                    var green = plot[this.greenIndex];
-                                    var swir1 = plot[this.swir1Index];
-                                    var swir2 = plot[this.swir2Index];
-                                    var calc = (nir - red) / (nir + red);
-                                    var ndmi = ((nir - swir1) / (nir + swir1));
-                                    var urban = (((swir1 - nir) / (swir1 + nir)) - ((nir - red) / (red + nir))) / 2;
-                                    normalizedValues.push(
+                                     var calc = (nir - red) / (nir + red);
+                                      normalizedValues.push(
                                             {y: calc,
                                                 tooltip: calc.toFixed(4) + ", " + (locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"}))});
+                                     itemInfo.push({
+                                        acqDate: items[a].attributes.AcquisitionDate,
+                                        values: normalizedValues
+                                    });
+                                 }
+                                 if(this.swir1Index){
+                                    var swir1 = plot[this.swir1Index];
+                                    var ndmi = ((nir - swir1) / (nir + swir1));
+                                    var urban = (((swir1 - nir) / (swir1 + nir)) - ((nir - red) / (red + nir))) / 2;
+                                
                                     normalizedValues1.push(
                                         {y: ndmi,
                                             tooltip: ndmi.toFixed(4) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
@@ -324,10 +332,7 @@ define([
                                     normalizedValues2.push(
                                         {y: urban,
                                             tooltip: urban.toFixed(4) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
-                                    itemInfo.push({
-                                        acqDate: items[a].attributes.AcquisitionDate,
-                                        values: normalizedValues
-                                    });
+                                   
                                     itemInfo1.push({
                                     acqDate: items[a].attributes.AcquisitionDate,
                                     values: normalizedValues1
@@ -339,14 +344,18 @@ define([
                                 });
                                 }
                             }
-
+                        }
+                        if(itemInfo[0]) {
                             var byDate = itemInfo.slice(0);
+                         byDate.sort(function(a, b) {
+                                return a.acqDate - b.acqDate;
+                            });
+                            this.NDVIData = byDate;
+                        }
+                          if(itemInfo1[0] && itemInfo2[0]){
                             var byDate1 = itemInfo1.slice(0);
 
                         var byDate2 = itemInfo2.slice(0);
-                            byDate.sort(function(a, b) {
-                                return a.acqDate - b.acqDate;
-                            });
                               byDate1.sort(function (a, b) {
                             return a.acqDate - b.acqDate;
                         });
@@ -354,14 +363,15 @@ define([
                         byDate2.sort(function (a, b) {
                             return a.acqDate - b.acqDate;
                         });
-                            this.NDVIData = byDate;
                             this.NDVIData1 = byDate1;
                         this.NDVIData2 = byDate2;
+                        
+                            }
                             this.NDVIValues = [];
                             this.NDVIValues1 = [];
                         this.NDVIValues2 = [];
                             this.NDVIDates = [];
-
+                            if(this.NDVIData){
                             for (a in this.NDVIData) {
                                 this.NDVIDates.push({
                                     text: locale.format(new Date(this.NDVIData[a].acqDate), {selector: "date", datePattern: "dd/MM/yy"}),
@@ -372,7 +382,9 @@ define([
                                     tooltip: this.NDVIData[a].values[0].tooltip
                                 });
                             }
-                             for (a in this.NDVIData1) {
+                        }
+                            if(this.NDVIData1 && this.NDVIData2){ 
+                            for (a in this.NDVIData1) {
 
                             this.NDVIValues1.push({
                                 y: this.NDVIData1[a].values[0].y,
@@ -388,6 +400,7 @@ define([
                             });
                         }
                         }
+                    }
 
                         this.axesParams = [];
                         for (a in this.bandPropMean) {
@@ -397,11 +410,11 @@ define([
                             };
                         }
 
-                        if (!this.chart) {
-                            registry.byId("chartDialog").show();
+                           registry.byId("chartDialog").show();
                             this.chart = new Chart("chartNode");
                             this.chart.addPlot("default", {
                                 type: "Lines",
+                                tension: "S",
                                 markers: true,
                                 shadows: {dx: 4, dy: 4}
                             });
@@ -412,94 +425,47 @@ define([
 
                             this.chart.addAxis("y", {vertical: true, fixLower: "major", fixUpper: "major", title: "Data Values", titleOrientation: "axis"});
 
-                            if (registry.byId("type").get("value") == "nonTemporal") {
+                            if (registry.byId("type").get("value") === "nonTemporal") {
                                 this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
-//                                this.chart.addSeries(this.degToDMS(normPoint.getLatitude(), 'LAT') + " " + this.degToDMS(normPoint.getLongitude(), 'LON') + " ", chartData);
-                                this.chart.addSeries("Point " + this.count, this.chartData);
+                                   this.chart.addSeries("Selected Point", this.chartData);
                                 this.count++;
-                            } else if (registry.byId("type").get("value") == "temporal") {
+                            } else if (registry.byId("type").get("value") === "temporal") {
                                 this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
                                 for (var x in this.temporalData) {
                                     this.chart.addSeries(locale.format(new Date(this.temporalData[x].acqDate), {selector: "date", formatLength: "long"}), this.temporalData[x].values);
                                 }
-                            } else if (registry.byId("type").get("value") == "NDVI") {
+                            } else if (registry.byId("type").get("value") === "NDVI") {
                                 this.chart.addAxis("x", {labels: this.NDVIDates, labelSizeChange: true, title: "Acquisition Date", titleOrientation: "away", majorTickStep: 1, minorTicks: false});
-                               
+                               if(this.NDVIValues1)
                                 this.chart.addSeries("NDMI Moisture", this.NDVIValues1, {hidden: true});
-                                this.chart.addSeries("Urban", this.NDVIValues2, {hidden: true});
-                                this.chart.addSeries("NDVI", this.NDVIValues);
+                            if(this.NDVIValues2)   
+                            this.chart.addSeries("Urban", this.NDVIValues2, {hidden: true});
+                            if(this.NDVIValues)    
+                            this.chart.addSeries("NDVI", this.NDVIValues);
                             }
-                            registry.byId("chartDialog").show();
+                           
                             this.magnify = new Magnify(this.chart, "default");
                             this.toolTip = new Tooltip(this.chart, "default");
                             this.chart.render();
-                            this.legend = new SelectableLegend({chart: this.chart, horizontal: false, outline: false}, "legend");
+                       if(!this.legend)
+                        this.legend = new SelectableLegend({chart: this.chart, horizontal: false, outline: false}, "legend");
+                            else{
+                                     this.legend.set("params", {chart: this.chart, horizontal: true, outline: false});
+                                        this.legend.set("chart", this.chart);
+                                        this.legend.refresh();
+                                    }
                             domConstruct.destroy("chartDialog_underlay");
-                        } else {
-                            registry.byId("chartDialog").show();
-                            if (registry.byId("type").get("value") == "nonTemporal") {
-                                if (!this.chart.getAxis("x")) {
-                                    this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
-                                }
-//                                this.chart.addSeries(this.degToDMS(normPoint.getLatitude(), 'LAT') + " " + this.degToDMS(normPoint.getLongitude(), 'LON') + " ", chartData);
-                                this.chart.addSeries("Point " + this.count, this.chartData);
-                                this.count++;
-                            } else if (registry.byId("type").get("value") == "temporal") {
-                              
-                                if (!this.chart.getAxis("x")) {
-                                    this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
-                                }
-                                for (var x in this.temporalData) {
-                                    this.chart.addSeries(locale.format(new Date(this.temporalData[x].acqDate), {selector: "date", formatLength: "long"}), this.temporalData[x].values);
-                                }
-                            } else if (registry.byId("type").get("value") == "NDVI") {
-                               
-                            if (!this.chart.getAxis("x")) {
-                                    this.chart.addAxis("x", {labels: this.NDVIDates, labelSizeChange: true, title: "Acquisition Date", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
-                                }
-                                
-                                this.chart.addSeries("NDMI Moisture", this.NDVIValues1, {hidden: true});
-                                this.chart.addSeries("Urban", this.NDVIValues2, {hidden: true});
-                                this.chart.addSeries("NDVI", this.NDVIValues);
-                            }
-                            this.chart.render();
-                            this.legend.refresh();
-                        }
+                   domStyle.set("loadingSpectralProfile","display","none");
+                    }),lang.hitch(this, function(error){
+                         domStyle.set("loadingSpectralProfile","display","none");
                     }));
                 },
-                degToDMS: function(decDeg, decDir) {
-                    /** @type {number} */
-                    var d = Math.abs(decDeg);
-                    /** @type {number} */
-                    var deg = Math.floor(d);
-                    d = d - deg;
-                    /** @type {number} */
-                    var min = Math.floor(d * 60);
-                    /** @type {number} */
-                    var sec = Math.floor((d - min / 60) * 60 * 60);
-                    if (sec === 60) { // can happen due to rounding above
-                        min++;
-                        sec = 0;
-                    }
-                    if (min === 60) { // can happen due to rounding above
-                        deg++;
-                        min = 0;
-                    }
-                    /** @type {string} */
-                    var min_string = min < 10 ? "0" + min : min;
-                    /** @type {string} */
-                    var sec_string = sec < 10 ? "0" + sec : sec;
-                    /** @type {string} */
-                    var dir = (decDir === 'LAT') ? (decDeg < 0 ? "S" : "N") : (decDeg < 0 ? "W" : "E");
-                    return (decDir === 'LAT') ?
-                            deg + "&deg;&nbsp;" + min_string + "&prime;&nbsp;" + sec_string + "&Prime;&nbsp;" + dir :
-                            deg + "&deg;&nbsp;" + min_string + "&prime;&nbsp;" + sec_string + "&Prime;&nbsp;" + dir;
-                },
+                
                 showLoading: function() {
-                    esri.show(dom.byId("loadingsp"));
+                    domStyle.set("loadingSpectralProfile","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingsp"));
+                    domStyle.set("loadingSpectralProfile","display","none");
                 }
             });
             clazz.hasLocale = false;

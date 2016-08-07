@@ -18,12 +18,9 @@ define([
   'dijit/_WidgetsInTemplateMixin',
   'dojo/text!./Widget.html',
   'jimu/BaseWidget',
-  'esri/dijit/Legend',
   "esri/arcgis/utils",
-  "dojo/on",
   "dijit/registry",
   "dojo/_base/lang",
-  "dojo/dom",
   'dojo/dom-construct',
   "esri/request",
   "esri/layers/RasterFunction",
@@ -51,12 +48,9 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                Legend,
                 arcgisUtils,
-                on,
                 registry,
                 lang,
-                dom,
                 domConstruct,
                 esriRequest,
                 RasterFunction,
@@ -103,7 +97,7 @@ define([
               registry.byId("primaryShow").on("change", lang.hitch(this, this.primaryVisibility));
               registry.byId("secondaryShow").on("change", lang.hitch(this, this.secondaryVisibility));
               registry.byId("resultShow").on("change", lang.hitch(this, this.resultVisibility));
-              //registry.byId("saveIconBtn").on("click", lang.hitch(this, this.saveResultLayer));
+             
               registry.byId("saveIconBtn").on("click", lang.hitch(this, this.selectSaveORAdd));
               registry.byId('saveBtn').on("click", lang.hitch(this, this.saveResultLayerCheck));
               registry.byId('yes').on("click", lang.hitch(this, this.saveResultLayerName, true));
@@ -119,6 +113,9 @@ define([
             },
             onOpen: function () {
               this.refreshData();
+            },
+            onClose: function () {
+              domStyle.set("loadingIsLayers","display","none");  
             },
             selectSaveORAdd: function () {
               registry.byId("saveDialog").show();
@@ -243,17 +240,9 @@ define([
                   domStyle.set(this.result, "display", "none");
                   this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                  
                 }
                 
-                var selectOptions = registry.byId("secondary").getOptions();
-               for(var i in this.layerList){
-                if(this.secondaryLayer && this.secondaryLayer.visible && this.secondaryLayer.url === this.layerList[i].url){
-                    registry.byId("secondary").attr("value",selectOptions[i].value,false);
-                     registry.byId("secondaryShow").set("checked", this.secondaryLayer.visible);
-                     break;
-                }
-              }}
+              }
             },
             populateServices: function () {
               var mainLayers, getItem, j;
@@ -268,11 +257,10 @@ define([
               this.layerList = [];
               registry.byId("imageView").removeOption(registry.byId('imageView').getOptions());
               registry.byId("secondary").removeOption(registry.byId('secondary').getOptions());
-              
+
               for (var i = 0; i < mainLayers.length; i++) {
                 this.layerList[i] = mainLayers[mainLayers.length - i - 1].layerObject;
                 this.layerList[i].title = mainLayers[mainLayers.length - i - 1].title;
-                this.layerList[i].name = mainLayers[mainLayers.length - i - 1].name;
                 registry.byId("imageView").addOption({label: this.layerList[i].title, value: "" + i + ""});
                 registry.byId("secondary").addOption({label: this.layerList[i].title, value: "" + i + ""});
               }
@@ -477,12 +465,12 @@ define([
                 this.secondaryBackup = this.secondaryLayer;
                 primaryIndex = this.primaryLayerIndex;
                 this.primaryBackup = this.primaryLayer;
-                if (secondaryIndex != registry.byId("imageView").get("value")) {
+                if (secondaryIndex !== registry.byId("imageView").get("value")) {
                   registry.byId("imageView").set("value", "" + secondaryIndex + "");
                 } else {
                   this.createLayer();
                 }
-                if (primaryIndex != registry.byId("secondary").get("value")) {
+                if (primaryIndex !== registry.byId("secondary").get("value")) {
                   registry.byId("secondary").set("value", "" + primaryIndex + "");
                 } else {
                   this.createSecondary();
@@ -511,10 +499,10 @@ define([
               }
             },
             showLoading: function () {
-              esri.show(dom.byId("loadingIsLayers"));
+              domStyle.set("loadingIsLayers","display","block");
             },
             hideLoading: function () {
-              esri.hide(dom.byId("loadingIsLayers"));
+              domStyle.set("loadingIsLayers","display","none");
             }
           });
           clazz.hasLocale = false;

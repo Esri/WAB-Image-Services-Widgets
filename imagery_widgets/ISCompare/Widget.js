@@ -18,18 +18,10 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dojo/text!./Widget.html',
     'jimu/BaseWidget',
-    'esri/dijit/Legend',
-    "esri/arcgis/utils",
-    "dojo/on",
     "dijit/registry",
     "dojo/_base/lang",
     "dojo/dom",
     'dojo/dom-construct',
-    "esri/layers/RasterFunction",
-    "esri/layers/MosaicRule",
-    "esri/layers/ArcGISImageServiceLayer",
-    "esri/layers/ImageServiceParameters",
-    "dojo/dom-construct",
     "esri/dijit/LayerSwipe",
     "dijit/form/HorizontalSlider",
     "dijit/form/HorizontalRule",
@@ -49,18 +41,11 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                Legend,
-                arcgisUtils,
-                on,
                 registry,
                 lang,
                 dom,
                 domConstruct,
-                RasterFunction,
-                MosaicRule,
-                ArcGISImageServiceLayer,
-                ImageServiceParameters,
-                domConstruct, LayerSwipe, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, domStyle) {
+                LayerSwipe, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, domStyle) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISCompare',
@@ -74,11 +59,25 @@ define([
                 layerList: null,
                 startup: function() {
                     this.inherited(arguments);
-                    domConstruct.place('<img id="loadingic" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
+                    domConstruct.place('<img id="loadingCompare" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
                 onOpen: function() {
                     this.refreshData();
+                     if (this.map) 
+                        this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
+                    if(registry.byId("compare").get("value") === "Swipe")
+                        this.setSwipe();
+                },
+                onClose: function () {
+                   if(this.refreshHandler){
+                       this.refreshHandler.remove();
+                       this.refreshHandler = null;
+                   }
+                  if(this.layerSwipe) {
+                  this.layerSwipe.destroy();
+                  this.layerSwipe = null;
+                  }
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
@@ -97,7 +96,6 @@ define([
                     registry.byId("primaryOpacity").on("change", lang.hitch(this, this.changePrimaryOpacity));
                     registry.byId("compare").on("change", lang.hitch(this, this.setSwipe));
                     if (this.map) {
-                        this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
@@ -106,8 +104,8 @@ define([
                     this.primaryLayer.setOpacity(1 - registry.byId("primaryOpacity").get("value"));
                 },
                 setSwipe: function() {
-                    domConstruct.place("<div id='swipewidget'></div>", "map", "after");// earlier the widget was created in the postCreate method but now it is created every time the setSwipe function is called 
-                    if (registry.byId("compare").get("value") == "Swipe") {
+                    domConstruct.place("<div id='swipewidget'></div>", "map", "after");
+                    if (registry.byId("compare").get("value") === "Swipe") {
                         registry.byId("primaryOpacity").set("value", 0);
                         this.layerSwipe = new LayerSwipe({
                             type: "vertical",
@@ -117,12 +115,13 @@ define([
                         this.layerSwipe.startup();
                         domStyle.set(registry.byId("primaryOpacity").domNode, "display", "none");
                     } else {
-                        this.layerSwipe.destroy(); //if the transparency option is selected the swipewidget is destroyed
+                        if(this.layerSwipe)
+                        this.layerSwipe.destroy(); 
                         domStyle.set(registry.byId("primaryOpacity").domNode, "display", "inline-block");
                         registry.byId("primaryOpacity").set("value", 0);
                     }
                 },
-                // updateSwipe function is never used in this code. it can be removed
+                
 //                updateSwipe: function() { 
 //                    if (this.layerSwipe) {
 //                        this.layerSwipe.destroy();
@@ -130,10 +129,10 @@ define([
 //                    }
 //                },
                 showLoading: function() {
-                    esri.show(dom.byId("loadingic"));
+                    domStyle.set("loadingCompare","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingic"));
+                    domStyle.set("loadingCompare","display","none");
                 }
             });
 

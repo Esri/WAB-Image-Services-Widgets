@@ -17,11 +17,8 @@ define([
     'dojo/_base/declare',
     'dijit/_WidgetsInTemplateMixin',
     'jimu/BaseWidget',
-    "dojo/on",
     "dijit/registry",
     "dojo/_base/lang",
-    "dojo/html",
-    "dojo/dom",
     "dojo/dom-style",
     'dojo/dom-construct',
     "esri/request",
@@ -41,12 +38,11 @@ define([
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
-                on, registry, lang, html, dom, domStyle, domConstruct, esriRequest, RasterFunction) {
+                registry, lang, domStyle, domConstruct, esriRequest, RasterFunction) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 name: 'ISRenderer',
                 baseClass: 'jimu-widget-ISRenderer',
-                layerInfos: [],
-                legend: null,
+                previousImageServiceLayerUrl: null,
                 imageServiceLayer: null,
                 startup: function() {
                     this.inherited(arguments);
@@ -61,13 +57,21 @@ define([
                     registry.byId("service_functions").on("change", lang.hitch(this, this.checkStretchDiv));
                     registry.byId("StretchType").on("change", lang.hitch(this, this.checkStretchTypeDiv));
                     if (this.map) {
-                        this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
                 onOpen: function() {
                     this.refreshData();
+                    if(this.map) 
+                        this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
+                },
+                onClose: function() {
+                    if(this.refreshHandler) {
+                        this.refreshHandler.remove();
+                        this.refreshHandler = null;
+                    }
+                    this.previousImageServiceLayerUrl = null;
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
@@ -76,11 +80,10 @@ define([
                         } else {
                             this.imageServiceLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                         }
-
+                        if(this.imageServiceLayer.url !== this.previousImageServiceLayerUrl) {
                         this.populateBands();
-
                         this.populateServiceFunctions();
-
+                        }
                         if (this.imageServiceLayer.bandIds) {
                             var bands = this.imageServiceLayer.bandIds;
                             registry.byId("Red").set("value", bands[0]);
@@ -111,6 +114,7 @@ define([
                     }
                 },
                 populateBands: function() {
+                    this.previousImageServiceLayerUrl = this.imageServiceLayer.url;
                     var bandCount = this.imageServiceLayer.bandCount;
                     registry.byId("Red").removeOption(registry.byId('Red').getOptions());
                     registry.byId("Green").removeOption(registry.byId('Green').getOptions());
@@ -169,7 +173,6 @@ define([
                     this.imageServiceLayer.refresh();
                 },
                 populateServiceFunctions: function() {
-                    console.log(this.imageServiceLayer);
                     if(this.imageServiceLayer.rasterFunctionInfos)
                     {
                     var  data = this.imageServiceLayer.rasterFunctionInfos;
@@ -258,10 +261,10 @@ define([
                     }
                 },
                 showLoading: function() {
-                    esri.show(dom.byId("loadingid"));
+                    domStyle.set("loadingid","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingid"));
+                    domStyle.set("loadingid","display","none");
                 }
 
             });

@@ -58,6 +58,8 @@ define([
             },
             onOpen: function () {
               this.refreshData();
+               if (this.map) 
+                this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
             },
             refreshData: function () {
               if (this.map.layerIds) {
@@ -79,11 +81,14 @@ define([
               this.layerswipeHorizontal.destroy();
               this.layerswipeHorizontal = null;
               registry.byId("splitTool").set("checked", false);
+              if(this.refreshHandler) {
+                  this.refreshHandler.remove();
+                  this.refreshHandler = null;
+              }
             },
             postCreate: function () {
               registry.byId("splitTool").on("change", lang.hitch(this, this.setSwipe));
               if (this.map) {
-                this.map.on("update-end", lang.hitch(this, this.refreshData));
                 this.map.on("update-start", lang.hitch(this, this.showLoading));
                 this.map.on("update-end", lang.hitch(this, this.hideLoading));
               }
@@ -108,20 +113,20 @@ define([
                 }, dom.byId("swipewidgetHorizontal"));
                 this.layerswipeHorizontal.startup();
               } else {
-                if (this.layerswipeVertical != null) {
+                if (this.layerswipeVertical !== null) {
                   this.layerswipeVertical.destroy();
                 }
-                if (this.layerswipeHorizontal != null)
+                if (this.layerswipeHorizontal !== null)
                 {
                   this.layerswipeHorizontal.destroy();
                 }
               }
             },
             showLoading: function () {
-              esri.show(dom.byId("loadingSplitTool"));
+              domStyle.set("loadingSplitTool","display","block");
             },
             hideLoading: function () {
-              esri.hide(dom.byId("loadingSplitTool"));
+              domStyle.set("loadingSplitTool","display","none");
             }
           });
           clazz.hasLocale = false;

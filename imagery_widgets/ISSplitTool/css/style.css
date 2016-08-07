@@ -4,21 +4,16 @@
 .esriLegendLayer{
     font-size: 12px;
 }
-.red{
-    background-image: url(../images/red.png);
-}
+
 .LayerSwipe .vertical {
     width: 1px !important;
-    z-index: 0; // it has been set to zero from 30 as it was overlapping with the widgets panel
+    z-index: 0; 
 }
 
 
 .LayerSwipe .horizontal {
     height:  1px;
    margin-top: 38px;
-    
-    //z-index: 0; // it has been set to zero from 30 as it was overlapping with the widgets panel
 }
 .LayerSwipe .horizontal .handle {
-//margin-top: -12px;
 }

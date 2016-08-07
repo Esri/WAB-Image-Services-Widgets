@@ -18,7 +18,6 @@ define([
   'dijit/_WidgetsInTemplateMixin',
   'dojo/text!./Widget.html',
   'jimu/BaseWidget',
-  "dojo/on",
   "dijit/registry",
   "dojo/_base/lang",
   "dojo/html",
@@ -28,11 +27,9 @@ define([
   "esri/tasks/QueryTask",
   "esri/geometry/Extent",
   "dojo/date/locale",
-  "esri/geometry/Point",
   "dojox/charting/Chart",
   "dojox/charting/action2d/Tooltip",
-  "dojox/charting/themes/Chris",
-  "esri/SpatialReference",
+  "dojox/charting/themes/PrimaryColors",
   "dojox/charting/widget/SelectableLegend",
   "dojox/charting/action2d/Magnify",
   "dojo/html",
@@ -40,22 +37,16 @@ define([
   "dijit/form/HorizontalSlider",
   "dijit/form/HorizontalRule",
   "dijit/form/HorizontalRuleLabels",
-  "dojo/_base/array",
   "esri/graphic",
   "esri/symbols/SimpleLineSymbol",
-  "esri/symbols/SimpleFillSymbol",
-  "esri/Color",
-  "esri/InfoTemplate",
   "dojo/dom-style",
   "esri/tasks/ImageServiceIdentifyTask",
   "esri/tasks/ImageServiceIdentifyParameters",
   "esri/geometry/Polygon",
   "esri/geometry/Point",
-  "esri/request",
-  "dojo/_base/connect",
+  "esri/request","esri/toolbars/draw",
   "esri/symbols/SimpleMarkerSymbol",
   "esri/Color",
-  "jimu/PanelManager",
   "dojo/i18n!./nls/strings",
   "dijit/form/Select",
   "dijit/form/Button",
@@ -76,13 +67,12 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                on,
                 registry,
                 lang,
                 html,
                 dom,
                 MosaicRule,
-                Query, QueryTask, Extent, locale, Point, Chart, Tooltip, theme, SpatialReference, SelectableLegend, Magnify, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, array, Graphic, SimpleLineSymbol, SimpleFillSymbol, Color, InfoTemplate, domStyle, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest, connect, SimpleMarkerSymbol, Color, PanelManager, strings) {
+                Query, QueryTask, Extent, locale,  Chart, Tooltip, theme, SelectableLegend, Magnify, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels,  Graphic, SimpleLineSymbol, domStyle, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest,Draw, SimpleMarkerSymbol, Color,  strings) {
           var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
             templateString: template,
             name: 'ISTimeFilterProfile',
@@ -103,7 +93,6 @@ define([
             ischartShow: false,
             graphId: [],
             handlerer: null,
-            graphicOnMap: null,
             startup: function () {
               this.inherited(arguments);
               domConstruct.place('<img id="loadingTimeProfile" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
@@ -118,46 +107,53 @@ define([
                 this.map.on("update-end", lang.hitch(this, this.hideLoading));
               }
             },
-            addgraphics: function (evt) {
-              this.map.graphics.add(new Graphic(
-                      evt.mapPoint, new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 0, 0]))
-                      ));
-            },
+            addGraphic: function(geometry){
+                    
+                    this.clear();
+                    for(var a in this.map.graphics.graphics){
+                        if(this.map.graphics.graphics[a].geometry && this.map.graphics.graphics[a].geometry.type==="point" && this.map.graphics.graphics[a].symbol && this.map.graphics.graphics[a].symbol.color.r===255){
+                            this.map.graphics.remove(this.map.graphics.graphics[a]);
+                            break;
+                        }
+                    }
+                    var symbol = new esri.symbol.SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20,
+                                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                                            new Color([255, 0, 0]), 1),
+                                    new Color([255, 0, 0, 0.35]));
+                    var graphic = new esri.Graphic(geometry, symbol);
+                    this.map.graphics.add(graphic);
+                    this.temporalProfile(geometry);
+                   
+                },
             onOpen: function () {
-              domStyle.set("loadingTimeProfile", "display", "block");
+              this.toolbarTemporalProfile = new Draw(this.map);
+                    dojo.connect(this.toolbarTemporalProfile,"onDrawEnd",lang.hitch(this,this.addGraphic));
+                    if(registry.byId("timeLineFilter").checked)
+                        this.toolbarTemporalProfile.activate(Draw.POINT);
               this.refreshData();
-              this.clicktemporalProfile = this.map.on("click", lang.hitch(this, this.temporalProfile));
-              this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
-              domStyle.set("loadingTimeProfile", "display", "none");
             },
             onClose: function () {
+                for(var a in this.map.graphics.graphics){
+                        if(this.map.graphics.graphics[a].geometry && this.map.graphics.graphics[a].geometry.type==="point" && this.map.graphics.graphics[a].symbol && this.map.graphics.graphics[a].symbol.color.r===255){
+                            this.map.graphics.remove(this.map.graphics.graphics[a]);
+                            break;
+                        }
+                    }
               html.set(this.pointOnGraph, "");
               this.clear();
               this.ischartShow = false;
               domStyle.set("sliderRules", "display", "block");
               domStyle.set("sliderLabels", "display", "block");
               domStyle.set("slider", "display", "block");
-              if (this.clicktemporalProfile !== null) {
-                this.clicktemporalProfile.remove();
-                this.clicktemporalProfile = null;
-              }
-              this.graphicOnMap.remove();
-              this.graphicOnMap = null;
+               this.toolbarTemporalProfile.deactivate();
+              
             },
             clear: function () {
-              var series;
+            
               registry.byId("timeDialog").hide();
               if (this.chart) {
-                if (this.map.graphics.graphics[1]) {
-                  this.map.graphics.remove(this.map.graphics.graphics[1]);
-                }
-                series = this.chart.getSeriesOrder("default");
-                for (var a in series) {
-                  this.chart.removeSeries(series[a]);
-                }
-                this.chart.removeAxis("x");
-                this.count = 1;
-                this.legend.refresh();
+                
+               dojo.empty("chartNodes");
               }
             },
             checkTime: function (currentVersion, timeInfo) {
@@ -168,7 +164,7 @@ define([
                   if (field) {
                     this.dateField = field;
                     registry.byId("timeLineFilter").set("disabled", false);
-                    if (this.ischartShow == true) {
+                    if (this.ischartShow === true) {
                       if (!registry.byId("timeDialog").open) {
                         registry.byId("timeDialog").show();
                       }
@@ -405,7 +401,7 @@ define([
               return num;
             },
             temporalProfile: function (evt) {
-              var getSamplesRequest, items, itemInfo, itemInfoNdmi, itemInfoUrban, normalizedValues, normalizedValuesNdmi, normalizedValuesUrban, ndvi, ndmi, urban, nir, red, green, cirrus, swir1, swir2, byDate, byDateNdmi, byDateUrban;
+              var getSamplesRequest, items, itemInfo, itemInfoNdmi, itemInfoUrban, normalizedValues, normalizedValuesNdmi, normalizedValuesUrban, ndvi, ndmi, urban, nir, red,  swir1,  byDate, byDateNdmi, byDateUrban;
               registry.byId("timeDialog").hide();
               this.ischartShow = true;
               this.clear();
@@ -413,12 +409,13 @@ define([
               getSamplesRequest = esriRequest({
                 url: this.primaryLayer.url + "/getSamples",
                 content: {
-                  geometry: '{"x":' + evt.mapPoint.x + ',"y":' + evt.mapPoint.y + ',"spatialReference":{"wkid":' + evt.mapPoint.spatialReference.wkid + '}}',
+                  geometry: JSON.stringify(evt.toJson()),
                   geometryType: "esriGeometryPoint",
                   returnGeometry: false,
                   returnFirstValueOnly: false,
                   outFields: 'AcquisitionDate,OBJECTID,GroupName,Category',
                   pixelSize: [this.primaryLayer.pixelSizeX, this.primaryLayer.pixelSizeY],
+                  mosaicRule: JSON.stringify(this.primaryLayer.mosaicRule),
                   f: "json"
                 },
                 handleAs: "json",
@@ -430,7 +427,7 @@ define([
                 itemInfoNdmi = [];
                 itemInfoUrban = [];
                 for (var a in items) {
-                  if (items[a].attributes.Category == 1) {
+                  if (items[a].attributes.Category === 1) {
                     var plot = items[a].value.split(' ');
                     for (var k in plot) {
                       if (plot[k]) {
@@ -442,37 +439,36 @@ define([
                     normalizedValues = [];
                     normalizedValuesNdmi = [];
                     normalizedValuesUrban = [];
-                    
-                    nir = plot[this.nirIndex] - 5000;
-                    red = plot[this.redIndex] - 5000;
+                    if(this.nirIndex && this.redIndex){
+                    nir = (plot[this.nirIndex] - this.minValue)/(this.maxValue - this.minValue);
+                    red = (plot[this.redIndex] - this.minValue)/(this.maxValue - this.minValue);
                     ndvi = (nir - red) / (red + nir);
-                    green = plot[this.greenIndex] - 5000;
-                    swir1 = plot[this.swir1Index] - 5000;
-                    swir2 = plot[this.swir2Index] - 5000;
-                    cirrus = plot[this.cirrusIndex] - 5000;
-                    
+                     ndvi = this.limitValue(ndvi);
+                     normalizedValues.push(
+                            {y: ndvi,
+                              tooltip: ndvi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
+                           itemInfo.push({
+                      acqDate: items[a].attributes.AcquisitionDate,
+                      objid: items[a].attributes.OBJECTID,
+                      values: normalizedValues,
+                      name: items[a].attributes.GroupName
+                    });
+                
+                          }
+                    if(this.swir1Index) {
+                    swir1 = (plot[this.swir1Index] - this.minValue)/(this.maxValue - this.minValue);
                     ndmi = ((nir - swir1) / (nir + swir1));
                     urban = (((swir1 - nir) / (swir1 + nir)) - ((nir - red) / (red + nir))) / 2;
                     ndmi = this.limitValue(ndmi);
-                    ndvi = this.limitValue(ndvi);
                     urban = this.limitValue(urban);
-                    
-                    normalizedValues.push(
-                            {y: ndvi,
-                              tooltip: ndvi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
-                    normalizedValuesNdmi.push(
+                 normalizedValuesNdmi.push(
                             {y: ndmi,
                               tooltip: ndmi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
                     normalizedValuesUrban.push(
                             {y: urban,
                               tooltip: urban.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
                     
-                    itemInfo.push({
-                      acqDate: items[a].attributes.AcquisitionDate,
-                      objid: items[a].attributes.OBJECTID,
-                      values: normalizedValues,
-                      name: items[a].attributes.GroupName
-                    });
+                    
                     itemInfoNdmi.push({
                       acqDate: items[a].attributes.AcquisitionDate,
                       objid: items[a].attributes.OBJECTID,
@@ -486,27 +482,32 @@ define([
                     });
                   }
                 }
-                
+            }
+            if(itemInfo[0]){
                 byDate = itemInfo.slice(0);
-                byDateNdmi = itemInfoNdmi.slice(0);
-                byDateUrban = itemInfoUrban.slice(0);
                 byDate.sort(function (a, b) {
                   return a.acqDate - b.acqDate;
                 });
+                this.NDVIData = byDate;
+            }
+            if(itemInfoNdmi[0] && itemInfoUrban[0]){
+            byDateNdmi = itemInfoNdmi.slice(0);
+                byDateUrban = itemInfoUrban.slice(0);
+                
                 byDateNdmi.sort(function (a, b) {
                   return a.acqDate - b.acqDate;
                 });
                 byDateUrban.sort(function (a, b) {
                   return a.acqDate - b.acqDate;
                 });
-                this.NDVIData = byDate;
+              
                 this.NDMIData = byDateNdmi;
                 this.UrbanData = byDateUrban;
-                this.NDVIValues = [];
+            }  this.NDVIValues = [];
                 this.NDMIValues = [];
                 this.UrbanValues = [];
                 this.NDVIDates = [];
-                
+                if(this.NDVIData){
                 for (var a = 0; a < this.NDVIData.length; a++) {
                   this.NDVIDates.push({
                     text: locale.format(new Date(this.NDVIData[a].acqDate), {selector: "date", datePattern: "dd/MM/yy"}),
@@ -516,7 +517,8 @@ define([
                     y: this.NDVIData[a].values[0].y,
                     tooltip: this.NDVIData[a].values[0].tooltip
                   });
-                }
+                }}
+            if(this.NDMIData && this.UrbanData) {
                 for (a in this.NDMIData) {
                   this.NDMIValues.push({
                     y: this.NDMIData[a].values[0].y,
@@ -529,6 +531,7 @@ define([
                     tooltip: this.UrbanData[a].values[0].tooltip
                   });
                 }
+            }
                 this.axesParams = [];
                 for (a in this.bandPropMean) {
                   this.axesParams[a] = {
@@ -537,7 +540,7 @@ define([
                   };
                 }
                 
-                if (!this.chart) {
+               // if (!this.chart) {
                   html.set(this.pointForTemporalProfile, "");
                   html.set(this.pointOnGraph, strings.pointOnGraph);
                   if (!registry.byId("timeDialog").open) {
@@ -546,6 +549,7 @@ define([
                   this.chart = new Chart("chartNodes");
                   this.chart.addPlot("default", {
                     type: "Lines",
+                    tension: "S",
                     markers: true,
                     shadows: {dx: 4, dy: 4}
                   });
@@ -553,34 +557,26 @@ define([
                   this.count = 1;
                   this.chart.addAxis("y", {vertical: true, fixLower: "major", fixUpper: "major", title: "Data Values", titleOrientation: "axis"});
                   this.chart.addAxis("x", {labels: this.NDVIDates, labelSizeChange: true, title: "Acquisition Date", titleOrientation: "away", majorTickStep: 1, minorTicks: false});
-                  this.chart.addSeries("NDMI Moisture", this.NDMIValues, {hidden: true});
-                  this.chart.addSeries("Urban", this.UrbanValues, {hidden: true});
-                  this.chart.addSeries("NDVI Vegetation", this.NDVIValues);
-                  if (!registry.byId("timeDialog").open) {
-                    registry.byId("timeDialog").show();
-                  }
-                  html.set(this.pointForTemporalProfile, "");
-                  html.set(this.pointOnGraph, strings.pointOnGraph);
+                  if(this.NDMIValues){
+                  this.chart.addSeries("NDMI Moisture", this.NDMIValues, {stroke: {color: "#A5F2F3",width: 1.5},fill: "#A5F2F3",hidden: true});
+                  this.chart.addSeries("Urban", this.UrbanValues, {stroke: {color: "teal",width: 1.5},fill: "teal",hidden: true});
+              }
+              if(this.NDVIValues)
+                  this.chart.addSeries("NDVI Vegetation", this.NDVIValues,{stroke: {color: "forestgreen",width: 1.5},fill: "forestgreen"});
+                  
+                  
                   this.toolTip = new Tooltip(this.chart, "default");
                   this.magnify = new Magnify(this.chart, "default");
                   this.chart.render();
-                  this.legend = new SelectableLegend({chart: this.chart, horizontal: true, outline: false}, "legends");
+                
                   domConstruct.destroy("timeDialog_underlay");
-                } else {
-                  if (!registry.byId("timeDialog").open) {
-                    registry.byId("timeDialog").show();
-                  }
-                  html.set(this.pointForTemporalProfile, "");
-                  html.set(this.pointOnGraph, strings.pointOnGraph);
-                  if (!this.chart.getAxis("x")) {
-                    this.chart.addAxis("x", {labels: this.NDVIDates, labelSizeChange: true, title: "Acquisition Date", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
-                  }
-                  this.chart.addSeries("NDMI Moisture", this.NDMIValues, {hidden: true});
-                  this.chart.addSeries("Urban", this.UrbanValues, {hidden: true});
-                  this.chart.addSeries("NDVI Vegetation", this.NDVIValues);
-                  this.chart.render();
-                  this.legend.refresh();
-                }
+                 if(!this.legend)
+                        this.legend = new SelectableLegend({chart: this.chart, horizontal: true, outline: false}, "legends");
+                            else{
+                                     this.legend.set("params", {chart: this.chart, horizontal: true, outline: false});
+                                        this.legend.set("chart", this.chart);
+                                        this.legend.refresh();
+                                    }
                 this.chart.connectToPlot("default", lang.hitch(this, this.clickdata));
                 html.set(this.pointOnGraph, strings.pointOnGraph);
                 domStyle.set("sliderRules", "display", "none");
@@ -598,16 +594,9 @@ define([
                 for (var g = 0; g < this.graphId.length; g++) {
                   if ((this.graphId[g].date === this.NDVIData[this.datesClicked].acqDate)) {
                     this.slider.set("value", g);
-                    this.sliderChange();
+                   // this.sliderChange();
                   }
-                  if ((this.graphId[g].date === this.NDMIData[this.datesClicked].acqDate)) {
-                    this.slider.set("value", g);
-                    this.sliderChange();
-                  }
-                  if ((this.graphId[g].date === this.UrbanData[this.datesClicked].acqDate)) {
-                    this.slider.set("value", g);
-                    this.sliderChange();
-                  }
+                 
                 }
               }
             },
@@ -620,30 +609,15 @@ define([
                 }
                 domStyle.set(this.filterDivContainer, "display", "block");
 
-                if (this.graphicOnMap == null)
-                {
-                  this.graphicOnMap = this.map.on("click", lang.hitch(this, this.addgraphics));
-                }
-                if (this.clicktemporalProfile === null)
-                {
-                  this.clicktemporalProfile = this.map.on("click", lang.hitch(this, this.temporalProfile));
-                }
+               
+                this.toolbarTemporalProfile.activate(Draw.POINT);
               } else {
                 domStyle.set(this.filterDivContainer, "display", "none");
                 registry.byId("timeDialog").hide();
                 this.ischartShow = false;
                 this.clear();
                 html.set(this.pointForTemporalProfile, "");
-                if (this.graphicOnMap != null)
-                {
-                  this.graphicOnMap.remove();
-                  this.graphicOnMap = null;
-                }
-                if (this.clicktemporalProfile != null)
-                {
-                  this.clicktemporalProfile.remove();
-                  this.clicktemporalProfile = null;
-                }
+               this.toolbarTemporalProfile.deactivate();
                 if (this.mosaicBackup) {
                   var mr = new MosaicRule(this.mosaicBackup);
                 } else {
@@ -739,12 +713,12 @@ define([
                     if (data.catalogItems.features[0]) {
                       maxVisible = data.catalogItems.features[0].attributes.OBJECTID;
                       for (var z in this.orderedFeatures) {
-                        if (this.orderedFeatures[z].attributes.OBJECTID == maxVisible) {
+                        if (this.orderedFeatures[z].attributes.OBJECTID === maxVisible) {
                           index = z;
                         }
                       }
                       this.slider.set("value", index);
-                      this.sliderChange();
+                     // this.sliderChange();
                     }
                     html.set(this.dateRange, locale.format(new Date(this.orderedDates[this.featureLength - 1]), {selector: "date", formatLength: "long"}));
                     this.hideLoading();
@@ -794,10 +768,10 @@ define([
               }
             },
             showLoading: function () {
-              esri.show(dom.byId("loadingTimeProfile"));
+              domStyle.set("loadingTimeProfile","display","block");
             },
             hideLoading: function () {
-              esri.hide(dom.byId("loadingTimeProfile"));
+              domStyle.set("loadingTimeProfile","display","none");
             }
           });
           clazz.hasLocale = false;

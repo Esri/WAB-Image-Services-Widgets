@@ -18,7 +18,6 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dojo/text!./Widget.html',
     'jimu/BaseWidget',
-    "dojo/on",
     "dijit/registry",
     "dojo/_base/lang",
     "dojo/html",
@@ -33,7 +32,6 @@ define([
     "dijit/form/HorizontalSlider",
     "dijit/form/HorizontalRule",
     "dijit/form/HorizontalRuleLabels",
-    "dojo/_base/array",
     "esri/graphic",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
@@ -61,13 +59,12 @@ define([
                 _WidgetsInTemplateMixin,
                 template,
                 BaseWidget,
-                on,
                 registry,
                 lang,
                 html,
                 dom,
                 MosaicRule,
-                Query, QueryTask, Extent, locale, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, array, Graphic, SimpleLineSymbol, SimpleFillSymbol, Color, InfoTemplate, domStyle,ArcGISImageServiceLayer, ImageServiceParameters, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest) {
+                Query, QueryTask, Extent, locale, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels, Graphic, SimpleLineSymbol, SimpleFillSymbol, Color, InfoTemplate, domStyle,ArcGISImageServiceLayer, ImageServiceParameters, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISTimeFilter',
@@ -85,7 +82,7 @@ define([
                 defaultMosaicRule : null,
                 startup: function() {
                     this.inherited(arguments);
-                    domConstruct.place('<img id="loadingts" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
+                    domConstruct.place('<img id="loadingTimeFilter" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
                 postCreate: function() {
@@ -454,10 +451,10 @@ define([
                     }
                 },
                 showLoading: function() {
-                    esri.show(dom.byId("loadingts"));
+                   domStyle.set("loadingTimeFilter","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingts"));
+                   domStyle.set("loadingTimeFilter","display","none");
                 }
             });
 

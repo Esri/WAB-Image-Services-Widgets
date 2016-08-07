@@ -17,16 +17,10 @@ define([
     'dojo/_base/declare',
     'dijit/_WidgetsInTemplateMixin',
     'jimu/BaseWidget',
-    'esri/dijit/Legend',
-    "esri/arcgis/utils",
-    "dojo/on",
     "dijit/registry",
     "dojo/_base/lang",
-    "dojo/html",
-    "dojo/dom",
     "dojo/dom-style",
     "esri/request",
-    "esri/layers/RasterFunction",
     "esri/layers/MosaicRule",
     'dojo/dom-construct',
     "dojo/parser",
@@ -42,30 +36,37 @@ define([
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
-                Legend,
-                arcgisUtils, on, registry, lang, html, dom, domStyle, esriRequest, RasterFunction, MosaicRule, domConstruct) {
+                registry, lang, domStyle, esriRequest, MosaicRule, domConstruct) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 name: 'ISDisplayOrder',
                 baseClass: 'jimu-widget-ISDisplayOrder',
-                layerInfos: [],
-                legend: null,
+                previousImageServiceLayerUrl: null,
                 imageServiceLayer: null,
                 startup: function() {
                     this.inherited(arguments);
-                    domConstruct.place('<img id="loadingido" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
+                    domConstruct.place('<img id="loadingDisplayOrder" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
                 postCreate: function() {
                     registry.byId("mosaicMethod").on("change", lang.hitch(this, this.checkFields));
                     registry.byId("mrapply").on("click", lang.hitch(this, this.applyMosaic));
                     if (this.map) {
-                        this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
                 onOpen: function() {
                     this.refreshData();
+                     if (this.map) {
+                        this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
+                    }
+                },
+                onClose: function() {
+                    if(this.refreshHandler) {
+                        this.refreshHandler.remove();
+                        this.refreshHandler = null;
+                    }
+                    this.previousImageServiceLayerUrl = null;
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
@@ -74,12 +75,14 @@ define([
                         } else {
                             this.imageServiceLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                         }
+                        if (this.previousImageServiceLayerUrl !== this.imageServiceLayer.url) {
                         this.populateAttributes();
                         this.checkFields();
                     }
+                    }
                 },
                 populateAttributes: function() {
-                  //  console.log(this.imageServiceLayer.fields);
+                    this.previousImageServiceLayerUrl = this.imageServiceLayer.url;
                     if(this.imageServiceLayer.fields)
                     {
                         registry.byId("sortField").removeOption(registry.byId('sortField').getOptions());
@@ -234,10 +237,10 @@ define([
                     this.imageServiceLayer.setMosaicRule(mr);
                 },
                 showLoading: function() {
-                    esri.show(dom.byId("loadingido"));
+                    domStyle.set("loadingDisplayOrder","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingido"));
+                    domStyle.set("loadingDisplayOrder","display","none");
                 }
             });
 

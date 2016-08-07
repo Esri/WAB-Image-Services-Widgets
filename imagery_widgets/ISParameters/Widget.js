@@ -17,11 +17,10 @@ define([
     'dojo/_base/declare',
     'dijit/_WidgetsInTemplateMixin',
     'jimu/BaseWidget',
-    "dojo/on",
+    "dojo/dom-style",
     "dijit/registry",
     "dojo/_base/lang",
     'dojo/dom-construct',
-    "dojo/dom",
     "dijit/form/Select",
     "dijit/form/HorizontalSlider",
     "dijit/form/HorizontalRule", 
@@ -33,29 +32,34 @@ define([
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
-                on, registry, lang, domConstruct, dom) {
+                domStyle, registry, lang, domConstruct) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 name: 'ISParameters',
                 baseClass: 'jimu-widget-ISParameters',
-                layerInfos: [],
-                legend: null,
                 primaryLayer: null,
                 startup: function() {
                     this.inherited(arguments);
-                    domConstruct.place('<img id="loadingip" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
+                    domConstruct.place('<img id="loadingParameter" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
                 postCreate: function() {
                     registry.byId("format").on("change", lang.hitch(this, this.checkQualityDisable));
                     registry.byId("ipapply").on("click", lang.hitch(this, this.applyParams));
                     if (this.map) {
-                        this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
                 onOpen: function() {
                     this.refreshData();
+                    if (this.map) 
+                      this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
+                },
+                onClose: function() {
+                  if(this.refreshHandler) {
+                      this.refreshHandler.remove();
+                      this.refreshHandler = null;
+                  }  
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
@@ -94,13 +98,13 @@ define([
                     }
                 },
                 applyParamsOnLayer: function(imageServiceLayer) {
-                    if (registry.byId("interpolation").get("value") != "Default") {
+                    if (registry.byId("interpolation").get("value") !== "Default") {
                         imageServiceLayer.setInterpolation(registry.byId("interpolation").get("value"), true);
                     } else {
                         imageServiceLayer.setInterpolation('', true);
                     }
 
-                    if (registry.byId("format").get("value") != "Default") {
+                    if (registry.byId("format").get("value") !== "Default") {
                         imageServiceLayer.setImageFormat(registry.byId("format").get("value"), true);
                     } else {
                         imageServiceLayer.setImageFormat('', true);
@@ -111,20 +115,20 @@ define([
                     } else {
                         imageServiceLayer.setCompressionQuality('', true);
                     }
-                    imageServiceLayer.refresh();
+                  imageServiceLayer.refresh();
                 },
                 checkQualityDisable: function() {
-                    if (registry.byId("format").get("value") == "jpgpng" || registry.byId("format").get("value") == "jpg") {
+                    if (registry.byId("format").get("value") === "jpgpng" || registry.byId("format").get("value") === "jpg") {
                         registry.byId("quality").set("disabled", false);
                     } else {
                         registry.byId("quality").set("disabled", true);
                     }
                 },
                 showLoading: function() {
-                    esri.show(dom.byId("loadingip"));
+                    domStyle.set("loadingParameter","display","block");
                 },
                 hideLoading: function() {
-                    esri.hide(dom.byId("loadingip"));
+                    domStyle.set("loadingParameter","display","none");
                 }
             });
 
