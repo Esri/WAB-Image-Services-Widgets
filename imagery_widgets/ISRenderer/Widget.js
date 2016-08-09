@@ -22,6 +22,7 @@ define([
     "dojo/dom-style",
     'dojo/dom-construct',
     "esri/request",
+     "dojo/html",
     "esri/layers/RasterFunction",
     "dijit/form/Select",
     "dijit/form/HorizontalSlider",
@@ -38,7 +39,7 @@ define([
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
-                registry, lang, domStyle, domConstruct, esriRequest, RasterFunction) {
+                registry, lang, domStyle, domConstruct, esriRequest, html, RasterFunction) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 name: 'ISRenderer',
                 baseClass: 'jimu-widget-ISRenderer',
@@ -173,8 +174,10 @@ define([
                     this.imageServiceLayer.refresh();
                 },
                 populateServiceFunctions: function() {
-                    if(this.imageServiceLayer.rasterFunctionInfos)
+                    
+                    if(this.imageServiceLayer.rasterFunctionInfos && this.imageServiceLayer.name)
                     {
+                        html.set(this.activeLayerName,this.imageServiceLayer.name);
                     var  data = this.imageServiceLayer.rasterFunctionInfos;
                     this.rendererRR(data);
                     }
@@ -189,7 +192,8 @@ define([
                         callbackParamName: "callback"
                     });   
                     request.then(lang.hitch(this, function(data) {
-                         this.rendererRR(data);
+                       html.set(this.activeLayerName,data.name); 
+                        this.rendererRR(data.rasterFunctionInfos);
                     }),function(error) {
                       console.log("Request failed");
                     });
