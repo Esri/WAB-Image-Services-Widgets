@@ -112,6 +112,7 @@ define([
               }
             },
             onOpen: function () {
+              
               this.refreshData();
             },
             onClose: function () {
@@ -257,24 +258,31 @@ define([
               this.layerList = [];
               registry.byId("imageView").removeOption(registry.byId('imageView').getOptions());
               registry.byId("secondary").removeOption(registry.byId('secondary').getOptions());
-
-              for (var i = 0; i < mainLayers.length; i++) {
-                this.layerList[i] = mainLayers[mainLayers.length - i - 1].layerObject;
-                this.layerList[i].title = mainLayers[mainLayers.length - i - 1].title;
-                registry.byId("imageView").addOption({label: this.layerList[i].title, value: "" + i + ""});
-                registry.byId("secondary").addOption({label: this.layerList[i].title, value: "" + i + ""});
+              var k=0;
+              for (var i = mainLayers.length -1; i >= 0; i--) {
+               if(mainLayers[i].layerType && mainLayers[i].layerType === "ArcGISImageServiceLayer"){
+                this.layerList[k] = mainLayers[i].layerObject;
+                this.layerList[k].title = mainLayers[i].title;
+                registry.byId("imageView").addOption({label: this.layerList[k].title, value: "" + k + ""});
+                registry.byId("secondary").addOption({label: this.layerList[k].title, value: "" + k + ""});
+              k++;
+                    }
               }
-
               if (this.config.webmapId) {
                 getItem = arcgisUtils.getItem(this.config.webmapId);
                 getItem.then(lang.hitch(this, function (response) {
                   j = 0;
+                  
                   for (var i = response.itemData.operationalLayers.length - 1; i >= 0; i--) {
+                      if(response.itemData.operationalLayers[i].layerType && response.itemData.operationalLayers[i].layerType ==="ArcGISImageServiceLayer"){
+                          
                     this.layerList.push(response.itemData.operationalLayers[i]);
-                    registry.byId("imageView").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + mainLayers.length) + ""});
-                    registry.byId("secondary").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + mainLayers.length) + ""});
+                    registry.byId("imageView").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + k) + ""});
+                    registry.byId("secondary").addOption({label: response.itemData.operationalLayers[i].title, value: "" + (j + k) + ""});
                     j++;
                   }
+              }
+              
                   this.layerwebMap = this.layerList.length;
                   if (this.autoSelectFirstLayer) {
                     this.createLayer();
@@ -323,6 +331,7 @@ define([
                           visible: registry.byId("primaryShow").get("checked"),
                           infoTemplate: this.secondaryBackup.infoTemplate
                         });
+                        firstLayer.title = this.secondaryBackup.title;
               } else {
                 if (this.layerList[this.primaryLayerIndex].mosaicRule) {
                   mosaicRule = new MosaicRule(this.layerList[this.primaryLayerIndex].mosaicRule);
@@ -353,6 +362,7 @@ define([
                           visible: registry.byId("primaryShow").get("checked"),
                           infoTemplate: popupInfo
                         });
+                        firstLayer.title =  this.layerList[this.primaryLayerIndex].title;
               }
 
               if (this.resultLayer) {
@@ -411,6 +421,7 @@ define([
                           visible: registry.byId("secondaryShow").get("checked"),
                           infoTemplate: this.primaryBackup.infoTemplate
                         });
+                         secondLayer.title = this.primaryBackup.title;
               } else {
                 this.secondaryLayerIndex = registry.byId("secondary").get("value");
                 if (this.layerList[this.secondaryLayerIndex].mosaicRule) {
@@ -439,11 +450,12 @@ define([
                         {
                           id: "secondaryLayer",
                           imageServiceParameters: params,
-                          visible: registry.byId("secondaryShow").get("checked"),
+                           visible: registry.byId("secondaryShow").get("checked"),
                           infoTemplate: popupInfo
                         });
-              }
-
+              secondLayer.title = this.layerList[this.secondaryLayerIndex].title;
+                }
+              
               if (this.resultLayer) {
                 this.map.addLayer(secondLayer, this.map.layerIds.length - 2);
                 this.map.on("layer-add-result", lang.hitch(this, function () {
