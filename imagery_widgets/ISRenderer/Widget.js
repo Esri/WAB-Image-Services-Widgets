@@ -177,7 +177,8 @@ define([
                     
                     if(this.imageServiceLayer.rasterFunctionInfos && this.imageServiceLayer.name)
                     {
-                        html.set(this.activeLayerName,this.imageServiceLayer.name);
+                       var title = this.imageServiceLayer.title || this.imageServiceLayer.name || "";
+                        html.set(this.activeLayerName,title);
                     var  data = this.imageServiceLayer.rasterFunctionInfos;
                     this.rendererRR(data);
                     }
@@ -192,8 +193,9 @@ define([
                         callbackParamName: "callback"
                     });   
                     request.then(lang.hitch(this, function(data) {
-                       html.set(this.activeLayerName,data.name); 
-                        this.rendererRR(data.rasterFunctionInfos);
+                            var title = data.title || data.name || "";
+                        html.set(this.activeLayerName,title);
+                 this.rendererRR(data.rasterFunctionInfos);
                     }),function(error) {
                       console.log("Request failed");
                     });
