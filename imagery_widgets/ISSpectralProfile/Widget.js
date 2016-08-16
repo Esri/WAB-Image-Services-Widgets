@@ -437,11 +437,11 @@ define([
                             } else if (registry.byId("type").get("value") === "NDVI") {
                                 this.chart.addAxis("x", {labels: this.NDVIDates, labelSizeChange: true, title: "Acquisition Date", titleOrientation: "away", majorTickStep: 1, minorTicks: false});
                                if(this.NDVIValues1)
-                                this.chart.addSeries("NDMI Moisture", this.NDVIValues1, {hidden: true});
+                                this.chart.addSeries("NDMI Moisture", this.NDVIValues1, {stroke: {color: "#A5F2F3",width: 1.5},fill: "#A5F2F3",hidden: true});
                             if(this.NDVIValues2)   
-                            this.chart.addSeries("Urban", this.NDVIValues2, {hidden: true});
+                            this.chart.addSeries("Urban", this.NDVIValues2, {stroke: {color: "teal",width: 1.5},fill: "teal",hidden: true});
                             if(this.NDVIValues)    
-                            this.chart.addSeries("NDVI", this.NDVIValues);
+                            this.chart.addSeries("NDVI", this.NDVIValues,{stroke: {color: "forestgreen",width: 1.5},fill: "forestgreen"});
                             }
                            
                             this.magnify = new Magnify(this.chart, "default");
@@ -450,7 +450,7 @@ define([
                        if(!this.legend)
                         this.legend = new SelectableLegend({chart: this.chart, horizontal: false, outline: false}, "legend");
                             else{
-                                     this.legend.set("params", {chart: this.chart, horizontal: true, outline: false});
+                                     this.legend.set("params", {chart: this.chart, horizontal: false, outline: false});
                                         this.legend.set("chart", this.chart);
                                         this.legend.refresh();
                                     }

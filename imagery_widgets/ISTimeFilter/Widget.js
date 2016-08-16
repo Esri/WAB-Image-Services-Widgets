@@ -91,7 +91,6 @@ define([
                     registry.byId("refreshTimesliderBtn").on("click", lang.hitch(this, this.timeSliderRefresh));
                     registry.byId("show").on("change", lang.hitch(this, this.sliderChange));
                     registry.byId("timeFilter").on("change", lang.hitch(this, this.setFilterDiv));
-                    registry.byId("setSecondaryLayerBtn").on("click", lang.hitch(this, this.setSecondaryLayer));
                     if (this.map) {
                         this.map.on("update-end", lang.hitch(this, this.refreshData));
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
@@ -405,45 +404,7 @@ define([
                         }
                     }
                 },
-                setSecondaryLayer: function(){
-                  if(this.primaryLayer){
-                      if(this.secondaryLayer)
-                          this.map.removeLayer(this.secondaryLayer);
-                      var params = new ImageServiceParameters();
-                       if (this.primaryLayer.mosaicRule) {
-                  params.mosaicRule = this.primaryLayer.mosaicRule;
-                }
-                if (this.primaryLayer.renderingRule) {
-                  params.renderingRule = this.primaryLayer.renderingRule;
-                }
-                if (this.primaryLayer.bandIds) {
-                  params.bandIds = this.primaryLayer.bandIds;
-                }
-                if (this.primaryLayer.format) {
-                  params.format = this.primaryLayer.format;
-                }
-                if (this.primaryLayer.interpolation) {
-                  params.interpolation = this.primaryLayer.interpolation;
-                }
-                var popupInfo = "";
-                if (this.primaryLayer.popupInfo) {
-                  popupInfo = new PopupTemplate(this.primaryLayer.popupInfo);
-                }
-                var secondLayer = new ArcGISImageServiceLayer(
-                        this.primaryLayer.url,
-                        {
-                          id: "secondaryLayer",
-                          imageServiceParameters: params,
-                          visible: true,
-                          infoTemplate: popupInfo
-                        });
-              this.map.addLayer(secondLayer,this.positionOfPrimaryLayer);
-                    html.set(this.setSecondaryLayerUpdateUser,"Setting current scene as secondary layer.");
-                    setTimeout(lang.hitch(this, function(){
-                        html.set(this.setSecondaryLayerUpdateUser,"");
-                    }),3000);
-                    }
-                  },
+              
                 timeSliderRefresh: function() {
                     if (this.slider) {
                         this.timeSliderHide();
