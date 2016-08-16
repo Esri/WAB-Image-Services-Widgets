@@ -242,6 +242,11 @@ define([
                   this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                 }
+                if(this.priamryLayer && this.primaryLayer.type && !this.primaryLayer.type === "ArcGISImageServiceLayer")
+                    this.primaryLayer = null;
+                if(this.secondaryLayer && this.secondaryLayer.type && !this.secondaryLayer.type === "ArcGISImageServiceLayer")
+                    this.secondaryLayer = null;
+                
                 
               }
             },
@@ -272,7 +277,7 @@ define([
                 getItem = arcgisUtils.getItem(this.config.webmapId);
                 getItem.then(lang.hitch(this, function (response) {
                   j = 0;
-                  
+                 
                   for (var i = response.itemData.operationalLayers.length - 1; i >= 0; i--) {
                       if(response.itemData.operationalLayers[i].layerType && response.itemData.operationalLayers[i].layerType ==="ArcGISImageServiceLayer"){
                           
@@ -288,13 +293,17 @@ define([
                     this.createLayer();
                     this.autoSelectFirstLayer = false;
                   }
-                }));
+                  if (!this.secondaryLayerIndex) {
+                registry.byId("secondary").set('value', "1");
+                this.secondaryLayerIndex = 1;
               }
-              
+                }));
+              }else{
               if (!this.secondaryLayerIndex) {
                 registry.byId("secondary").set('value', "1");
                 this.secondaryLayerIndex = 1;
               }
+          }
             },
             createLayer: function () {
               var params, mosaicRule, renderingRule, popupInfo, firstLayer;
@@ -364,7 +373,7 @@ define([
                         });
                         firstLayer.title =  this.layerList[this.primaryLayerIndex].title;
               }
-
+             
               if (this.resultLayer) {
                 this.map.addLayer(firstLayer, this.map.layerIds.length - 1);
                 this.map.on("layer-add-result", lang.hitch(this, function () {
@@ -376,7 +385,7 @@ define([
                   this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                 }));
               }
-              this.toggle = false;
+              
             },
             makeSecondary: function () {
               this.toggle = true;
@@ -393,6 +402,7 @@ define([
               if (this.secondaryLayer) {
                 this.map.removeLayer(this.secondaryLayer);
               }
+               this.secondaryLayerIndex = registry.byId("secondary").get("value");
               params = new ImageServiceParameters();
               if (this.toggle) {
                 if (this.primaryBackup.mosaicRule) {
@@ -422,6 +432,7 @@ define([
                           infoTemplate: this.primaryBackup.infoTemplate
                         });
                          secondLayer.title = this.primaryBackup.title;
+                         
               } else {
                 this.secondaryLayerIndex = registry.byId("secondary").get("value");
                 if (this.layerList[this.secondaryLayerIndex].mosaicRule) {
