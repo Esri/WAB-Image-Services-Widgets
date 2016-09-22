@@ -29,12 +29,12 @@ define(['dojo/_base/declare',
       titleHeight: 20,
       content: null, //content is a dijit
       folded: false,
-      templateString: '<div>' +
+      templateString: '<div><div>' +
         '<div class="title" data-dojo-attach-point="titleNode">' +
         '<div class="title-label"' +
         'data-dojo-attach-point="titleLabelNode"></div>' + '</div>' +
         '<div class="jimu-panel-content" data-dojo-attach-point="containerNode"></div>' +
-        '</div>',
+        '</div></div>',
 
       startup: function() {
         this.inherited(arguments);
