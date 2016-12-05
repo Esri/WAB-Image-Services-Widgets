@@ -7,7 +7,7 @@
 
 .LayerSwipe .vertical {
     width: 1px !important;
-    z-index: 0;
+    z-index: 30;
 }
 
 

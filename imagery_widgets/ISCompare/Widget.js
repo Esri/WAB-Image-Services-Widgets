@@ -104,7 +104,7 @@ define([
                     this.primaryLayer.setOpacity(1 - registry.byId("primaryOpacity").get("value"));
                 },
                 setSwipe: function() {
-                    domConstruct.place("<div id='swipewidget'></div>", "map", "after");
+                    domConstruct.place("<div id='swipewidget'></div>", "map", "first");
                     if (registry.byId("compare").get("value") === "Swipe") {
                         registry.byId("primaryOpacity").set("value", 0);
                         this.layerSwipe = new LayerSwipe({
