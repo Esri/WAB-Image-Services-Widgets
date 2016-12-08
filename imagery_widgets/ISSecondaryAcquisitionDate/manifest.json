@@ -10,9 +10,9 @@
   "properties": {
     "inPanel": false,
     "hasLocale" : false,
-    "hasSettingPage" : false,
-    "hasSettingUIFile" : false,
+    "hasSettingPage" : true,
+    "hasSettingUIFile" : true,
     "hasSettingLocale" : false,
-    "hasSettingStyle" : false
+    "hasSettingStyle" : true
   }
 }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Esri. All Rights Reserved.
+// Copyright © 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,17 +52,16 @@ define([
     Select,Textarea) {
     return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
 
-      baseClass: 'jimu-widget-ISProfile-setting',
+      baseClass: 'jimu-widget-ISSpectralProfile-setting',
       ISLayers: [],
       bandNames: [],
       requestFlag : true,
-
       startup: function() {
         this.inherited(arguments);
         domConstruct.place('<img id="loadingSpectralProfile" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
         domStyle.set("loadingSpectralProfile",'display','none');
         this.populatePage();
-        this.setConfig(this.config); 
+        this.setConfig(this.config);        
       },
       
       postCreate: function(){
@@ -94,34 +93,43 @@ define([
         for(var a in this.ISLayers){
           var label = this.ISLayers[a].url.split('//')[1];
           if(config[label]){
-            if(config[label].bandCount !== undefined){
-              registry.byId("bandCount_"+a).set('value',config[label].bandCount);   
-            }
-            if(config[label].bandNames !== undefined){
-              var val;
-              for(var i in config[label].bandNames){
-                if(registry.byId("bandNames_"+a).get('value')){
-                  val = registry.byId("bandNames_"+a).get('value')+","+config[label].bandNames[i];
-                }
-                else{
-                  val = config[label].bandNames[i];
-                }
-                registry.byId("bandNames_"+a).set('value',val);
+          if(config[label].hasNDVI !== undefined){
+            registry.byId("ndvi_"+a).set('checked',config[label].hasNDVI);   
+          }
+          if(config[label].hasOverlap !== undefined){
+            registry.byId("overlap_"+a).set('checked',config[label].hasOverlap);   
+          }
+          if(config[label].bandCount !== undefined){
+            registry.byId("bandCount_"+a).set('value',config[label].bandCount);   
+          }
+          if(config[label].bandNames !== undefined){
+            var val;
+            for(var i in config[label].bandNames){
+              if(registry.byId("bandNames_"+a).get('value')){
+                val = registry.byId("bandNames_"+a).get('value')+","+config[label].bandNames[i];
               }
-              registry.byId("bandNames_"+a).set('value',config[label].bandNames);   
+              else{
+                val = config[label].bandNames[i];
+              }
+              registry.byId("bandNames_"+a).set('value',val);
             }
-            if(config[label].acquisitionDate !== undefined){
-              registry.byId("acquisitionDate_"+a).set('value',config[label].acquisitionDate);   
-            }
-            if(config[label].nirIndex !== undefined){
-              registry.byId("nirIndex_"+a).set('value',config[label].nirIndex);   
-            }
-            if(config[label].redIndex !== undefined){
-              registry.byId("redIndex_"+a).set('value',config[label].redIndex);   
-            }
-            if(config[label].swirIndex !== undefined){
-              registry.byId("swirIndex_"+a).set('value',config[label].swirIndex);   
-            }
+            registry.byId("bandNames_"+a).set('value',config[label].bandNames);   
+          }
+          if(config[label].category !== undefined){
+            registry.byId("category_"+a).set('value',config[label].category);   
+          }
+          if(config[label].acquisitionDate !== undefined){
+            registry.byId("acquisitionDate_"+a).set('value',config[label].acquisitionDate);   
+          }
+          if(config[label].nirIndex !== undefined){
+            registry.byId("nirIndex_"+a).set('value',config[label].nirIndex);   
+          }
+          if(config[label].redIndex !== undefined){
+            registry.byId("redIndex_"+a).set('value',config[label].redIndex);   
+          }
+          if(config[label].swirIndex !== undefined){
+            registry.byId("swirIndex_"+a).set('value',config[label].swirIndex);   
+          }
           }
         }
       },
@@ -130,17 +138,39 @@ define([
         for(var a in this.ISLayers){
           this.bandNames = registry.byId("bandNames_"+a).get('value').split(',');
           var obj = {
+            hasOverlap: registry.byId("overlap_"+a).get('checked'),
+            hasNDVI: registry.byId("ndvi_"+a).get('checked'),
+            ndvi: registry.byId("ndvi_"+a).get('checked'),
+            ndmi: registry.byId("ndvi_"+a).get('checked'),
+            urban: registry.byId("ndvi_"+a).get('checked'),
             bandCount: parseInt(registry.byId("bandCount_"+a).get('value')),
             bandNames: this.bandNames,
             acquisitionDate: registry.byId("acquisitionDate_"+a).get('value'),
+            category: registry.byId("category_"+a).get('value'),
             nirIndex: parseInt(registry.byId("nirIndex_"+a).get('value')),
             redIndex: parseInt(registry.byId("redIndex_"+a).get('value')),
             swirIndex: parseInt(registry.byId("swirIndex_"+a).get('value')),
-            title: this.ISLayers[a].title,
-            objectID: "OBJECTID",
-            category: "Category",
-            groupName: "GroupName"
+            title: this.ISLayers[a].title
           };
+          if(obj.bandCount===1){
+            obj.hasNDVI = false;
+          }
+          if(registry.byId("acquisitionDate_"+a).get('value')===""){
+            obj.hasOverlap = false;
+            obj.hasNDVI = false;
+          }
+          else if(registry.byId("nirIndex_"+a).get('value')==="")
+            obj.hasNDVI = false;
+          else{
+            if(registry.byId("redIndex_"+a).get('value')===""){
+              obj.ndvi = false;
+              obj.urban = false;
+            }
+            if(registry.byId("swirIndex_"+a).get('value')===""){
+              obj.ndmi = false;
+              obj.urban = false;
+            }
+          }
           this.config[this.ISLayers[a].url.split('//')[1]] = obj;
         }       
         return this.config;
@@ -150,21 +180,28 @@ define([
         for(var a in this.ISLayers){
           var layerSetting = domConstruct.create("tbody",{
             innerHTML: '<tr><td>'+this.ISLayers[a].title+'</td></tr>'+
-                    '<tr id="count_'+a+'"><td class="first">*Band Count</td><td class="second">'+
+                    '<tr><td class="first">*Overlapping Images<input id="overlap_'+a+'"/>'+
+                    '</td><td class="first">*Indices<input id="ndvi_'+a+'"/>'+
+                    '</td></tr>'+'<tr id="count_'+a+'"><td class="first">*Band Count</td><td class="second">'+
                     '<input id="bandCount_'+a+'"/>'+
                     '</td></tr>'+'<tr id="names_'+a+'" style="display:none;"><td class="first">*Band Names</td><td class="second">'+
                     '<textarea id="bandNames_'+a+'"></textarea>'+
-                    '</td></tr>'+'<tr id="acqDate_'+a+'"><td class="first">Acquisition Date</td><td class="second">'+
+                    '</td></tr>'+'<tr id="cat_'+a+'" style="display:none;"><td class="first">Category</td><td class="second">'+
+                    '<select id="category_'+a+'"></select>'+
+                    '</td></tr>'+'<tr id="acqDate_'+a+'" style="display:none;"><td class="first">Acquisition Date</td><td class="second">'+
                     '<select id="acquisitionDate_'+a+'"></select>'+
-                    '</td></tr>'+'<tr id="nir_'+a+'"><td class="first">Near-IR Band</td><td class="second">'+
+                    '</td></tr>'+'<tr id="nir_'+a+'" style="display:none;"><td class="first">Near-IR Band</td><td class="second">'+
                     '<select id="nirIndex_'+a+'"></select>'+
-                    '</td></tr>'+'<tr id="red_'+a+'"><td class="first">Red Band</td><td class="second">'+
+                    '</td></tr>'+'<tr id="red_'+a+'" style="display:none;"><td class="first">Red Band</td><td class="second">'+
                     '<select id="redIndex_'+a+'"></select>'+
-                    '</td></tr>'+'<tr id="swir_'+a+'"><td class="first">Shortwave-IR Band</td><td class="second">'+
+                    '</td></tr>'+'<tr id="swir_'+a+'" style="display:none;"><td class="first">Shortwave-IR Band</td><td class="second">'+
                     '<select id="swirIndex_'+a+'"></select>'+
                     '</td></tr>'
           });
           domConstruct.place(layerSetting,dom.byId("setting-table"));
+          var category = new Select({
+            style: "margin:10px;"
+          },"category_"+a).startup();
           var acquisitionDate = new Select({
             style: "margin:10px;"
           },"acquisitionDate_"+a).startup();
@@ -180,6 +217,38 @@ define([
             style: "margin:10px;",
             options: [{"label":"No value","value":""}]
           },"swirIndex_"+a).startup();
+          var ndvi = new CheckBox({
+            style: "margin:10px;",
+            onChange:function(checked){
+              if(checked){
+                domStyle.set(dom.byId("acqDate_"+this.id.slice(-1)),'display','table-row');
+                domStyle.set(dom.byId("red_"+this.id.slice(-1)),'display','table-row');
+                domStyle.set(dom.byId("nir_"+this.id.slice(-1)),'display','table-row');
+                domStyle.set(dom.byId("swir_"+this.id.slice(-1)),'display','table-row');
+              }
+              else{
+                if(registry.byId("overlap_"+this.id.slice(-1)).get('value')===false){
+                  domStyle.set(dom.byId("acqDate_"+this.id.slice(-1)),'display','none');
+                }
+                domStyle.set(dom.byId("red_"+this.id.slice(-1)),'display','none');
+                domStyle.set(dom.byId("nir_"+this.id.slice(-1)),'display','none');
+                domStyle.set(dom.byId("swir_"+this.id.slice(-1)),'display','none');
+              }
+            }
+          },"ndvi_"+a).startup();
+          var overlap = new CheckBox({
+            style: "margin:10px;",
+            onChange:function(checked){
+              if(checked){
+                domStyle.set(dom.byId("acqDate_"+this.id.slice(-1)),'display','table-row');
+              }
+              else{
+                if(registry.byId("ndvi_"+this.id.slice(-1)).get('value')===false){
+                  domStyle.set(dom.byId("acqDate_"+this.id.slice(-1)),'display','none');
+                }
+              }
+            }
+          },"overlap_"+a).startup();
           var bandCount = new ValidationTextBox({
             required:true,
             style:"margin:10px;"
@@ -228,7 +297,7 @@ define([
       loopRequest: function(a){
           this.saveValue =a;
           domStyle.set("loadingSpectralProfile",'display','block');
-          var layersRequest = esriRequest({
+        var layersRequest = esriRequest({
             url: this.ISLayers[a].url + "/1/info/keyProperties",
             content: {f: "json"},
             handleAs: "json",
@@ -304,8 +373,20 @@ define([
             domStyle.set(dom.byId("count_"+a),'display','none');
             domStyle.set(dom.byId("names_"+a),'display','table-row');
             registry.byId("bandCount_"+a).set('value',this.ISLayers[a].bandCount);
+            if(this.ISLayers[a].bandCount<3){
+              registry.byId("ndvi_"+a).set('disabled',true);
+            }
           }
+          this._populateDropDown(registry.byId("category_"+a),this.ISLayers[a].fields,"esriFieldTypeInteger",new RegExp(/Category/i));
           this._populateDropDown(registry.byId("acquisitionDate_"+a),this.ISLayers[a].fields,"esriFieldTypeDate",new RegExp(/acq[a-z]*[_]?Date/i));
+          if(registry.byId("category_"+a).getOptions().length===1){
+            registry.byId("ndvi_"+a).set('disabled',true);
+            registry.byId("overlap_"+a).set('disabled',true);
+          }
+          else if(registry.byId("acquisitionDate_"+a).getOptions().length===1){
+            registry.byId("ndvi_"+a).set('disabled',true);
+            registry.byId("overlap_"+a).set('disabled',true);
+          }
         }
           
           if(this.ISLayers.length)
@@ -331,5 +412,6 @@ define([
           node.addOption(options);
           node.set('value',initialVal);
       }
+      
     });
   });

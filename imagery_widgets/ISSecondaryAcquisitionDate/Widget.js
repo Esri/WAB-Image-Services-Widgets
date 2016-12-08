@@ -17,76 +17,47 @@
 define([
     'dojo/_base/declare',
     'dijit/_WidgetsInTemplateMixin',
-    "esri/geometry/Point",
     'esri/SpatialReference',
     'jimu/BaseWidget',
     'dojo/_base/lang',
-    'dojo/on',
-    "dojo/dom-style",
-    "dojo/dom-class",
-    "dojo/dom-construct",
-    "dijit/DropDownMenu",
-    "dijit/MenuItem",
-    "dijit/CheckedMenuItem",
-    "dojo/aspect",
-    "esri/tasks/ProjectParameters",
-    "esri/config",
-    "esri/geometry/Extent",
-    "esri/tasks/query",
     "dojo/_base/array",
     "dojo/date/locale",
     "dojo/html",
-    "esri/geometry/Polygon",
     "esri/request"
 ],
         function(
                 declare,
                 _WidgetsInTemplateMixin,
-                Point,
                 SpatialReference,
                 BaseWidget,
                 lang,
-                on,
-                domStyle,
-                domClass,
-                domConstruct,
-                DropDownMenu,
-                MenuItem,
-                CheckedMenuItem,
-                aspect,
-                ProjectParameters,
-                esriConfig,
-                Extent,
-                Query,
                 array,
                 locale,
                 html,
-                Polygon,
                 esriRequest) {
-            /**
-             * The Coordinate widget displays the current mouse coordinates.
-             * If the map's spatial reference is geographic or web mercator, the coordinates can be displayed as
-             * decimal degrees or as degree-minute-seconds.
-             * Otherwise, the coordinates will show in map units.
-             *
-             * @module widgets/Coordinate
-             */
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 baseClass: 'jimu-widget-ISSecondaryAcquisitionDate',
                 name: 'ISSecondaryAcquisitionDate',
                 primaryLayer: null,
                 postCreate: function() {
+                    this.layerInfos = this.config;
                     if (this.map.layerIds.length > 2) {
                         this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                         this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                         this.map.on("update-start", lang.hitch(this, this.clearDateRange));
                         this.map.on("update-end", lang.hitch(this, this.changeDateRange));
+                        this.map.on("layer-reorder", lang.hitch(this, this.changeDateRange));
                         if (this.primaryLayer) {
                             this.primaryLayer.on("visibility-change", lang.hitch(this, this.changeDateRange));
                         }
                         if (this.secondaryLayer) {
                             this.secondaryLayer.on("visibility-change", lang.hitch(this, this.changeDateRange));
                         }
+                    }
+                },
+                onOpen:function(){
+                    if(this.map.layerIds.length > 2){
+                        this.changeDateRange();
                     }
                 },
                 clearDateRange: function() {
@@ -96,46 +67,153 @@ define([
                 {
                     if (this.dateField) {
                                 var layer = this.secondaryLayer;
-                                var query1 = new Query();
                                 var e = this.map.extent;
                                 var polygonJson = {
                                     "rings": [[[e.xmin, e.ymin], [e.xmin, e.ymax], [e.xmax, e.ymax], [e.xmax, e.ymin], [e.xmin, e.ymin]]],
                                     "spatialReference": new SpatialReference(e.spatialReference)
                                 };
-//                        query.geometry = new Extent(e.xmin, e.ymin, e.xmax, e.ymax, new SpatialReference(e.spatialReference));
-                                query1.geometry = new Polygon(polygonJson);
-                               // query1.outFields = ["*"];
-                               query1.outFields=[this.dateField];
-                                query1.returnGeometry = false;
-                                var queryVisible = layer.queryVisibleRasters(query1,{});
-                                queryVisible.then(lang.hitch(this, function(result) {
-                                    var dates = [];
-                                    for (var i = 0; i < result.length; i++) {
-                                        if (result[i].attributes.AcquisitionDate && (array.indexOf(dates, result[i].attributes.AcquisitionDate) == -1)) {
-                                            dates.push(result[i].attributes.AcquisitionDate);
+                                    
+                                var mosaicRule;
+                                if(layer.mosaicRule&&layer.mosaicRule.method==="esriMosaicLockRaster"){
+                                    mosaicRule=layer.mosaicRule;
+                                    var getSamplesRequest = esriRequest({
+                                        url: layer.url+'/getSamples',
+                                        content: {
+                                            f:"json",
+                                            outFields: this.dateField,
+                                            geometry: JSON.stringify(polygonJson),
+                                            geometryType: "esriGeometryPolygon",
+                                            mosaicRule: JSON.stringify(mosaicRule.toJson()),
+                                            returnFirstValueOnly:false
+                                        },
+                                        handleAs: "json",
+                                        callbackParamName: "callback"
+                                    });
+                                    getSamplesRequest.then(lang.hitch(this,function(result){
+                                        var dates = [];
+                                            
+                                        for (var i = 0; i < result.samples.length; i++) {
+                                            if (result.samples[i].attributes[this.dateField] && (array.indexOf(dates, result.samples[i].attributes[this.dateField]) === -1)) {
+                                                dates.push(result.samples[i].attributes[this.dateField]);
+                                            }
                                         }
-                                    }
-
-                                    if (dates.length != 0) {
-                                        var max = dates.reduce(function(previous, current) {
-                                            return previous > current ? previous : current;
-                                        });
-                                        var min = dates.reduce(function(previous, current) {
-                                            return previous < current ? previous : current;
-                                        });
-                                        var min = new Date(min);
-                                        var max = new Date(max);
-                                        var maxdate = locale.format(max, {selector: "date", formatLength: "long"});
-                                        var mindate = locale.format(min, {selector: "date", formatLength: "long"});
-                                        if (mindate == maxdate) {
-                                            html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                        if (dates.length !== 0) {
+                                            var max = dates.reduce(function(previous, current) {
+                                                return previous > current ? previous : current;
+                                            });
+                                            var min = dates.reduce(function(previous, current) {
+                                                return previous < current ? previous : current;
+                                            });
+                                            this.minDate = new Date(min);
+                                            this.maxDate = new Date(max);
+                                            var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                            var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                            if (mindate === maxdate) {
+                                                html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                            } else {
+                                                html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                            }
                                         } else {
-                                            html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                            html.set(this.secondaryDate, '');
                                         }
-                                    } else {
-                                        html.set(this.secondaryDate, '');
-                                    }
-                                }));
+                                    }),lang.hitch(this,function(){
+                                        var identifyRequest = esriRequest({
+                                            url: layer.url+'/identify',
+                                            content: {
+                                                f: "json",
+                                                geometry: JSON.stringify(polygonJson),
+                                                geometryType: "esriGeometryPolygon",
+                                                returnCatalogItems: "true",
+                                                mosaicRule: JSON.stringify(mosaicRule.toJson())
+                                            },
+                                            handleAs: "json",
+                                            callbackParamName: "callback"
+                                        });
+                                        identifyRequest.then(lang.hitch(this,function(result){
+                                            var dates = [];
+                                            for (var i=0;i<result.catalogItems.length;i++){
+                                                if(result.catalogVisibilities[i]!==0&&result.catalogItems[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems[i].attributes[this.dateField]) === -1)){
+                                                    dates.push(result.catalogItems[i].attributes[this.dateField]);
+                                                }
+                                            }
+                                            if (dates.length !== 0) {
+                                                var max = dates.reduce(function(previous, current) {
+                                                    return previous > current ? previous : current;
+                                                });
+                                                var min = dates.reduce(function(previous, current) {
+                                                    return previous < current ? previous : current;
+                                                });
+                                                this.minDate = new Date(min);
+                                                this.maxDate = new Date(max);
+                                                var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                                var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                                if (mindate === maxdate) {
+                                                    html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                                } else {
+                                                    html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                                }
+                                            } else {
+                                                html.set(this.secondaryDate, '');
+                                            }
+                                        }));
+                                    }));
+                                }
+                                else{
+                                    mosaicRule=layer.defaultMosaicRule;
+                                    var getSamplesRequest = esriRequest({
+                                        url: layer.url+'/getSamples',
+                                        content: {
+                                            f:"json",
+                                            outFields: this.dateField,
+                                            geometry: JSON.stringify(this.map.extent.getCenter()),
+                                            geometryType: "esriGeometryPoint",
+                                            mosaicRule: JSON.stringify(mosaicRule.toJson()),
+                                            returnFirstValueOnly:false
+                                        },
+                                        handleAs: "json",
+                                        callbackParamName: "callback"
+                                    });
+                                    getSamplesRequest.then(lang.hitch(this,function(result){
+                                        var dates = [];
+                                        
+                                        for (var i = 0; i < result.samples.length; i++) {
+                                            if (result.samples[i].attributes[this.dateField] && (array.indexOf(dates, result.samples[i].attributes[this.dateField]) === -1)) {
+                                                dates.push(result.samples[i].attributes[this.dateField]);
+                                            }
+                                        }
+                                        if (dates.length !== 0) {
+                                            html.set(this.secondaryDate, '<br/>S: ' + locale.format(new Date(dates[0]), {selector: "date", formatLength: "long"}));
+                                        } else {
+                                            html.set(this.secondaryDate, '');
+                                        }
+                                    }),lang.hitch(this,function(){
+                                        var identifyRequest = esriRequest({
+                                            url: layer.url+'/identify',
+                                            content: {
+                                                f: "json",
+                                                geometry: JSON.stringify(polygonJson),
+                                                geometryType: "esriGeometryPolygon",
+                                                returnCatalogItems: "true",
+                                                mosaicRule: JSON.stringify(mosaicRule.toJson())
+                                            },
+                                            handleAs: "json",
+                                            callbackParamName: "callback"
+                                        });
+                                        identifyRequest.then(lang.hitch(this,function(result){
+                                            var dates = [];
+                                            for (var i=0;i<result.catalogItems.length;i++){
+                                                if(result.catalogVisibilities[i]!==0&&result.catalogItems[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems[i].attributes[this.dateField]) === -1)){
+                                                    dates.push(result.catalogItems[i].attributes[this.dateField]);
+                                                }
+                                            }
+                                            if (dates.length !== 0) {
+                                                html.set(this.secondaryDate, '<br/>S: ' + locale.format(new Date(dates[0]), {selector: "date", formatLength: "long"}));
+                                            } else {
+                                                html.set(this.secondaryDate, '');
+                                            }
+                                        }));
+                                    }));
+                                }
                             } else {
                                 html.set(this.secondaryDate, '');
                             }
@@ -149,54 +227,94 @@ define([
                         this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                         this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                     }
+                    
+                    this.secondLabel = this.secondaryLayer.url.split('//')[1];
 
-                    if (this.previousPrimary != this.primaryLayer) {
+                    if (this.previousPrimary !== this.primaryLayer) {
                         this.primaryLayer.on("visibility-change", lang.hitch(this, this.changeDateRange));
                     }
 
-                    if (this.secondaryLayer && !this.primaryLayer.visible && this.secondaryLayer.visible) {
-                                if (this.secondaryLayer.timeInfo && this.secondaryLayer.timeInfo.startTimeField) {
+                    if (this.secondaryLayer && this.secondaryLayer.visible) {
+                        if (this.layerInfos[this.secondLabel]) {
+                            this.dateField = this.layerInfos[this.secondLabel].dateField;
+                            this.secondarydate();
+                        }
+                        else{
+                            var obj={};
+                            if (this.secondaryLayer.timeInfo && this.secondaryLayer.timeInfo.startTimeField) {
                                 var timeInfo = this.secondaryLayer.timeInfo;
                                 var field = timeInfo.startTimeField;
                                 if (field) {
                                     this.dateField = field;
+                                    obj.dateField = field;
                                 } else {
                                     this.dateField = null;
+                                    obj.dateField = null;
                                 }
                                 this.secondarydate();
                             } else {
                                var layersRequest1 = esriRequest({
-                            url: this.secondaryLayer.url,
-                            content: {f: "json"},
-                            handleAs: "json",
-                            callbackParamName: "callback"
-                        });
-                        layersRequest1.then(lang.hitch(this, function(data) {
-                            var timeInfo = data.timeInfo;
-                            if (timeInfo) {
-                           var field = timeInfo.startTimeField;
-                                if (field) {
-                                    this.dateField = field;
-                                } else {
-                                    this.dateField = null;
-                                }
-                       }else {
-                       this.dateField= null;
+                                    url: this.secondaryLayer.url,
+                                    content: {f: "json"},
+                                    handleAs: "json",
+                                    callbackParamName: "callback"
+                                });
+                                layersRequest1.then(lang.hitch(this, function(data) {
+                                    var timeInfo = data.timeInfo;
+                                    if (timeInfo) {
+                                        var field = timeInfo.startTimeField;
+                                        if (field) {
+                                            this.dateField = field;
+                                            obj.dateField = field;
+                                        } else {
+                                            var regExp = new RegExp(/acq[a-z]*[_]?Date/i);
+                                            for (var i in data.fields){
+                                                if(regExp.test(data.fields[i].name)){
+                                                    this.dateField = data.fields[i].name;
+                                                    obj.dateField = data.fields[i].name;
+                                                    break;
+                                                }
+                                                else if(data.fields[i].type==="esriFieldTypeDate"){
+                                                    this.dateField = data.fields[i].name;
+                                                    obj.dateField = data.fields[i].name;
+                                                    break;
+                                                }
+                                                this.dateField= null;
+                                                obj.dateField= null;
+                                            }
+                                        }
+                                    }else {
+                                        var regExp = new RegExp(/acq[a-z]*[_]?Date/i);
+                                        for (var i in data.fields){
+                                            if(regExp.test(data.fields[i].name)){
+                                                this.dateField = data.fields[i].name;
+                                                obj.dateField = data.fields[i].name;
+                                                break;
+                                            }
+                                            else if(data.fields[i].type==="esriFieldTypeDate"){
+                                                this.dateField = data.fields[i].name;
+                                                obj.dateField = data.fields[i].name;
+                                                break;
+                                            }
+                                            this.dateField= null;
+                                            obj.dateField= null;
+                                        }
+                                    }
+                                    this.secondarydate();
+                                }));
                             }
-                            this.secondarydate();
-                            }));
-                        }
-                        } else {
+                            this.layerInfos[this.secondaryLabel] = obj;
+                        } 
+                    } else {
                         html.set(this.secondaryDate, '');
                     }
                 }
-
             });
             clazz.hasLocale = false;
-            clazz.hasSettingPage = false;
-            clazz.hasSettingUIFile = false;
+            clazz.hasSettingPage = true;
+            clazz.hasSettingUIFile = true;
             clazz.hasSettingLocale = false;
-            clazz.hasSettingStyle = false;
+            clazz.hasSettingStyle = true;
             clazz.inPanel = false;
             return clazz;
         });

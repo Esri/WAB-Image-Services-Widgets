@@ -1,15 +1,19 @@
 <div>
-    <label for="type">Type : </label><select id="type" data-dojo-type="dijit/form/Select">
-        <option value="nonTemporal">Current Image</option>
-        <option value="temporal">Overlapping Images</option>
-        <option value="NDVI">Indices(NDVI)</option>
-    </select>
-    <br /><br/>
-    <label>Click on map for spectral Profile</label>
+    <div id="layerTitle" style="line-height: 17px; font-weight: bolder;"></div>
+    <div id="selectType">
+      <label for="type">Type : </label><select id="type" data-dojo-type="dijit/form/Select">
+      </select>
+      <br /><br/>
+      <div id="single-value" style="color:#007ac2; display:none;"></div><br />
+      <label>Click on the map for a Spectral Profile.</label>
+    </div>
+    <div id="error-message" style="color:red; display:none;">Cannot perform Spectral Profile for primary layer.</div>
+    <div id="extent-error-message" style="color:red; display:none;">No primary layer data for the point.</div>
+    <div id="identify-error" style="color: red; display:none;"></div>
    <!-- <div data-dojo-attach-point="drawBox" data-dojo-type="jimu/dijit/DrawBox" data-dojo-props='types:["point"],showClear:true' style="margin-top:5px;"></div>-->
-    <div data-dojo-type="dijit/Dialog" id="chartDialog" title="Spectral Profile" style="background-color: white;height: 400px;overflow: scroll;">
+    <div data-dojo-type="dijit/Dialog" id="chartDialog" title="Spectral Profile" style="background-color: white; height: 40%; width: 50%; position:relative;">
         <div>
-            <div id="chartNode" style="float: left;width: 900px; height: 400px;"></div>
+            <div id="chartNode" style="float: left; height: 100%; width: 80%;"></div>
             <div id="legend" style="float: right;"></div>
         </div>
     </div>

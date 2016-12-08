@@ -44,6 +44,7 @@ define([
   "esri/tasks/ImageServiceIdentifyParameters",
   "esri/geometry/Polygon",
   "esri/geometry/Point",
+  "dojo/i18n!esri/nls/jsapi",
   "esri/request","esri/toolbars/draw",
   "esri/symbols/SimpleMarkerSymbol",
   "esri/Color",
@@ -72,7 +73,7 @@ define([
                 html,
                 dom,
                 MosaicRule,
-                Query, QueryTask, Extent, locale,  Chart, Tooltip, theme, SelectableLegend, Magnify, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels,  Graphic, SimpleLineSymbol, domStyle, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, esriRequest,Draw, SimpleMarkerSymbol, Color,  strings) {
+                Query, QueryTask, Extent, locale,  Chart, Tooltip, theme, SelectableLegend, Magnify, html, domConstruct, HorizontalSlider, HorizontalRule, HorizontalRuleLabels,  Graphic, SimpleLineSymbol, domStyle, ImageServiceIdentifyTask, ImageServiceIdentifyParameters, Polygon, Point, bundle, esriRequest,Draw, SimpleMarkerSymbol, Color,  strings) {
           var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
             templateString: template,
             name: 'ISTimeFilterProfile',
@@ -97,6 +98,7 @@ define([
               this.inherited(arguments);
               domConstruct.place('<img id="loadingTimeProfile" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
               this.hideLoading();
+              this.layerInfos = this.config;
             },
             postCreate: function () {
               registry.byId("refreshTimesliderButton").on("click", lang.hitch(this, this.timeSliderRefresh));
@@ -130,6 +132,7 @@ define([
                     dojo.connect(this.toolbarTemporalProfile,"onDrawEnd",lang.hitch(this,this.addGraphic));
                     if(registry.byId("timeLineFilter").checked)
                         this.toolbarTemporalProfile.activate(Draw.POINT);
+                    bundle.toolbars.draw.addPoint = "Pick a point";
               this.refreshData();
             },
             onClose: function () {
@@ -156,13 +159,12 @@ define([
                dojo.empty("chartNodes");
               }
             },
-            checkTime: function (currentVersion, timeInfo) {
+            checkTime: function (currentVersion) {
               var field;
               if (currentVersion >= 10.21) {
-                if (timeInfo) {
-                  field = timeInfo.startTimeField;
-                  if (field) {
-                    this.dateField = field;
+                if (this.layerInfos[this.label]) {
+                  if (this.layerInfos[this.label].acquisitionDate&&this.layerInfos[this.label].objectID&&this.layerInfos[this.label].category&&this.layerInfos[this.label].groupName) {
+                    this.dateField = this.layerInfos[this.label].acquisitionDate;
                     registry.byId("timeLineFilter").set("disabled", false);
                     if (this.ischartShow === true) {
                       if (!registry.byId("timeDialog").open) {
@@ -203,88 +205,42 @@ define([
               if (this.map.layerIds) {
                 this.prevPrimary = this.primaryLayer;
                 if (this.map.getLayer("resultLayer")) {
-                  if (this.primaryLayer != this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]) && this.primaryLayer) {
+                  if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]) && this.primaryLayer) {
                     this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                   } else {
                     this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
                   }
                 } else {
-                  if (this.primaryLayer != this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]) && this.primaryLayer) {
+                  if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]) && this.primaryLayer) {
                     this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   } else {
                     this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
                   }
                 }
+                this.label = this.primaryLayer.url.split('//')[1];
+                if(this.layerInfos[this.label])
+                  this.toolbarTemporalProfile.activate(Draw.POINT);
                 this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
-                this.minValue = this.primaryLayer.minValues[0];
-                this.maxValue = this.primaryLayer.maxValues[0];
-                if (this.minValue === undefined || this.maxValue === undefined) {
-                  this.pixelType = this.primaryLayer.pixelType;
-                  switch (this.pixelType) {
-                    case 'U8' :
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 255;
-                      break;
+                if (!this.layerInfos[this.label]) {
+                  this.showLoading();
+                  this.layerObj = {
+                      objectID: "OBJECTID",
+                      category: "Category",
+                      groupName: "GroupName"
+                  };
+                  if (this.primaryLayer.type === "ArcGISImageServiceLayer") {
+                    if(this.primaryLayer.bandCount){
+                      this.layerObj.bandCount = this.primaryLayer.bandCount;
+                      this.layerObj.bandNames = [];
+                      for(var i=0;i<this.layerObj.bandCount;i++){
+                        var num = i+1;
+                        this.layerObj.bandNames[i] = num.toString(); 
+                      }
                     }
-                    case 'U16' :
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 65535;
-                      break;
+                    for(var j in this.primaryLayer.fields){
+                      if(this.primaryLayer.fields[j].name==="AcquisitionDate")
+                        this.layerObj.acquisitionDate = this.primaryLayer.fields[j].name;
                     }
-                    case 'S8' :
-                    {
-                      this.minValue = -128;
-                      this.maxValue = 127;
-                      break;
-                    }
-                    case 'S16':
-                    {
-                      this.minValue = -32768;
-                      this.maxValue = 32767;
-                      break;
-                    }
-                    case 'U4':
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 16;
-                      break;
-                    }
-                    case 'U2':
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 4;
-                      break;
-                    }
-                    case 'U1':
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 1;
-                      break;
-                    }
-                    case 'U32':
-                    {
-                      this.minValue = 0;
-                      this.maxValue = 4294967295;
-                      break;
-                    }
-                    case 'S32' :
-                    {
-                      this.minValue = -2147483648;
-                      this.maxValue = 2147483647;
-                      break;
-                    }
-                    case 'F32':
-                    {
-                      this.minValue = -3.402823466e+38;
-                      this.maxValue = 3.402823466e+38;
-                      break;
-                    }
-                  }
-                }
-                if (this.config.bandNames === '') {
-                  if (this.primaryLayer !== this.secLayer) {
                     layersRequest = esriRequest({
                       url: this.primaryLayer.url + "/1/info/keyProperties",
                       content: {f: "json"},
@@ -294,81 +250,49 @@ define([
                     bandMean = [];
                     layersRequest.then(lang.hitch(this, function (response) {
                       bandProp = response.BandProperties;
-                      this.bandNames = [];
                       if (bandProp) {
                         for (var i = 0; i < bandProp.length; i++) {
-                          if (bandProp[i].WavelengthMax && bandProp[i].WavelengthMin) {
-                            bandMean[i] = parseInt((parseFloat(bandProp[i].WavelengthMax) + parseFloat(bandProp[i].WavelengthMin)) / 2);
-                            if (bandProp[i].BandName) {
-                              this.bandNames[i] = bandProp[i].BandName;
-                            }
+                          if (bandProp[i] && bandProp[i].BandName) {
+                            this.layerObj.bandNames[i] = bandProp[i].BandName;
                           }
                         }
                       }
-                      this.sensorName = response.SensorName;
-                      if (this.sensorName == "Landsat 8") {
-                        this.bandNames = ["Coastal", "Blue", "Green", "Red", "NIR", "SWIR 1", "SWIR 2", "Cirrus"];
-                      }
-                      for (i in this.bandNames) {
-                        if (this.bandNames[i] == "NearInfrared" || this.bandNames[i] == "NearInfrared_1" || this.bandNames[i] == "NIR" || this.bandNames[i] == "NIR_1") {
-                          this.nirIndex = i;
+                      for (i in this.layerObj.bandNames) {
+                        if (this.layerObj.bandNames[i] === "NearInfrared" || this.layerObj.bandNames[i] === "NearInfrared_1" || this.layerObj.bandNames[i] === "NIR" || this.layerObj.bandNames[i] === "NIR_1") {
+                          this.layerObj.nirIndex = i;
                         }
-                        if (this.bandNames[i] == "Red") {
-                          this.redIndex = i;
+                        if (this.layerObj.bandNames[i] === "Red") {
+                          this.layerObj.redIndex = i;
                         }
-                        if (this.bandNames[i] == "Green") {
-                          this.greenIndex = i;
-                        }
-                        if (this.bandNames[i] == "SWIR 1") {
-                          this.swir1Index = i;
-                        }
-                        if (this.bandNames[i] == "SWIR 2") {
-                          this.swir2Index = i;
+                        if (this.layerObj.bandNames[i] === "SWIR 1") {
+                          this.layerObj.swirIndex = i;
                         }
                       }
-                    }), function (error) {
-                      console.log("Error: ", error.message);
+                      this.addObj();
+                    }), function () {
+                      //console.log("Error: ", error.message);
+                      this.addObj();
                     });
-                  }
-                }
-                else {
-                  this.bandNames = [];
-                  this.bandNames = this.config.bandNames.split(",");
-                  for (i in this.bandNames) {
-                    if (this.bandNames[i] == "NearInfrared" || this.bandNames[i] == "NearInfrared_1" || this.bandNames[i] == "NIR" || this.bandNames[i] == "NIR_1") {
-                      this.nirIndex = i;
-                    }
-                    if (this.bandNames[i] == "Red") {
-                      this.redIndex = i;
-                    }
-                    if (this.bandNames[i] == "Green") {
-                      this.greenIndex = i;
-                    }
-                    if (this.bandNames[i] == "SWIR 1") {
-                      this.swir1Index = i;
-                    }
-                    if (this.bandNames[i] == "SWIR 2") {
-                      this.swir2Index = i;
-                    }
+                  } else {
+                    this.hideLoading();
                   }
                 }
                 if (!this.prevPrimary) {
                   this.mosaicBackup = this.primaryLayer.mosaicRule;
                   this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
-                } else if (this.prevPrimary.url != this.primaryLayer.url) {
+                } else if (this.prevPrimary.url !== this.primaryLayer.url) {
                   this.mosaicBackup = this.primaryLayer.mosaicRule;
                   this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
-                } else if (this.prevPrimary.url == this.primaryLayer.url && this.primaryLayer.mosaicRule) {
-                  if (this.primaryLayer.mosaicRule.method != "esriMosaicLockRaster") {
+                } else if (this.prevPrimary.url === this.primaryLayer.url && this.primaryLayer.mosaicRule) {
+                  if (this.primaryLayer.mosaicRule.method !== "esriMosaicLockRaster") {
                     this.mosaicBackup = this.primaryLayer.mosaicRule;
                   }
                 }
                 currentVersion = this.primaryLayer.currentVersion;
-                if (this.primaryLayer.timeInfo && this.primaryLayer.currentVersion)
+                if (this.primaryLayer.currentVersion)
                 {
-                  timeInfo = this.primaryLayer.timeInfo;
                   currentVersion = this.primaryLayer.currentVersion;
-                  this.checkTime(currentVersion, timeInfo);
+                  this.checkTime(currentVersion);
                 } else {
                   layersRequest = esriRequest({
                     url: this.primaryLayer.url,
@@ -377,9 +301,8 @@ define([
                     callbackParamName: "callback"
                   });
                   layersRequest.then(lang.hitch(this, function (data) {
-                    timeInfo = data.timeInfo;
                     currentVersion = data.currentVersion;
-                    this.checkTime(currentVersion, timeInfo);
+                    this.checkTime(currentVersion);
                   }), lang.hitch(this, function (error) {
                     domStyle.set("loadingTimeProfile", "display", "none");
                   }));
@@ -390,6 +313,23 @@ define([
               }
               domStyle.set("loadingTimeProfile", "display", "none");
               this.secLayer = this.primaryLayer;
+            },
+            addObj: function(){
+              if(this.layerObj.bandCount&&this.layerObj.bandNames){
+                this.layerInfos[this.label]=this.layerObj;
+                this.toolbarTemporalProfile.activate(Draw.POINT);
+                this.hideLoading();
+              }
+              else {
+                this.hideLoading();
+                for(var a in this.map.graphics.graphics){
+                  if(this.map.graphics.graphics[a].geometry && this.map.graphics.graphics[a].geometry.type==="point" && this.map.graphics.graphics[a].symbol && this.map.graphics.graphics[a].symbol.color.r===255){
+                    this.map.graphics.remove(this.map.graphics.graphics[a]);
+                    break;
+                  }
+                }
+                this.toolbarTemporalProfile.deactivate();
+              }
             },
             limitValue: function (num) {
               if (num < (-1)) {
@@ -413,7 +353,7 @@ define([
                   geometryType: "esriGeometryPoint",
                   returnGeometry: false,
                   returnFirstValueOnly: false,
-                  outFields: 'AcquisitionDate,OBJECTID,GroupName,Category',
+                  outFields: this.layerInfos[this.label].acquisitionDate+','+this.layerInfos[this.label].objectID+','+this.layerInfos[this.label].groupName+','+this.layerInfos[this.label].category,
                   pixelSize: [this.primaryLayer.pixelSizeX, this.primaryLayer.pixelSizeY],
                   mosaicRule: JSON.stringify(this.primaryLayer.mosaicRule),
                   f: "json"
@@ -427,7 +367,7 @@ define([
                 itemInfoNdmi = [];
                 itemInfoUrban = [];
                 for (var a in items) {
-                  if (items[a].attributes.Category === 1) {
+                  if (items[a].attributes[this.layerInfos[this.label].category] === 1) {
                     var plot = items[a].value.split(' ');
                     for (var k in plot) {
                       if (plot[k]) {
@@ -439,45 +379,42 @@ define([
                     normalizedValues = [];
                     normalizedValuesNdmi = [];
                     normalizedValuesUrban = [];
-                    if(this.nirIndex && this.redIndex){
-                    nir = (plot[this.nirIndex] - this.minValue)/(this.maxValue - this.minValue);
-                    red = (plot[this.redIndex] - this.minValue)/(this.maxValue - this.minValue);
+                    if(this.layerInfos[this.label].nirIndex && this.layerInfos[this.label].redIndex){
+                    nir = plot[this.layerInfos[this.label].nirIndex];
+                    red = plot[this.layerInfos[this.label].redIndex];
                     ndvi = (nir - red) / (red + nir);
-                     ndvi = this.limitValue(ndvi);
                      normalizedValues.push(
                             {y: ndvi,
-                              tooltip: ndvi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
+                              tooltip: ndvi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes[this.layerInfos[this.label].acquisitionDate]), {selector: "date", datePattern: "dd/MM/yy"})});
                            itemInfo.push({
-                      acqDate: items[a].attributes.AcquisitionDate,
-                      objid: items[a].attributes.OBJECTID,
+                      acqDate: items[a].attributes[this.layerInfos[this.label].acquisitionDate],
+                      objid: items[a].attributes[this.layerInfos[this.label].objectID],
                       values: normalizedValues,
-                      name: items[a].attributes.GroupName
+                      name: items[a].attributes[this.layerInfos[this.label].groupName]
                     });
                 
                           }
-                    if(this.swir1Index) {
-                    swir1 = (plot[this.swir1Index] - this.minValue)/(this.maxValue - this.minValue);
+                    if(this.layerInfos[this.label].swirIndex) {
+                    swir1 = plot[this.layerInfos[this.label].swirIndex];
                     ndmi = ((nir - swir1) / (nir + swir1));
                     urban = (((swir1 - nir) / (swir1 + nir)) - ((nir - red) / (red + nir))) / 2;
-                    ndmi = this.limitValue(ndmi);
-                    urban = this.limitValue(urban);
                  normalizedValuesNdmi.push(
                             {y: ndmi,
-                              tooltip: ndmi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
+                              tooltip: ndmi.toFixed(3) + ", " + locale.format(new Date(items[a].attributes[this.layerInfos[this.label].acquisitionDate]), {selector: "date", datePattern: "dd/MM/yy"})});
                     normalizedValuesUrban.push(
                             {y: urban,
-                              tooltip: urban.toFixed(3) + ", " + locale.format(new Date(items[a].attributes.AcquisitionDate), {selector: "date", datePattern: "dd/MM/yy"})});
+                              tooltip: urban.toFixed(3) + ", " + locale.format(new Date(items[a].attributes[this.layerInfos[this.label].acquisitionDate]), {selector: "date", datePattern: "dd/MM/yy"})});
                     
                     
                     itemInfoNdmi.push({
-                      acqDate: items[a].attributes.AcquisitionDate,
-                      objid: items[a].attributes.OBJECTID,
+                      acqDate: items[a].attributes[this.layerInfos[this.label].acquisitionDate],
+                      objid: items[a].attributes[this.layerInfos[this.label].objectID],
                       values: normalizedValuesNdmi,
-                      name: items[a].attributes.GroupName
+                      name: items[a].attributes[this.layerInfos[this.label].groupName]
                     });
                     itemInfoUrban.push({
-                      acqDate: items[a].attributes.AcquisitionDate,
-                      objid: items[a].attributes.OBJECTID,
+                      acqDate: items[a].attributes[this.layerInfos[this.label].acquisitionDate],
+                      objid: items[a].attributes[this.layerInfos[this.label].objectID],
                       values: normalizedValuesUrban
                     });
                   }
@@ -511,7 +448,7 @@ define([
                 for (var a = 0; a < this.NDVIData.length; a++) {
                   this.NDVIDates.push({
                     text: locale.format(new Date(this.NDVIData[a].acqDate), {selector: "date", datePattern: "dd/MM/yy"}),
-                    value: parseInt(a) + 1,
+                    value: parseInt(a) + 1
                   });
                   this.NDVIValues.push({
                     y: this.NDVIData[a].values[0].y,
@@ -533,10 +470,10 @@ define([
                 }
             }
                 this.axesParams = [];
-                for (a in this.bandPropMean) {
+                for (a in this.layerInfos[this.label].bandNames) {
                   this.axesParams[a] = {
                     value: parseInt(a) + 1,
-                    text: this.bandNames[a]
+                    text: this.layerInfos[this.label].bandNames[a]
                   };
                 }
                 
@@ -643,7 +580,7 @@ define([
                 query = new Query();
                 query.geometry = extentnew;
                 query.outFields = [this.dateField];
-                query.where = "Category = 1";
+                query.where = this.layerInfos[this.label].category+" = 1";
                 query.orderByFields = [this.dateField];
                 query.returnGeometry = false;
                 this.showLoading();
@@ -673,8 +610,8 @@ define([
                   for (var i = 0; i < this.orderedDates.length; i++) {
                     this.graphId.push({
                       date: this.orderedDates[i],
-                      obj: this.orderedFeatures[i].attributes.OBJECTID,
-                      name: this.orderedFeatures[i].attributes.GroupName
+                      obj: this.orderedFeatures[i].attributes[this.layerInfos[this.label].objectID],
+                      name: this.orderedFeatures[i].attributes[this.layerInfos[this.label].groupName]
                     });
                   }
                   labelsNode = domConstruct.create("div", {}, sliderNode, "second");
@@ -711,9 +648,9 @@ define([
 
                   imageTask.execute(imageParams, lang.hitch(this, function (data) {
                     if (data.catalogItems.features[0]) {
-                      maxVisible = data.catalogItems.features[0].attributes.OBJECTID;
+                      maxVisible = data.catalogItems.features[0].attributes[this.layerInfos[this.label].objectID];
                       for (var z in this.orderedFeatures) {
-                        if (this.orderedFeatures[z].attributes.OBJECTID === maxVisible) {
+                        if (this.orderedFeatures[z].attributes[this.layerInfos[this.label].objectID] === maxVisible) {
                           index = z;
                         }
                       }
@@ -747,7 +684,7 @@ define([
                 this.featureIds = [];
 
                 featureSelect.push(this.orderedFeatures[this.slider.get("value")]);
-                this.featureIds.push(this.orderedFeatures[this.slider.get("value")].attributes.OBJECTID);
+                this.featureIds.push(this.orderedFeatures[this.slider.get("value")].attributes[this.layerInfos[this.label].objectID]);
                 html.set(this.dateRange, locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}));
 
                 var mr = new MosaicRule();

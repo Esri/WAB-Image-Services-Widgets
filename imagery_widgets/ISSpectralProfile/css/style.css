@@ -11,3 +11,8 @@ circle {
 {
     overflow: hidden;
 }
+
+.dijitDialogPaneContent {
+  overflow-y:scroll;
+  height:95%;
+}

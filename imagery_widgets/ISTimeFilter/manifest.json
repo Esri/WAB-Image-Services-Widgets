@@ -9,9 +9,9 @@
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
     "hasLocale" : false,
-    "hasSettingPage" : false,
-    "hasSettingUIFile" : false,
+    "hasSettingPage" : true,
+    "hasSettingUIFile" : true,
     "hasSettingLocale" : false,
-    "hasSettingStyle" : false
+    "hasSettingStyle" : true
   }
 }

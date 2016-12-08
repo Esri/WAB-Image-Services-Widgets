@@ -39,7 +39,7 @@ define([
     "esri/InfoTemplate",
     "dojo/dom-style",
     "esri/layers/ArcGISImageServiceLayer",
-  "esri/layers/ImageServiceParameters",
+    "esri/layers/ImageServiceParameters",
     "esri/tasks/ImageServiceIdentifyTask",
     "esri/tasks/ImageServiceIdentifyParameters",
     "esri/geometry/Polygon",
@@ -86,6 +86,7 @@ define([
                     this.hideLoading();
                 },
                 postCreate: function() {
+                    this.layerInfos = this.config;
                     registry.byId("subtractValue").on("change", lang.hitch(this, this.sliderChange));
                     registry.byId("subtractDateString").on("change", lang.hitch(this, this.sliderChange));
                     registry.byId("refreshTimesliderBtn").on("click", lang.hitch(this, this.timeSliderRefresh));
@@ -100,65 +101,65 @@ define([
                 onOpen: function() {
                     this.refreshData();
                 },
-                checktime : function(currentVersion, timeInfo)
+                checktime : function(currentVersion)
                 {
                     if (currentVersion >= 10.21) {
-                                if (timeInfo) {
-                                    var field = timeInfo.startTimeField;
-                                   if (field) {
-                                        this.dateField = field;
-                                        registry.byId("timeFilter").set("disabled", false);
-                                        html.set(this.errorDiv, "");
-                                    } else {
-                                        registry.byId("timeFilter").set("checked", false);
-                                        registry.byId("timeFilter").set("disabled", true);
-                                        html.set(this.errorDiv, "TimeInfo is absent");
-                                    }
-                                } else {
-                                    registry.byId("timeFilter").set("checked", false);
-                                    registry.byId("timeFilter").set("disabled", true);
-                                    html.set(this.errorDiv, "TimeInfo is absent");
-                                }
+                        if(this.layerInfos[this.label]){
+                            if (this.layerInfos[this.label].dateField&&this.layerInfos[this.label].objectID&&this.layerInfos[this.label].category) {
+                                this.dateField = this.layerInfos[this.label].dateField;
+                                this.objectID = this.layerInfos[this.label].objectID;
+                                this.categoryField = this.layerInfos[this.label].category;
+                                registry.byId("timeFilter").set("disabled", false);
+                                html.set(this.errorDiv, "");
                             } else {
                                 registry.byId("timeFilter").set("checked", false);
                                 registry.byId("timeFilter").set("disabled", true);
-                                html.set(this.errorDiv, "Services pre 10.2.1 not supported");
+                                if(!this.layerInfos[this.label].dateField){
+                                    html.set(this.errorDiv, "Date field is not specified.");
+                                }
+                                else if(!this.layerInfos[this.label].objectID){
+                                    html.set(this.errorDiv, "No ObjectID field.");
+                                }
+                                else {
+                                    html.set(this.errorDiv, "No Category field.");
+                                }
                             }
+                        }
+                        else{
+                            registry.byId("timeFilter").set("checked", false);
+                            registry.byId("timeFilter").set("disabled", true);
+                            html.set(this.errorDiv, "Cannot perform action for primary layer.");
+                        }
+                    } else {
+                        registry.byId("timeFilter").set("checked", false);
+                        registry.byId("timeFilter").set("disabled", true);
+                        html.set(this.errorDiv, "Services pre 10.2.1 not supported.");
+                    }
                 },
                 refreshData: function() {
                     if (this.map.layerIds) {
                         this.prevPrimary = this.primaryLayer;
                         if (this.map.getLayer("resultLayer")) {
                             if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]) && this.primaryLayer) {
-                                this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
-                                this.positionOfPrimaryLayer = this.map.layerIds.length - 2;
                                 registry.byId("timeFilter").set("checked", false);
 //                                this.timeSliderRefresh();
-                            } else {
-                                this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
-                                this.positionOfPrimaryLayer = this.map.layerIds.length - 2;
                             }
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            //this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 3]);
+                            //this.positionOfPrimaryLayer = this.map.layerIds.length - 2;
                         } else {
                             if (this.primaryLayer !== this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]) && this.primaryLayer) {
-                                this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
-                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                                this.positionOfPrimaryLayer = this.map.layerIds.length - 1;
                                 registry.byId("timeFilter").set("checked", false);
 //                                this.timeSliderRefresh();
-                            } else {
-                                this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
-                                this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
-                                this.positionOfPrimaryLayer = this.map.layerIds.length - 1;
                             }
+                            this.primaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
+                            //this.secondaryLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                            //this.positionOfPrimaryLayer = this.map.layerIds.length - 1;
                         }
-                          
-                            this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
-                        if (!this.prevPrimary) {
-                            this.mosaicBackup = this.primaryLayer.mosaicRule;
-                            this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
-                        } else if (this.prevPrimary.url !== this.primaryLayer.url) {
+                        
+                        this.label = this.primaryLayer.url.split('//')[1];
+                        this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
+                        if (!this.prevPrimary || this.prevPrimary.url !== this.primaryLayer.url) {
                             this.mosaicBackup = this.primaryLayer.mosaicRule;
                             this.primaryLayer.on("visibility-change", lang.hitch(this, this.sliderChange));
                         } else if (this.prevPrimary.url === this.primaryLayer.url && this.primaryLayer.mosaicRule) {
@@ -168,28 +169,57 @@ define([
                         }
                         
                     
-                             var currentVersion = this.primaryLayer.currentVersion;
+                        var currentVersion = this.primaryLayer.currentVersion;
                             
-                           if(this.primaryLayer.timeInfo && this.primaryLayer.currentVersion)
-                           {
-                               var timeInfo = this.primaryLayer.timeInfo;
-                               var currentVersion = this.primaryLayer.currentVersion;
-                               this.checktime(currentVersion, timeInfo);
-                           }
-                           else {
-                               var layersRequest = esriRequest({
-                            url: this.primaryLayer.url,
-                            content: {f: "json"},
-                            handleAs: "json",
-                            callbackParamName: "callback"
-                        });
-                        layersRequest.then(lang.hitch(this, function(data) {
-                            var timeInfo = data.timeInfo;
-                            var currentVersion = data.currentVersion;
-                            this.checktime(currentVersion, timeInfo);
-                        }));
-                           }
-                       
+                        if(this.layerInfos[this.label] && this.primaryLayer.currentVersion)
+                        {
+                            var currentVersion = this.primaryLayer.currentVersion;
+                            this.checktime(currentVersion);
+                            dom.byId("layerTitle").innerHTML = this.layerInfos[this.label].title;
+                        }
+                        else if(this.layerInfos[this.label] && !this.primaryLayer.currentVersion){
+                            dom.byId("layerTitle").innerHTML = this.layerInfos[this.label].title;
+                            var layersRequest = esriRequest({
+                                url: this.primaryLayer.url,
+                                content: {f: "json"},
+                                handleAs: "json",
+                                callbackParamName: "callback"
+                            });
+                            layersRequest.then(lang.hitch(this, function(data) {
+                                var currentVersion = data.currentVersion;
+                                this.checktime(currentVersion);
+                            }));
+                        }
+                        else if(!this.layerInfos[this.label]){
+                            dom.byId("layerTitle").innerHTML = this.primaryLayer.name;
+                            var layersRequest = esriRequest({
+                                url: this.primaryLayer.url,
+                                content: {f: "json"},
+                                handleAs: "json",
+                                callbackParamName: "callback"
+                            });
+                            layersRequest.then(lang.hitch(this, function(data) {
+                                var currentVersion = data.currentVersion;
+                                var obj={};
+                                var regExp = new RegExp(/acq[a-z]*[_]?Date/i);
+                                for (var a in data.fields){
+                                    if(data.fields[a].type==="esriFieldTypeOID"){
+                                        obj.objectID = data.fields[a].name;
+                                    }
+                                    if(data.fields[a].name==="Category"){
+                                        obj.category = data.fields[a].name;
+                                    }
+                                    if(regExp.test(data.fields[a].name)){
+                                        obj.dateField = data.fields[a].name;
+                                    }
+                                    else if(!obj.dateField&&data.fields[a].type==="esriFieldTypeDate"){
+                                        obj.dateField = data.fields[a].name;
+                                    }
+                                }
+                                this.layerInfos[this.label] = obj;
+                                this.checktime(currentVersion);
+                            }));
+                        }
 
                         if (!this.slider) {
                             this.timeSliderShow();
@@ -208,14 +238,7 @@ define([
                     } else {
                         domStyle.set(this.filterDiv, "display", "none");
                         this.map.graphics.clear();
-                        
-                        if (this.mosaicBackup) {
-                            var mr = new MosaicRule(this.mosaicBackup);
-                        } else {
-                            
-                            var mr = new MosaicRule(this.defaultMosaicRule);
-                            //var mr = new MosaicRule({"mosaicMethod": "esriMosaicNone", "ascending": true, "mosaicOperation": "MT_FIRST"});
-                        }
+                        var mr = new MosaicRule(this.defaultMosaicRule);
                         this.primaryLayer.setMosaicRule(mr);
                     }
                 },
@@ -233,79 +256,88 @@ define([
                         var query = new Query();
                         query.geometry = extentnew;
                         query.outFields = [this.dateField];
-                        query.where = "Category = 1";
+                        query.where = this.categoryField+" = 1";
                         query.orderByFields = [this.dateField];
                         query.returnGeometry = true;
                         this.showLoading();
                         var queryTask = new QueryTask(this.primaryLayer.url);
                         queryTask.execute(query, lang.hitch(this, function(result) {
                             this.orderedFeatures = result.features;
-
-                            this.orderedDates = [];
-                            for (var a in this.orderedFeatures) {
-                                this.orderedDates.push(this.orderedFeatures[a].attributes[this.dateField]);
-                            }
-
-                            this.featureLength = this.orderedFeatures.length;
-
-                            var sliderNode = domConstruct.create("div", {}, this.timeSliderDiv, "first");
-
-                            var rulesNode = domConstruct.create("div", {}, sliderNode, "first");
-                            this.sliderRules = new HorizontalRule({
-                                container: "bottomDecoration",
-                                count: this.featureLength,
-                                style: "height:5px;"
-                            }, rulesNode);
-
-                            var labels = [];
-                            for (var i = 0; i < this.orderedDates.length; i++) {
-                                labels[i] = locale.format(new Date(this.orderedDates[i]), {selector: "date", formatLength: "short"});
-                            }
-
-                            var labelsNode = domConstruct.create("div", {}, sliderNode, "second");
-                            this.sliderLabels = new HorizontalRuleLabels({
-                                container: "bottomDecoration",
-                                labelStyle: "height:1em;font-size:75%;color:gray;",
-                                labels: [labels[0], labels[this.orderedDates.length - 1]]
-                            }, labelsNode);
-
-                            this.slider = new HorizontalSlider({
-                                name: "slider",
-                                value: 0,
-                                minimum: 0,
-                                maximum: this.featureLength - 1,
-                                discreteValues: this.featureLength,
-                                onChange: lang.hitch(this, this.sliderChange)
-                            }, sliderNode);
-
-                            this.slider.startup();
-                            this.sliderRules.startup();
-                            this.sliderLabels.startup();
-                            var polygonJson = {"rings": [[[extent.xmin, extent.ymin], [extent.xmin, extent.ymax], [extent.xmax, extent.ymax], [extent.xmax, extent.ymin],
-                                        [extent.xmin, extent.ymin]]], "spatialReference": {"wkid": 102100}};
-                            var polygon = new Polygon(polygonJson);
-                            var imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
-                            var imageParams = new ImageServiceIdentifyParameters();
-                            imageParams.geometry = new Point(polygon.getCentroid());
-                            imageParams.returnGeometry = false;
-                            imageTask.execute(imageParams, lang.hitch(this, function(data) {
-                                if (data.catalogItems.features[0]) {
-                                    var maxVisible = data.catalogItems.features[0].attributes.OBJECTID;
-                                    for (var z in this.orderedFeatures) {
-                                        if (this.orderedFeatures[z].attributes.OBJECTID === maxVisible) {
-                                            var index = z;
-                                        }
-                                    }
-                                    this.slider.set("value", index);
-                                    this.sliderChange();
+                            
+                            if(this.orderedFeatures.length){
+                                this.orderedDates = [];
+                                for (var a in this.orderedFeatures) {
+                                    this.orderedDates.push(this.orderedFeatures[a].attributes[this.dateField]);
                                 }
-                                html.set(this.dateRange, locale.format(new Date(this.orderedDates[this.featureLength - 1]), {selector: "date", formatLength: "long"}));
-                                html.set(this.imageCount, "1");
-                            }), lang.hitch(this, function(error) {
+
+                                this.featureLength = this.orderedFeatures.length;
+
+                                var sliderNode = domConstruct.create("div", {}, this.timeSliderDiv, "first");
+
+                                var rulesNode = domConstruct.create("div", {}, sliderNode, "first");
+                                this.sliderRules = new HorizontalRule({
+                                    container: "bottomDecoration",
+                                    count: this.featureLength,
+                                    style: "height:5px;"
+                                }, rulesNode);
+
+                                var labels = [];
+                                for (var i = 0; i < this.orderedDates.length; i++) {
+                                    labels[i] = locale.format(new Date(this.orderedDates[i]), {selector: "date", formatLength: "short"});
+                                }
+
+                                var labelsNode = domConstruct.create("div", {}, sliderNode, "second");
+                                this.sliderLabels = new HorizontalRuleLabels({
+                                    container: "bottomDecoration",
+                                    labelStyle: "height:1em;font-size:75%;color:gray;",
+                                    labels: [labels[0], labels[this.orderedDates.length - 1]]
+                                }, labelsNode);
+
+                                this.slider = new HorizontalSlider({
+                                    name: "slider",
+                                    value: 0,
+                                    minimum: 0,
+                                    maximum: this.featureLength - 1,
+                                    discreteValues: this.featureLength,
+                                    onChange: lang.hitch(this, this.sliderChange)
+                                }, sliderNode);
+
+                                this.slider.startup();
+                                this.sliderRules.startup();
+                                this.sliderLabels.startup();
+                                var polygonJson = {"rings": [[[extent.xmin, extent.ymin], [extent.xmin, extent.ymax], [extent.xmax, extent.ymax], [extent.xmax, extent.ymin],
+                                            [extent.xmin, extent.ymin]]], "spatialReference": {"wkid": 102100}};
+                                var polygon = new Polygon(polygonJson);
+                                var imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
+                                var imageParams = new ImageServiceIdentifyParameters();
+                                imageParams.geometry = new Point(polygon.getCentroid());
+                                imageParams.returnGeometry = false;
+                                imageTask.execute(imageParams, lang.hitch(this, function(data) {
+                                    if (data.catalogItems.features[0]) {
+                                        var maxVisible = data.catalogItems.features[0].attributes[this.objectID];
+                                        for (var z in this.orderedFeatures) {
+                                            if (this.orderedFeatures[z].attributes[this.objectID] === maxVisible) {
+                                                var index = z;
+                                            }
+                                        }
+                                        this.slider.set("value", index);
+                                        this.sliderChange();
+                                    }
+                                    html.set(this.dateRange, locale.format(new Date(this.orderedDates[this.featureLength - 1]), {selector: "date", formatLength: "long"}));
+                                    html.set(this.imageCount, "1");
+                                    this.hideLoading();
+                                }), lang.hitch(this, function(error) {
+                                    this.hideLoading();
+                                    this.slider.set("value", 0);
+                                    this.sliderChange();
+                                }));
+                            }
+                            else {
+                                html.set(this.errorDiv, "No primary layer scenes in current extent.");
+                                html.set(this.dateRange, "");
+                                html.set(this.imageCount, "");
                                 this.hideLoading();
-                                this.slider.set("value", 0);
-                                this.sliderChange();
-                            }));
+                            }
                         }));
 
                     }
@@ -349,13 +381,13 @@ define([
                             for (var i = this.orderedFeatures.length - 1; i >= 0; i--) {
                                 if (new Date(this.orderedFeatures[i].attributes[this.dateField]) <= new Date(aqDate) && new Date(this.orderedFeatures[i].attributes[this.dateField]) >= compareDate) {
                                     featureSelect.push(this.orderedFeatures[i]);
-                                    this.featureIds.push(this.orderedFeatures[i].attributes.OBJECTID);
+                                    this.featureIds.push(this.orderedFeatures[i].attributes[this.objectID]);
                                 }
                             }
                             html.set(this.dateRange, locale.format(compareDate, {selector: "date", formatLength: "long"}) + " - " + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}));
                         } else {
                             featureSelect.push(this.orderedFeatures[this.slider.get("value")]);
-                            this.featureIds.push(this.orderedFeatures[this.slider.get("value")].attributes.OBJECTID);
+                            this.featureIds.push(this.orderedFeatures[this.slider.get("value")].attributes[this.objectID]);
                             html.set(this.dateRange, locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}));
                         }
 
