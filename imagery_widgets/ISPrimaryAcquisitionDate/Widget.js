@@ -159,7 +159,10 @@ define([
                                     }));
                                 }
                                 else{
-                                    mosaicRule=layer.defaultMosaicRule;
+                                    if(layer.mosaicRule)
+                                        mosaicRule = layer.mosaicRule;
+                                    else
+                                        mosaicRule=layer.defaultMosaicRule;
                                     var getSamplesRequest = esriRequest({
                                         url: layer.url+'/getSamples',
                                         content: {

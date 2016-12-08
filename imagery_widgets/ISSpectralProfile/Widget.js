@@ -571,7 +571,7 @@ define([
                       }
                       else if (this.layerInfos[this.label].bandCount===1&&this.temporalData.length===1){
                         registry.byId("chartDialog").hide();
-                        dom.byId("single-value").innerHTML="No overlapping scenes at this point.<br>Data Value on "+locale.format(new Date(this.temporalData[0].acqDate), {selector: "date", formatLength: "long"})+": <span style='font-weight:bolder;'>"+this.temporalData[0].values+"</span>";
+                        dom.byId("single-value").innerHTML="No overlapping scenes at this point.<br>Data Value on "+locale.format(new Date(this.temporalData[0].acqDate), {selector: "date", formatLength: "long"})+": <span style='font-weight:bolder;'>"+this.temporalData[0].values[0].y+"</span>";
                         domStyle.set(dom.byId("single-value"),'display','block');
                       }
                     } else if (registry.byId("type").get("value") === "NDVI") {

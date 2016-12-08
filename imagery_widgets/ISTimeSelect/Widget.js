@@ -54,7 +54,6 @@ primaryLayer:  null,
       this.inherited(arguments);
       
       registry.byId("imageMosaicSelect").on("change",lang.hitch(this, this.mosaicRuleApplied));
-      registry.byId("setSecondaryLayerBtnSelect").on("click", lang.hitch(this, this.setSecondaryLayerSelect));
       // MAKE MOVABLE //
       new Moveable(this.containerNode, {handle: this.titleNode});
 
@@ -424,44 +423,6 @@ primaryLayer:  null,
      * @param selectedDateText
      * @private
      */
-    setSecondaryLayerSelect: function(){
-       
-        if(this.primaryLayer){
-                      if(this.secondaryLayer)
-                          this.map.removeLayer(this.secondaryLayer);
-                      var params = new ImageServiceParameters();
-                       if (this.primaryLayer.mosaicRule) {
-                  params.mosaicRule = this.primaryLayer.mosaicRule;
-                }
-                if (this.primaryLayer.renderingRule) {
-                  params.renderingRule = this.primaryLayer.renderingRule;
-                }
-        
-            if (this.primaryLayer.bandIds) {
-                  params.bandIds = this.primaryLayer.bandIds;
-                }
-                if (this.primaryLayer.format) {
-                  params.format = this.primaryLayer.format;
-                }
-                if (this.primaryLayer.interpolation) {
-                  params.interpolation = this.primaryLayer.interpolation;
-                }
-                var popupInfo = "";
-                if (this.primaryLayer.popupInfo) {
-                  popupInfo = new PopupTemplate(this.primaryLayer.popupInfo);
-                }
-                var secondLayer = new ArcGISImageServiceLayer(
-                        this.primaryLayer.url,
-                        {
-                          id: "secondaryLayer",
-                          imageServiceParameters: params,
-                          visible: true,
-                          infoTemplate: popupInfo
-                        });
-                        
-              this.map.addLayer(secondLayer,this.primaryLayerPosition);
-                    }
-    },
     _onDateChange: function (selectedDateText) {
       var deferred = new Deferred();
 

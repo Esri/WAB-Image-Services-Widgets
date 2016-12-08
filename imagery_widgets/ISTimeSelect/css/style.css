@@ -20,7 +20,7 @@
 }
 
 .ISTimeSelect-toolbar {
-  display : table-row !important;
+  display : block !important;
   border  : none !important;
   background-color: #ffffff;
 }

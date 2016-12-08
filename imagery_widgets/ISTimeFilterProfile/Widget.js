@@ -641,6 +641,34 @@ define([
                   polygonJson = {"rings": [[[extent.xmin, extent.ymin], [extent.xmin, extent.ymax], [extent.xmax, extent.ymax], [extent.xmax, extent.ymin],
                         [extent.xmin, extent.ymin]]], "spatialReference": {"wkid": 102100}};
                   polygon = new Polygon(polygonJson);
+                  var request = new esriRequest({
+                                  url: this.primaryLayer.url + "/getSamples",
+                            content: {
+                                geometry: JSON.stringify(this.map.extent.getCenter()),
+                                geometryType: "esriGeometryPoint",
+                                returnGeometry: false,
+                                sampleCount: 1,
+                                outFields: this.objectID,
+                                f: "json"
+                            },
+                            handleAs: "json",
+                            callbackParamName: "callback"
+                        });
+                                request.then(lang.hitch(this, function(bestScene){
+                                     var maxVisible = bestScene.samples[0].attributes[this.objectID];
+                                        for (var z in this.orderedFeatures) {
+                                            if (this.orderedFeatures[z].attributes[this.objectID] === maxVisible) {
+                                                var index = z;
+                                            }
+                                        }
+                                        this.slider.set("value", index);
+                                        this.sliderChange();
+                                    
+                                   html.set(this.dateRange, locale.format(new Date(this.orderedDates[this.featureLength - 1]), {selector: "date", formatLength: "long"}));
+                                    html.set(this.imageCount, "1");
+                                    this.hideLoading();
+                                }), lang.hitch(this, function(){
+                                    
                   imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
                   imageParams = new ImageServiceIdentifyParameters();
                   imageParams.geometry = new Point(polygon.getCentroid());
@@ -664,6 +692,7 @@ define([
                     this.slider.set("value", 0);
                     this.sliderChange();
                   }));
+              }));
                   this.hideLoading();
                 }), lang.hitch(this, function (error) {
                   this.hideLoading();
