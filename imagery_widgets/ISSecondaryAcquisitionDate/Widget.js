@@ -38,6 +38,7 @@ define([
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 baseClass: 'jimu-widget-ISSecondaryAcquisitionDate',
                 name: 'ISSecondaryAcquisitionDate',
+                requestCount:0,
                 primaryLayer: null,
                 postCreate: function() {
                     this.layerInfos = this.config;
@@ -74,149 +75,159 @@ define([
                                 };
                                     
                                 var mosaicRule;
-                                if(layer.mosaicRule&&layer.mosaicRule.method==="esriMosaicLockRaster"){
-                                    mosaicRule=layer.mosaicRule;
-                                    var getSamplesRequest = esriRequest({
-                                        url: layer.url+'/getSamples',
-                                        content: {
-                                            f:"json",
-                                            outFields: this.dateField,
-                                            geometry: JSON.stringify(polygonJson),
-                                            geometryType: "esriGeometryPolygon",
-                                            mosaicRule: JSON.stringify(mosaicRule.toJson()),
-                                            returnFirstValueOnly:false
-                                        },
-                                        handleAs: "json",
-                                        callbackParamName: "callback"
-                                    });
-                                    getSamplesRequest.then(lang.hitch(this,function(result){
-                                        var dates = [];
-                                            
-                                        for (var i = 0; i < result.samples.length; i++) {
-                                            if (result.samples[i].attributes[this.dateField] && (array.indexOf(dates, result.samples[i].attributes[this.dateField]) === -1)) {
-                                                dates.push(result.samples[i].attributes[this.dateField]);
-                                            }
-                                        }
-                                        if (dates.length !== 0) {
-                                            var max = dates.reduce(function(previous, current) {
-                                                return previous > current ? previous : current;
-                                            });
-                                            var min = dates.reduce(function(previous, current) {
-                                                return previous < current ? previous : current;
-                                            });
-                                            this.minDate = new Date(min);
-                                            this.maxDate = new Date(max);
-                                            var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
-                                            var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
-                                            if (mindate === maxdate) {
-                                                html.set(this.secondaryDate, '<br/>S: ' + mindate);
-                                            } else {
-                                                html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
-                                            }
+                      if(layer.mosaicRule){
+                          if(layer.mosaicRule.method==="esriMosaicLockRaster"){
+                              var queryNum = this.requestCount;
+                              queryNum++;
+                              this.requestCount = queryNum;
+                              var query = new Query();
+                              query.objectIds = layer.mosaicRule.lockRasterIds;
+                              query.returnGeometry = false;
+                              query.outFields = [this.dateField];
+                              query.geometry = this.map.extent;
+                              var queryTask = new QueryTask(layer.url);
+                              queryTask.execute(query,lang.hitch(this,function(result){
+                                  if(queryNum===this.requestCount){
+                                  var dates = [];
+                                  for (var i = 0; i< result.features.length; i++){
+                                      if(result.features[i].attributes[this.dateField] && (array.indexOf(dates, result.features[i].attributes[this.dateField]) === -1)){
+                                          dates.push(result.features[i].attributes[this.dateField]);
+                                      }
+                                  }
+                                  if (dates.length !== 0) {
+                                      var max = dates.reduce(function(previous, current) {
+                                        return previous > current ? previous : current;
+                                      });
+                                      var min = dates.reduce(function(previous, current) {
+                                          return previous < current ? previous : current;
+                                      });
+                                      this.minDate = new Date(min);
+                                      this.maxDate = new Date(max);
+                                      var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                      var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                      if (mindate === maxdate) {
+                                          html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                      } else {
+                                          html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                      }
+                                  } else {
+                                      html.set(this.secondaryDate, '');
+                                  }}
+                              }));
+                          }else{
+                              var queryNum = this.requestCount;
+                              queryNum++;
+                              this.requestCount = queryNum;
+                              mosaicRule = layer.mosaicRule;
+                              mosaicRule.where = "Category=1";
+                              var identifyRequest = esriRequest({
+                                  url: layer.url+'/identify',
+                                  content: {
+                                      f: "json",
+                                      geometry: JSON.stringify(polygonJson),
+                                      geometryType: "esriGeometryPolygon",
+                                      returnCatalogItems: "true",
+                                      mosaicRule: JSON.stringify(mosaicRule.toJson())
+                                  },
+                                  handleAs: "json",
+                                  callbackParamName: "callback"
+                              });
+                              identifyRequest.then(lang.hitch(this,function(result){
+                                  if(queryNum===this.requestCount){
+                                  var dates = [];
+                                  for (var i=0;i<result.catalogItems.features.length;i++){
+                                    if(result.catalogItemVisibilities[i]!==0&&result.catalogItems.features[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems.features[i].attributes[this.dateField]) === -1)){
+                                        dates.push(result.catalogItems.features[i].attributes[this.dateField]);
+                                    }
+                                  }
+                                  if (dates.length !== 0) {
+                                      var max = dates.reduce(function(previous, current) {
+                                          return previous > current ? previous : current;
+                                      });
+                                      var min = dates.reduce(function(previous, current) {
+                                          return previous < current ? previous : current;
+                                      });
+                                      this.minDate = new Date(min);
+                                      this.maxDate = new Date(max);
+                                      var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                      var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                      if (mindate === maxdate) {
+                                          html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                      } else {
+                                          html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                      }
+                                  } else {
+                                      html.set(this.secondaryDate, '');
+                                  }}
+                              }));
+                          }
+                      }
+                      else{
+                          var queryNum = this.requestCount;
+                          queryNum++;
+                          this.requestCount = queryNum;
+                          var query = new Query();
+                          query.where = "Category=1";
+                          query.returnGeometry = false;
+                          query.outFields = [this.dateField];
+                          query.geometry = this.map.extent;
+                          
+                          var queryTask = new QueryTask(layer.url);
+                          queryTask.executeForCount(query,lang.hitch(this,function(count){
+                              if(queryNum===this.requestCount){
+                              if(count<=1000){
+                              query.start = 0;
+                              query.num = count;
+                              queryTask.execute(query,lang.hitch(this,function(result){
+                              var dates = [];
+                              for (var i = 0; i< result.features.length; i++){
+                                  if(result.features[i].attributes[this.dateField] && (array.indexOf(dates, result.features[i].attributes[this.dateField]) === -1)){
+                                      dates.push(result.features[i].attributes[this.dateField]);
+                                  }
+                              }
+                              if (dates.length !== 0) {
+                                  var max = dates.reduce(function(previous, current) {
+                                    return previous > current ? previous : current;
+                                  });
+                                  var min = dates.reduce(function(previous, current) {
+                                      return previous < current ? previous : current;
+                                  });
+                                  this.minDate = new Date(min);
+                                  this.maxDate = new Date(max);
+                                  var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                  var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                  if (mindate === maxdate) {
+                                      html.set(this.secondaryDate, '<br/>S: ' + mindate);
+                                  } else {
+                                      html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
+                                  }
+                              } else {
+                                  html.set(this.primaryDate, '');
+                              }
+                              }));
+                              }
+                              else{
+                                query.start = 0;
+                                query.num = 1;
+                                query.orderByFields = [this.dateField+" DESC"];
+                                queryTask.execute(query,lang.hitch(this,function(result){
+                                    this.maxDate = new Date(result.features[0].attributes[this.dateField]);
+                                    query.start = count-1;
+                                    query.num = 1;
+                                    queryTask.execute(query,lang.hitch(this,function(result){
+                                        this.minDate = new Date(result.features[0].attributes[this.dateField]);
+                                        var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                        var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                        if (mindate === maxdate) {
+                                            html.set(this.secondaryDate, '<br/>S: ' + mindate);
                                         } else {
-                                            html.set(this.secondaryDate, '');
+                                            html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
                                         }
-                                    }),lang.hitch(this,function(){
-                                        var identifyRequest = esriRequest({
-                                            url: layer.url+'/identify',
-                                            content: {
-                                                f: "json",
-                                                geometry: JSON.stringify(polygonJson),
-                                                geometryType: "esriGeometryPolygon",
-                                                returnCatalogItems: "true",
-                                                mosaicRule: JSON.stringify(mosaicRule.toJson())
-                                            },
-                                            handleAs: "json",
-                                            callbackParamName: "callback"
-                                        });
-                                        identifyRequest.then(lang.hitch(this,function(result){
-                                            var dates = [];
-                                            for (var i=0;i<result.catalogItems.length;i++){
-                                                if(result.catalogVisibilities[i]!==0&&result.catalogItems[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems[i].attributes[this.dateField]) === -1)){
-                                                    dates.push(result.catalogItems[i].attributes[this.dateField]);
-                                                }
-                                            }
-                                            if (dates.length !== 0) {
-                                                var max = dates.reduce(function(previous, current) {
-                                                    return previous > current ? previous : current;
-                                                });
-                                                var min = dates.reduce(function(previous, current) {
-                                                    return previous < current ? previous : current;
-                                                });
-                                                this.minDate = new Date(min);
-                                                this.maxDate = new Date(max);
-                                                var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
-                                                var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
-                                                if (mindate === maxdate) {
-                                                    html.set(this.secondaryDate, '<br/>S: ' + mindate);
-                                                } else {
-                                                    html.set(this.secondaryDate, '<br/>S: ' + mindate + ' -  ' + maxdate);
-                                                }
-                                            } else {
-                                                html.set(this.secondaryDate, '');
-                                            }
-                                        }));
                                     }));
-                                }
-                                else{
-                                    if(layer.mosaicRule)
-                                        mosaicRule=layer.mosaicRule;
-                                    else
-                                        mosaicRule=layer.defaultMosaicRule;
-                                    var getSamplesRequest = esriRequest({
-                                        url: layer.url+'/getSamples',
-                                        content: {
-                                            f:"json",
-                                            outFields: this.dateField,
-                                            geometry: JSON.stringify(this.map.extent.getCenter()),
-                                            geometryType: "esriGeometryPoint",
-                                            mosaicRule: JSON.stringify(mosaicRule.toJson()),
-                                            returnFirstValueOnly:false
-                                        },
-                                        handleAs: "json",
-                                        callbackParamName: "callback"
-                                    });
-                                    getSamplesRequest.then(lang.hitch(this,function(result){
-                                        var dates = [];
-                                        
-                                        for (var i = 0; i < result.samples.length; i++) {
-                                            if (result.samples[i].attributes[this.dateField] && (array.indexOf(dates, result.samples[i].attributes[this.dateField]) === -1)) {
-                                                dates.push(result.samples[i].attributes[this.dateField]);
-                                            }
-                                        }
-                                        if (dates.length !== 0) {
-                                            html.set(this.secondaryDate, '<br/>S: ' + locale.format(new Date(dates[0]), {selector: "date", formatLength: "long"}));
-                                        } else {
-                                            html.set(this.secondaryDate, '');
-                                        }
-                                    }),lang.hitch(this,function(){
-                                        var identifyRequest = esriRequest({
-                                            url: layer.url+'/identify',
-                                            content: {
-                                                f: "json",
-                                                geometry: JSON.stringify(polygonJson),
-                                                geometryType: "esriGeometryPolygon",
-                                                returnCatalogItems: "true",
-                                                mosaicRule: JSON.stringify(mosaicRule.toJson())
-                                            },
-                                            handleAs: "json",
-                                            callbackParamName: "callback"
-                                        });
-                                        identifyRequest.then(lang.hitch(this,function(result){
-                                            var dates = [];
-                                            for (var i=0;i<result.catalogItems.length;i++){
-                                                if(result.catalogVisibilities[i]!==0&&result.catalogItems[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems[i].attributes[this.dateField]) === -1)){
-                                                    dates.push(result.catalogItems[i].attributes[this.dateField]);
-                                                }
-                                            }
-                                            if (dates.length !== 0) {
-                                                html.set(this.secondaryDate, '<br/>S: ' + locale.format(new Date(dates[0]), {selector: "date", formatLength: "long"}));
-                                            } else {
-                                                html.set(this.secondaryDate, '');
-                                            }
-                                        }));
-                                    }));
-                                }
+                                }));
+                              }}
+                          }));
+                      }
                             } else {
                                 html.set(this.secondaryDate, '');
                             }
