@@ -191,7 +191,7 @@ define([
                             }));
                         }
                         else if(!this.layerInfos[this.label]){
-                            dom.byId("layerTitle").innerHTML = this.primaryLayer.name;
+                            dom.byId("layerTitle").innerHTML = this.primaryLayer.name||this.primaryLayer.id;
                             var layersRequest = esriRequest({
                                 url: this.primaryLayer.url,
                                 content: {f: "json"},
@@ -200,7 +200,7 @@ define([
                             });
                             layersRequest.then(lang.hitch(this, function(data) {
                                 var currentVersion = data.currentVersion;
-                                var obj={};
+                                var obj={title:this.primaryLayer.name||this.primaryLayer.id};
                                 var regExp = new RegExp(/acq[a-z]*[_]?Date/i);
                                 for (var a in data.fields){
                                     if(data.fields[a].type==="esriFieldTypeOID"){

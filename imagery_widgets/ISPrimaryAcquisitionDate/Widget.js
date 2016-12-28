@@ -26,6 +26,7 @@ define([
     "dojo/date/locale",
     "dojo/html",
     "esri/request",
+    "esri/layers/MosaicRule",
     "esri/graphic"
 ],
         function(
@@ -39,7 +40,7 @@ define([
                 array,
                 locale,
                 html,
-                esriRequest) {
+                esriRequest, MosaicRule) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 baseClass: 'jimu-widget-ISPrimaryAcquisitionDate',
                 name: 'ISPrimaryAcquisitionDate',
@@ -78,19 +79,21 @@ define([
                       };
                                     
                       var mosaicRule;
-                      if(layer.mosaicRule){
-                          if(layer.mosaicRule.method==="esriMosaicLockRaster"){
-                              var queryNum = this.requestCount;
-                              queryNum++;
-                              this.requestCount = queryNum;
-                              var query = new Query();
-                              query.objectIds = layer.mosaicRule.lockRasterIds;
-                              query.returnGeometry = false;
-                              query.outFields = [this.dateField];
-                              query.geometry = this.map.extent;
-                              var queryTask = new QueryTask(layer.url);
-                              queryTask.execute(query,lang.hitch(this,function(result){
-                                  if(queryNum===this.requestCount){
+                      if((layer.mosaicRule&&layer.mosaicRule.method==="esriMosaicLockRaster")||(!layer.mosaicRule&&layer.defaultMosaicRule.method==="esriMosaicLockRaster")){
+                          var queryNum = this.requestCount;
+                          queryNum++;
+                          this.requestCount = queryNum;
+                          var query = new Query();
+                          if(layer.mosaicRule)
+                            query.objectIds = layer.mosaicRule.lockRasterIds;
+                          else
+                            query.objectIds = layer.defaultMosaicRule.lockRasterIds;
+                          query.returnGeometry = false;
+                          query.outFields = [this.dateField];
+                          query.geometry = this.map.extent;
+                          var queryTask = new QueryTask(layer.url);
+                          queryTask.execute(query,lang.hitch(this,function(result){
+                              if(queryNum===this.requestCount){
                                   var dates = [];
                                   for (var i = 0; i< result.features.length; i++){
                                       if(result.features[i].attributes[this.dateField] && (array.indexOf(dates, result.features[i].attributes[this.dateField]) === -1)){
@@ -115,57 +118,10 @@ define([
                                       }
                                   } else {
                                       html.set(this.primaryDate, '');
-                                  }}
-                              }));
-                          }else{
-                              var queryNum = this.requestCount;
-                              queryNum++;
-                              this.requestCount = queryNum;
-                              mosaicRule = layer.mosaicRule;
-                              mosaicRule.where = "Category=1";
-                              var identifyRequest = esriRequest({
-                                  url: layer.url+'/identify',
-                                  content: {
-                                      f: "json",
-                                      geometry: JSON.stringify(polygonJson),
-                                      geometryType: "esriGeometryPolygon",
-                                      returnCatalogItems: "true",
-                                      mosaicRule: JSON.stringify(mosaicRule.toJson())
-                                  },
-                                  handleAs: "json",
-                                  callbackParamName: "callback"
-                              });
-                              identifyRequest.then(lang.hitch(this,function(result){
-                                  if(queryNum===this.requestCount){
-                                  var dates = [];
-                                  for (var i=0;i<result.catalogItems.features.length;i++){
-                                    if(result.catalogItemVisibilities[i]!==0&&result.catalogItems.features[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems.features[i].attributes[this.dateField]) === -1)){
-                                        dates.push(result.catalogItems.features[i].attributes[this.dateField]);
-                                    }
                                   }
-                                  if (dates.length !== 0) {
-                                      var max = dates.reduce(function(previous, current) {
-                                          return previous > current ? previous : current;
-                                      });
-                                      var min = dates.reduce(function(previous, current) {
-                                          return previous < current ? previous : current;
-                                      });
-                                      this.minDate = new Date(min);
-                                      this.maxDate = new Date(max);
-                                      var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
-                                      var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
-                                      if (mindate === maxdate) {
-                                          html.set(this.primaryDate, '<br/>P: ' + mindate);
-                                      } else {
-                                          html.set(this.primaryDate, '<br/>P: ' + mindate + ' -  ' + maxdate);
-                                      }
-                                  } else {
-                                      html.set(this.primaryDate, '');
-                                  }}
-                              }));
-                          }
-                      }
-                      else{
+                              }
+                          }));
+                      }else if (!layer.mosaicRule||(layer.mosaicRule&&this.compareMosaicRule(layer.mosaicRule,layer.defaultMosaicRule))){
                           var queryNum = this.requestCount;
                           queryNum++;
                           this.requestCount = queryNum;
@@ -229,6 +185,53 @@ define([
                                     }));
                                 }));
                               }}
+                          }));
+                      } else if(layer.mosaicRule){
+                          var queryNum = this.requestCount;
+                          queryNum++;
+                          this.requestCount = queryNum;
+                          mosaicRule = layer.mosaicRule;
+                          mosaicRule.where = "Category=1";
+                          var identifyRequest = esriRequest({
+                              url: layer.url+'/identify',
+                              content: {
+                                  f: "json",
+                                  geometry: JSON.stringify(polygonJson),
+                                  geometryType: "esriGeometryPolygon",
+                                  returnCatalogItems: "true",
+                                  mosaicRule: JSON.stringify(mosaicRule.toJson())
+                              },
+                              handleAs: "json",
+                              callbackParamName: "callback"
+                          });
+                          identifyRequest.then(lang.hitch(this,function(result){
+                              if(queryNum===this.requestCount){
+                                  var dates = [];
+                                  for (var i=0;i<result.catalogItems.features.length;i++){
+                                    if(result.catalogItemVisibilities[i]!==0&&result.catalogItems.features[i].attributes[this.dateField]&&(array.indexOf(dates, result.catalogItems.features[i].attributes[this.dateField]) === -1)){
+                                        dates.push(result.catalogItems.features[i].attributes[this.dateField]);
+                                    }
+                                  }
+                                  if (dates.length !== 0) {
+                                      var max = dates.reduce(function(previous, current) {
+                                          return previous > current ? previous : current;
+                                      });
+                                      var min = dates.reduce(function(previous, current) {
+                                          return previous < current ? previous : current;
+                                      });
+                                      this.minDate = new Date(min);
+                                      this.maxDate = new Date(max);
+                                      var maxdate = locale.format(this.maxDate, {selector: "date", formatLength: "long"});
+                                      var mindate = locale.format(this.minDate, {selector: "date", formatLength: "long"});
+                                      if (mindate === maxdate) {
+                                          html.set(this.primaryDate, '<br/>P: ' + mindate);
+                                      } else {
+                                          html.set(this.primaryDate, '<br/>P: ' + mindate + ' -  ' + maxdate);
+                                      }
+                                  } else {
+                                      html.set(this.primaryDate, '');
+                                  }
+                              }
                           }));
                       }
                     } else {
@@ -325,6 +328,65 @@ define([
                     } else {
                         html.set(this.primaryDate, '');
                     }
+                },
+                
+                compareMosaicRule: function(m1,m2){
+                  //compare method and method specific fields
+                  if(m1.method!==m2.method){
+                    return false;
+                  }
+                  else if(m1.method===MosaicRule.METHOD_ATTRIBUTE){
+                    if((m1.sortField&&!m2.sortField)||(!m1.sortField&&m2.sortField)||(m1.sortField&&m2.sortField&&m1.sortField!==m2.sortField)){
+                      return false;
+                    }
+                    if((m1.sortValue&&!m2.sortValue)||(!m1.sortValue&&m2.sortValue)||(m1.sortValue&&m2.sortValue&&m1.sortValue!==m2.sortValue)){
+                      return false;
+                    }
+                  }
+                  else if(m1.method===MosaicRule.METHOD_VIEWPOINT){
+                    if(JSON.stringify(m1.viewpoint)!==JSON.stringify(m2.viewpoint)){
+                      return false;
+                    }
+                  }
+                  else if(m1.method!==MosaicRule.METHOD_NONE){
+                    return true;
+                  }
+                  
+                  //compare where clause
+                  if((m1.where&&!m2.where)||(!m1.where&&m2.where)||(m1.where&&m2.where&&m1.where!==m2.where)){
+                      return false;
+                  }
+                  //compare operation
+                  if((m1.operation&&!m2.operation)||(!m1.operation&&m2.operation)||(m1.operation&&m2.operation&&m1.operation!==m2.operation)){
+                      return false;
+                  }
+                  //compare ascending
+                  if(m1.method!==MosaicRule.METHOD_SEAMLINE){
+                    if((m1.objectIds&&!m2.ascending)||(m2.ascending&&!m1.ascending)||(m1.ascending!==m2.ascending)){
+                      return false;
+                    }
+                  }
+                  //compared objectIds
+                  if((m1.objectIds&&!m2.objectIds)||(!m1.objectIds&&m2.objectIds)){
+                    return false;
+                  }else if(m1.objectIds&&m2.objectIds){
+                    for(var i=0;i<m1.objectIds.length;i++){
+                      if(m2.objectIds.indexOf(m1.objectIds[i])!==-1)
+                        continue;
+                      return false;
+                    }
+                  }
+                  //compare multiDimensionalDefinition
+                  if((m1.multidimensionalDefinition&&!m2.multidimensionalDefinition)||(!m1.multidimensionalDefinition&&m2.multidimensionalDefinition)){
+                    return false;
+                  } else if(m1.multidimensionalDefinition&&m2.multidimensionalDefinition){
+                    for(var i=0;i<m1.multidimensionalDefinition.length;i++){
+                      if(JSON.stringify(m1.multidimensionalDefinition[i]).equals(JSON.stringify(m2.multidimensionalDefinition[i])))
+                        continue;
+                      return false;
+                    }  
+                  }
+                  return true;
                 }
             });
 

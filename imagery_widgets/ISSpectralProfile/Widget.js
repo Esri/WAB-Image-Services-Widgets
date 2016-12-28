@@ -153,7 +153,7 @@ define([
                         registry.byId("type").addOption(options);
                       }
                       if(!this.layerInfos[this.label]){
-                        dom.byId("layerTitle").innerHTML = this.primaryLayer.name;
+                        dom.byId("layerTitle").innerHTML = this.primaryLayer.name||this.primaryLayer.id;
                         domStyle.set(dom.byId("selectType"),'display','none');
                         this.showLoading();
                         this.layerObj = {
@@ -161,7 +161,8 @@ define([
                           hasOverlap: false,
                           ndvi: false,
                           ndmi: false,
-                          urban: false
+                          urban: false,
+						  title: this.primaryLayer.name||this.primaryLayer.id
                         };
                         if(this.primaryLayer.type==="ArcGISImageServiceLayer"){
                           if(this.primaryLayer.bandCount){
