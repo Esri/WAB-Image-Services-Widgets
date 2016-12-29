@@ -4,8 +4,23 @@
     <label for='method'>Method :</label>
     <select id="method" data-dojo-type="dijit/form/Select">
         <option value="difference">Difference</option>
+        <option value="ndvi">Vegetation Index</option>
+        <option value="savi">Soil Adjusted Veg. Index</option>
+        <option value="water">Water Index</option>
+        <option value="burn">Burn Index</option>
     </select>
     <button data-dojo-type="dijit/form/Button" type="button" id="changeDetectionApply">Apply</button>
+    <div id="bandInputs" style="display: none;">
+        <br />
+        
+        <table style="border: 0 solid transparent;"><tr><td><div id="bandName1" style="display: inline-block;color: #0080C0;font-weight: bolder;"></div></td>
+                <td><input data-dojo-type="dijit/form/NumberTextBox" id="band1" style="width: 200px;display: inline-block;" placeholder="Enter zero based band"/>
+                </td></tr>
+            <tr><td><div id="bandName2" style="display: inline-block;color: #0080C0;font-weight: bolder;"></div></td>
+                <td><input data-dojo-type="dijit/form/NumberTextBox" id="band2" style="width: 200px;display: inline-block;" placeholder="Enter zero based band" /></td></tr></table>
+                <br />
+                <span style='color:red;'>Note -  Zero based band means the indexed band order value in the service. i.e If Red band order in the image service is 4, then indexed band order will be 3.</span>
+    </div>
     </div>
     <div data-dojo-attach-point="setPrimarySecondaryLayers" style="color: #0080C0;">
     </div>
