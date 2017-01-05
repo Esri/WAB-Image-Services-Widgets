@@ -1,0 +1,21 @@
+<div style="width:100%;height:100%;">
+  <div class="settings-section" data-dojo-attach-point="searchesSection">
+    Frequency Ramp <br>
+    Start Color:
+  <div data-dojo-type="dijit/form/DropDownButton" style="display: inline-block;" id="startColorButton">
+    <div id="startnode" class="color-node"></div>
+    <div data-dojo-type="dijit/TooltipDialog">
+      <div id="startColorPalette"></div>
+    </div>
+  </div>
+  End Color:
+  <div data-dojo-type="dijit/form/DropDownButton" style="display: inline-block;" id="endColorButton">
+    <div id="endnode" class="color-node"></div>
+    <div data-dojo-type="dijit/TooltipDialog">
+      <div id="endColorPalette"></div>
+    </div>
+  </div>
+  <br/>
+  <div id="color-error" style="display:none; color:red">Frequency start and end color cannot be the same. Choose another color.</div>
+  </div>
+</div>
