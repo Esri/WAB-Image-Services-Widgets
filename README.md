@@ -1,4 +1,4 @@
-ï»¿# WAB-Image Services-Widgets
+# WAB-Image Services-Widgets
 
 These are custom widgets to be used in Web App Builder, dealing specifically with Image Services. 
 
@@ -25,7 +25,7 @@ Widgets:
 *	Display current date of primary and secondary layer (ISPrimaryAcquisitionDate,ISSecondaryAcquisitionDate)
 
 Theme: 
-* 	Use the foldable wrapper theme to size the widgets and remove unwanted â€˜whiteâ€™ space. 
+* 	Use the foldable wrapper theme to size the widgets and remove unwanted ‘white’ space. 
 ## Instructions
 
 1. Download and unzip the .zip file.
@@ -67,5 +67,4 @@ limitations under the License.
 
 A copy of the license is available in the repository's [License.txt](License.txt?raw=true) file
 
-[](Esri Tags: WebApp Builder,ImageServices,Imagery)
-[](Esri Language: Javascript)
+
