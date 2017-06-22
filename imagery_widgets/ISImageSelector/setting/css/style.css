@@ -1,0 +1,60 @@
+/* jimu-widget-coordinate-setting */
+.jimu-widget-ISImageSelector-setting{
+  margin:0;
+  padding:0;
+  font-size:15px;
+}
+.jimu-widget-ISImageSelector-setting .dijitArrowButtonContainer{
+  width: 17px;
+}
+.jimu-widget-ISImageSelector-setting .dijitSelect{
+  height: 30px;
+  width: 100%;
+}
+.jimu-widget-ISImageSelector-setting .setting-table > thead > tr > th,
+.jimu-widget-ISImageSelector-setting .setting-table > tbody > tr > td{
+  height:40px;
+  line-height:40px;
+  vertical-align:middle;
+}
+
+.jimu-widget-ISImageSelector-setting .input-table > tbody > tr > .first{
+  width:auto;
+  text-align: right;
+  padding-right:15px;
+}
+
+.jimu-widget-ISImageSelector-setting .input-table > tbody > tr > .second{
+  width:250px;
+}
+
+.jimu-widget-ISImageSelector-setting .input-table > tbody > tr > .third{
+  width:35px;
+}
+.gameboard {
+    width: 330px;
+    height:310px;
+    border:3px solid white;
+    z-index: 1;
+}
+.gameboard div {
+    width: 100px;
+    height: 100px;
+    float: left;
+}
+.middle {
+    border: 1px solid;
+}
+.button {
+    background-color:white;
+    width: 160px;
+    margin:0 auto;
+}
+.updown {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+.leftright {
+    border-left: 1px solid;
+    border-right: 1px solid;
+}

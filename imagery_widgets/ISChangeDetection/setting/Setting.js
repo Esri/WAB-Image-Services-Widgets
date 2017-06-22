@@ -15,55 +15,91 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
-  'dojo/_base/declare',
-  'dijit/_WidgetsInTemplateMixin',
-  'jimu/BaseWidgetSetting'
+    'dojo/_base/declare',
+    'dijit/_WidgetsInTemplateMixin',
+    'jimu/BaseWidgetSetting', "dojo/dom-construct", "dojo/dom", "dijit/registry", "dijit/form/CheckBox"
 ],
-        function(
+        function (
                 declare,
                 _WidgetsInTemplateMixin,
-                BaseWidgetSetting
+                BaseWidgetSetting, domConstruct, dom, registry, CheckBox
                 ) {
 
-          return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
-            //these two properties is defined in the BaseWidget
-         
-            startup: function() {
-              this.inherited(arguments);
-           
-            },
-            _multiSelectClick: function() {
-             
-            },
+            return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
+                //these two properties is defined in the BaseWidget
+                ISLayers: [],
+                startup: function () {
+                    this.inherited(arguments);
+                    this.populatePage();
+                    this.setConfig(this.config);
+                },
+                postCreate: function () {
+                    this.inherited(arguments);
+                    var i = 0, j = 0;
+                    for (var a in this.map.layerIds) {
+                        if (this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) {
+                            var title = (this.map.getLayer(this.map.layerIds[a])).arcgisProps ? (this.map.getLayer(this.map.layerIds[a])).arcgisProps.title : "";
+                           if(title.charAt(title.length - 1) !== "_"){// if (!((title.toLowerCase()).includes("_result"))) {
+                                this.ISLayers[i] = this.map.getLayer(this.map.layerIds[a]);
+                                while (this.map.itemInfo.itemData.operationalLayers[j] && this.map.itemInfo.itemData.operationalLayers[j].url !== this.ISLayers[i].url) {
+                                    j++;
+                                }
+                                if (this.map.itemInfo.itemData.operationalLayers[j] && this.map.itemInfo.itemData.operationalLayers[j].title)
+                                    this.ISLayers[i].title = this.map.itemInfo.itemData.operationalLayers[j].title;
+                                else if (this.map.getLayer(this.map.layerIds[a]).name) {
+                                    this.ISLayers[i].title = this.map.getLayer(this.map.layerIds[a]).name;
+                                } else if (this.map.getLayer(this.map.layerIds[a]).id) {
+                                    this.ISLayers[i].title = this.map.getLayer(this.map.layerIds[a]).id;
+                                } else {
+                                    this.ISLayers[i].title = "Layer" + i;
+                                }
+                                i++;
+                            }
+                        }
+                    }
+                },
+                populatePage: function () {
+                    for (var a in this.ISLayers) {
+                        var layerSetting = domConstruct.create("tbody", {
+                            innerHTML: '<tr><br><td>' + this.ISLayers[a].title + '</td></tr>' +
+                                    '<tr><br /><td class="first"><input id="veg_' + a + '" /><label for="veg_' + a + '">Vegetation Index</label></td><td class="first">' +
+                                    '<input id="savi_' + a + '" /><label for="savi_' + a + '">Soil Adjusted Vegetation Index</label>' +
+                                    '</td><td class="first"><input id="water_' + a + '" /><label for="water_' + a + '">Water Index</label></td><td class="first">' +
+                                    '<input id="burn_' + a + '" /><label for="burn_' + a + '">Burn Index</label></td></tr>'
+                        });
+                        domConstruct.place(layerSetting, dom.byId("setting-table"));
+                        var vegIndex = new CheckBox({
+                            style: ""
+                        }, "veg_" + a).startup();
+                        var saviIndex = new CheckBox({
+                            style: "margin-left:10px;"
+                        }, "savi_" + a).startup();
+                        var waterIndex = new CheckBox({
+                            style: "margin-left:10px;"
+                        }, "water_" + a).startup();
+                        var burnIndex = new CheckBox({
+                            style: "margin-left:10px;"
+                        }, "burn_" + a).startup();
+                    }
 
-            _checkForImageServiceLayers: function() {
+                },
+                setConfig: function (config) {
+                    this.config = config;
+                },
+                getConfig: function () {
+                    for (var a in this.ISLayers) {
+                        var obj = {
+                            veg: registry.byId("veg_" + a).get('checked'),
+                            savi: registry.byId("savi_" + a).get('checked'),
+                            water: registry.byId("water_" + a).get('checked'),
+                            burn: registry.byId("burn_" + a).get('checked'),
+                            title: this.ISLayers[a].title
+                        };
+                        this.config[this.ISLayers[a].url.split('//')[1]] = obj;
+                    }
+                    return this.config;
+                }
 
-            },
 
-            _populateLayers: function() {
-              
-            },
-            _isImageServiceLayer: function(layer) {
-            
-            },
-            _populateFields: function() {
-             
-            },
-            _clearFields: function(obj) {
-              
-            },
-            _addFields: function(obj, searchTerm) {
-             
-            },
-            _getDefaultFields: function() {
-             
-            },
-            setConfig: function(config) {
-             
-            },
-            getConfig: function() {
-            
-            }
-
-          });
+            });
         });

@@ -1,0 +1,57 @@
+.jimu-widget-ISScatterplot{}
+.jimu-widget-ISScatterplot canvas{
+    /*margin: 0 auto;*/
+    /*display: none;;*/
+    border: 1px solid #d3d3d3;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+/*    cursor: url('images/draw.png'),auto;*/
+}
+.jimu-widget-ISScatterplot .draw-active{
+    /*cursor: url('images/draw-active.png'),auto;*/
+    cursor:crosshair;
+}
+.jimu-widget-ISScatterplot table .edit-button{
+    background-image: url('images/draw.png');
+    width: 17px;
+    height:17px;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+    cursor:pointer;
+}
+.jimu-widget-ISScatterplot .dijitSelect{
+    width:180px;
+}
+.jimu-widget-ISScatterplot .edit-section{
+    background:aliceblue;
+    padding:10px;
+    -webkit-transition: display 0.5s;
+    -moz-transition: display 0.5s;
+    -o-transition: display 0.5s;
+    transition: display 0.5s;
+}
+.jimu-widget-ISScatterplot .edit-section .close-edit-btn{
+    float:right;
+    background-image: url(images/close.png);
+    background-repeat: no-repeat;
+    width:15px;
+    height:15px;
+    cursor:pointer;
+}
+.jimu-widget-ISScatterplot .instructions {
+    /*display:none;*/
+    padding:2px;
+    font-size:11px;
+    /*margin:0 auto;*/
+    width:296px;
+}
+.jimu-widget-ISScatterplot table.input-section{
+    /*margin:0 auto;*/
+}

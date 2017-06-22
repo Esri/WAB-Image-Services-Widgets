@@ -1,46 +1,11 @@
 <div>
     <div data-dojo-attach-point="result" style="display:none;">
-
-        <input id="resultShow" data-dojo-type="dijit/form/CheckBox" checked/> <div style="width:130px;display:inline-block;"><label for="resultShow">Result</label></div>
-        <button data-dojo-type="dijit/form/Button" type="button" id="saveIconBtn"><img src="widgets/ISLayers/images/save.png" height="15"/></button>
+        
+        <input id="resultShow" data-dojo-type="dijit/form/CheckBox" checked/><label for="resultShow">Result</label> 
+        <button data-dojo-type="dijit/form/Button" type="button" id="saveIconBtn"><img src="widgets/ISLayers/images/down.png" height="15"/></button>
         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'saveIconBtn',position:['below']">
-            Save the Result layer in the layer list
+            Add the Result layer in the secondary layer list
         </div>
-    </div>
-    <div data-dojo-type="dijit/Dialog" id="saveDialog" title="Save Layer" style="background-color: white;">
-        <div id="saveOrAdd" style="display: block;">
-            <div style="color : #0080C0;">Do you want to save the layer to ArcGIS Online or add to the layer list?</div>
-            <br />
-            <br />
-            <button data-dojo-type='dijit/form/Button' type='button' id='saveToArcGIS'>Save</button>
-            <button data-dojo-type="dijit/form/Button" type="button" id="addBtn">Add</button>
-        </div>
-        <div id="askingItemId" style="display: none;">
-            <table>
-                <tr><td><label for="itemTitle" style="color: #0080C0;width:100px;">Title: </label></td><td><input id="itemTitle" data-dojo-type="dijit/form/TextBox" /></td>
-            </tr>
-            <tr><td>
-                    <label for="itemDescription" style="color: #0080C0;width:100px;">Description: </label></td><td><input id="itemDescription" data-dojo-type="dijit/form/TextBox" /></td>
-            </tr>
-            <tr><td><label for="itemTags" style="color : #0080C0;width:100px;">Tags:  </label></td><td><input id="itemTags" data-dojo-type="dijit/form/TextBox" /></td>
-            </tr></table>
-            <br />
-            
-            <button id="submitBtn" data-dojo-type="dijit/form/Button" type="button" style="margin-left: 100px;">Submit</button>
-        </div>
-        <div id="saveDialogContent" style="display: none;">
-            <label for="saveName" style="color: #0080C0;">Enter the name: </label> <input id="saveName" data-dojo-type="dijit/form/TextBox" />
-            <button data-dojo-type="dijit/form/Button" type="button" id="saveBtn">Save</button>
-            <br />
-            <br />
-            <div data-dojo-attach-point="saveDialogText" style="color: #0080C0;"></div>
-        </div>
-        <div id="overWrite" style="display: none;">
-            <div style ="color: #0080C0;">Name already exists in the Layer list. Do you want to overwrite it?</div>
-            <button data-dojo-type="dijit/form/Button" type="button" id="yes">Yes</button>
-            <button data-dojo-type="dijit/form/Button" type="button" id="no">No</button>
-        </div>
-
     </div>
     <div>
         <br/>
@@ -50,7 +15,7 @@
         </div>
         <select id="imageView" data-dojo-type="dijit/form/Select" style="width:130px;height:12px;">
         </select>
-        <button data-dojo-type="dijit/form/Button" type="button" id="secondaryBtn"><img src="widgets/ISLayers/images/down.png" height="15"/></button>
+        <button data-dojo-type="dijit/form/Button" type="button" id="secondaryBtn"><img src="widgets/ISLayers/images/down.png" height="15" /></button>
         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'secondaryBtn',position:['below']">
             Copy primary to secondary
         </div>
@@ -71,4 +36,5 @@
     </div>
 
     <br/>
+    <div data-dojo-attach-point="layersErrorDiv" style="color: red;"></div>
 </div>

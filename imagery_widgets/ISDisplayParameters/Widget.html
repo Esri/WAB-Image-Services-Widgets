@@ -1,0 +1,39 @@
+<div>
+    <div data-dojo-attach-point="displayParametersContainer">
+        <div data-dojo-attach-point="parametersLayerTitle"></div><br>
+        <br/>
+        <div style="width:80px;display:inline-block;"><label for="interpolation">Interpolation</label></div>:
+        <select id="interpolation" data-dojo-type="dijit/form/Select" style="width:55px;height:12px;">
+            <option value='Default'>Default</option>
+            <option value="RSP_BilinearInterpolation">Bilinear</option>
+            <option value="RSP_CubicConvolution">Cubic Convolution</option>
+            <option value="RSP_Majority">Majority</option>
+            <option value="RSP_NearestNeighbor">Nearest Neighbor</option>
+        </select>
+        <br/><br/>
+        <div style="width:80px;display:inline-block;"><label for="format">Compression</label></div>:
+        <select id="format" data-dojo-type="dijit/form/Select" style="width:55px;height:12px;">
+            <option value='Default'>Default</option>
+            <option value='None'>None</option>
+            <option value="jpgpng">jpgpng</option>
+            <option value="png">png</option>
+            <option value="jpg">jpg</option>
+        </select>
+        <div data-dojo-attach-point="qualityParameterDiv" style="display:inline-block;"><label for="quality">Quality(%):</label>
+        <select id="quality" data-dojo-type="dijit/form/Select" style="height:12px;">
+            <option value="100">100</option>
+            <option value="95">95</option>
+            <option value="80">80</option>
+            <option value="75">75</option>
+            <option value="60">60</option>
+            <option value="50">50</option>
+            <option value="30">30</option>
+            <option value="10">10</option>
+        </select></div><br>
+        <br/>
+         <button data-dojo-type="dijit/form/Button" type="button" id="ipapply" style="margin-left:40%;">Apply</button>
+    </div>
+    <div data-dojo-attach-point="displayParametersErrorContainer" style="color:red;"></div>
+</div>
+
+

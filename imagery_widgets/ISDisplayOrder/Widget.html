@@ -1,5 +1,6 @@
 <div>
-    <div>
+    <div data-dojo-attach-point="displayOrderContainer">
+        <div data-dojo-attach-point="displayOrderLayerTitle"></div><br>
         <div style="width:55px;display:inline-block;"><label for="mosaicMethod">Order by</label></div>:
         <select id="mosaicMethod" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
             <option value='esriMosaicNone'>Only Scale</option>
@@ -7,10 +8,11 @@
             <option value="esriMosaicCenter">Image center closest to center</option>
             <option value="esriMosaicNorthwest">Fixed order w/ most NW on top</option>
             <option value="esriMosaicNadir">Sensor location closest to center</option>
+            <option value="esriMosaicViewpoint">Closest to View Point</option>
             <option value="esriMosaicSeamline">Defined Seamlines</option>
             <option value="esriMosaicLockRaster">A list of images</option>
         </select>
-        <div data-dojo-type="dijit/form/DropDownButton">
+        <div data-dojo-attach-point="dropDownDisplayOrderOptions" data-dojo-type="dijit/form/DropDownButton">
             <span><img src="widgets/ISDisplayOrder/images/props.png" height="15"/></span>
             <div data-dojo-type="dijit/TooltipDialog">
                 <div data-dojo-attach-point="notseamline">
@@ -34,9 +36,10 @@
             <br/>
             <div style="width:55px;display:inline-block;"><label for="sortField">Attribute</label></div>:
             <select id="sortField" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
-            </select>
+            </select><br /><br/>
             <div style="display:inline-block;"><label for="sortValue"> Priority</label></div>:
             <div data-dojo-type="dijit/form/TextBox" id="sortValue" style="width:65px;height:30px;"></div>
+            <input style="display: none;" type="text" id="sortValueDate" data-dojo-type="dijit/form/DateTextBox" required="true" value="2017-01-01" />
         </div>
         <div data-dojo-attach-point="lockraster">
             <br/>
@@ -47,6 +50,7 @@
             <button data-dojo-type="dijit/form/Button" type="button" id="mrapply">Apply</button>
         </div>
     </div>
+    <div data-dojo-attach-point="displayOrderErrorContainer" style="color:red;"></div>
 </div>
 
 

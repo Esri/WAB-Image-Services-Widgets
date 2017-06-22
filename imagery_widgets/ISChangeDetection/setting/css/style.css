@@ -1,0 +1,32 @@
+.jimu-widget-ISChangeDetection-setting{
+  margin:0;
+  padding:0;
+  font-size:15px;
+}
+.jimu-widget-ISChangeDetection-setting .dijitArrowButtonContainer{
+  width: 17px;
+}
+.jimu-widget-ISChangeDetection-setting .dijitSelect{
+  height: 30px;
+  width: 100%;
+}
+.jimu-widget-ISChangeDetection-setting .setting-table > thead > tr > th,
+.jimu-widget-ISChangeDetection-setting .setting-table > tbody > tr > td{
+  height:40px;
+  line-height:40px;
+  vertical-align:middle;
+}
+
+.jimu-widget-ISChangeDetection-setting .input-table > tbody > tr > .first{
+  width:auto;
+ margin-top: 10px;
+ margin-left: 10px;
+}
+
+.jimu-widget-ISChangeDetection-setting .input-table > tbody > tr > .second{
+  width:250px;
+}
+
+.jimu-widget-ISChangeDetection-setting .input-table > tbody > tr > .third{
+  width:35px;
+}

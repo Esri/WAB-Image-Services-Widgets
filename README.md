@@ -1,46 +1,12 @@
-﻿# WAB-Image Services-Widgets
+# Web AppBuilder for Image Services 2.0 Beta
 
-These are custom widgets to be used in Web App Builder, dealing specifically with Image Services. 
+Web AppBuilder for Image Services (WABIS) is a set of custom widgets to be used in Web AppBuilder that are designed to work with image services. 
 
-### [View live app here with IS Mensuration and IS Classification widgets](http://imageryworkflows.arcgis.com/SampleApp)
-
-### [View live app here with timeFilter, IS Change Detection and IS Split Tool](http://imageryworkflows.arcgis.com/Sample_App)
-
-### [View live app here with IS Compare, IS Display Order, IS Parameters, IS Renderer and IS Spectral Profile](http://imageryworkflows.arcgis.com/SampleAppwithimagerywidgets)
-
-
-## Features
-Widgets:
-*	Quickly set primary layers on which most widget will work (ISLayer)
-*	Set renderer to be applied to primary layer (ISRenderer)
-*	Do simple image classification (ISClassification)
-*	Provide a time slider/filter based on image intersecting the current extent (ISTimeFilter)
-*	Change the display order of imagery (ISDisplayOrder)
-*	Plot a spectral profile from multispectral imagery (ISSpectralProfile)
-*	Display all images sorted by selected date based on image intersecting the current extent (ISTimeSelect).
-*	Change the parameters such as compression and sampling method (ISParameters)
-*	Set secondary layer to be used for comparisons and change (ISLayer)
-*	Compare two layers using transparency or swipe (ISCompare)
-*	Perform change detection between two images using the ISChangeDetection Widget
-*	Display current date of primary and secondary layer (ISPrimaryAcquisitionDate,ISSecondaryAcquisitionDate)
-
-Theme: 
-* 	Use the foldable wrapper theme to size the widgets and remove unwanted ‘white’ space. 
-## Instructions
-
-1. Download and unzip the .zip file.
-2. Browse to the documentation folder.
-3. Open and follow instructions in the "WEBAPP BUILDER USER DOC.docx" 
+WABIS 2.0 Beta is provided here for testing. For more extensive documentation on WABIS 1.0, see the Master branch of this GitHub repo. 
 
 ## Requirements
 
-* IIS 
-* Web App Builder.
-* Web Access.
-
-## Resources
-
-* [Web App Builder for ArcGIS (Developer Edition)] (https://developers.arcgis.com/web-appbuilder/)
+* [Web AppBuilder for ArcGIS (Developer Edition)] (https://developers.arcgis.com/web-appbuilder/)
 
 ## Issues
 
@@ -48,7 +14,7 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 ## Contributing
 
-Want to contribute. Create your own fork and update and let us know via email.  
+Want to contribute? Create your own fork and update and let us know via email.  
 
 ## Licensing
 Copyright 2016 Esri

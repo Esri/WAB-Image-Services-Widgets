@@ -1,0 +1,50 @@
+<div>
+<div id="noCanvasSupport" style="color:red;">This browser does not support HTML5 canvas tag.</div>
+<div id="scatterplotNode" style="margin:0 auto;">
+  <div data-dojo-attach-point="scatterPlotLayerTitle"></div><br>
+  <table class="input-section"><tr><td class="first">
+  <table>
+  <tr><td>
+  <label>X:</label></td><td class="second">
+  <select data-dojo-type="dijit/form/Select" data-dojo-attach-point="xSelect">
+  </select>
+  </td></tr>
+      
+  <tr><td>
+  <label>Y:</label></td><td class="second">
+  <select data-dojo-type="dijit/form/Select" data-dojo-attach-point="ySelect">
+  </select>
+  </td></tr>
+  </table></td><td style="width:25px;">
+      <div class="edit-button" data-dojo-attach-point="changeColor" title="Draw Tool Setting"></div>
+  </td></tr></table>
+  <div id="changeColorSection" class="edit-section" style="display:none;">
+  <span style="color:black !important">Draw Color:</span>
+  <div data-dojo-type="dijit/form/DropDownButton" style="display: inline-block;" id="drawColorButton">
+    <span><img src="./widgets/ISScatterplot/images/ColorPicker.png" width="15" height="15" alt=""/></span>
+    <div data-dojo-type="dijit/TooltipDialog">
+      <div id="drawColorPalette"></div>
+    </div>
+  </div>
+  <div data-dojo-attach-point="closeEdit" class="close-edit-btn" title="Hide Setting"></div>
+  </div>
+  <br>
+  <div id="draw-color-error" style="display:none; color:red">Color lies on frequency ramp. Choose another color.</div>
+  <div id="band-error" style="display:none; color:red">Please select different bands.</div>
+  <div id="canvasBlock" style="width:300px;position:relative;">
+  <canvas data-dojo-attach-point="ScatterPlotWidgetCanvas" width="296" height="316"  class="draw-active">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+  </div>
+  <div id="drawInstructions" class="instructions">
+      Draw on the plot to select pixels on the map.<br>
+      Click on the map to see the point on the plot.
+  </div>
+  <table id="defineAOISection"><tr>
+  <td><input data-dojo-type="dijit/form/CheckBox" id="defineAOI"/><label for="defineAOI">Define Areas of Interest</label></td>
+  <td ><button data-dojo-attach-point="applyAOI" data-dojo-type="dijit/form/Button" style="display:none;">Apply</button><td>
+  <td><button data-dojo-attach-point="resetAOI" data-dojo-type="dijit/form/Button" style="display:none;" title="Use Map Extent">Reset</button><td>
+  </tr></table>
+</div>
+<div data-dojo-attach-point="scatterplotErrorContainer" style="color:red;"></div>
+</div>

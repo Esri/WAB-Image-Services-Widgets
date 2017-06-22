@@ -1,0 +1,41 @@
+<div>
+     <div id='selectExportDisplay' style='display: none;'>
+         
+    <label for='saveAndExportOption'>Mode:  </label><select data-dojo-type="dijit/form/Select" style="height: 21px;" id="saveAndExportOption">
+           <option value='agol'>Save to Portal</option>
+           <option value='disk'>Save to Disk</option>
+         </select>
+    <br /><br />
+    </div>
+    <div data-dojo-attach-point="exportLayerTitle"></div><br>
+    <div id="saveAgolContainer" style='display: none;'>
+        
+ 
+    <table style="border: 0px solid transparent;">
+    <tr><td><label for="itemTitle" style="color: #0080C0;width:100px;">Title: </label></td><td><textarea id="itemTitle" rows="3" style="height: 40px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+            </tr>
+            <tr><td>
+                    <label for="itemDescription" style="color: #0080C0;width:100px;">Description: </label></td><td><textarea id="itemDescription"  rows="6" style="height: 80px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+            </tr>
+            <tr><td><label for="itemTags" style="color : #0080C0;width:100px;">Tags:  </label></td><td><textarea id="itemTags" rows="2" style="width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+            </tr></table>
+            <br />
+            
+            <button id="submitAgolBtn" data-dojo-type="dijit/form/Button" type="button" style="margin-left: 40%;">Submit</button>
+            <div data-dojo-attach-point="successNotification" style="color: #0080C0;"></div>
+    </div>
+    <div id="exportSaveContainer" style='display: none;'>
+        <label for="pixelSize">Pixel Size:&nbsp;</label>
+        <input type="text" id="pixelSize" data-dojo-type="dijit/form/TextBox" style="width: 100px;"/>&nbsp;&nbsp;m<br /><br />
+        <label for="outputSp">Output Spatial Reference:&nbsp;</label>
+        <select  id="outputSp" data-dojo-type="dijit/form/Select" style="width: 100px;"></select>
+        <div id="errorPixelSize" style="color: #0080C0;"></div><br />
+         <input data-dojo-type="dijit/form/CheckBox"  id="renderer"/> <label for="renderer">Current Renderer</label>
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         <input data-dojo-type="dijit/form/CheckBox"  id="defineExtent"/> <label for="defineExtent">Define Extent</label><br /><br />
+         <p style='text-align: justify;'><b>Note:</b> If Current Renderer is checked, the rendering<br /> is exported, else the original data values<br/>will be exported.</p>
+         <br />
+    <button data-dojo-type="dijit/form/Button"  id="exportBtn" type="button" style="margin-left: 40%" >Export</button>
+    <a href="none" download id="linkDownload" style="display: none;">ExportImage</a>
+    </div>
+</div>

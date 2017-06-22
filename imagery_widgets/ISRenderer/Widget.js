@@ -22,7 +22,7 @@ define([
     "dojo/dom-style",
     'dojo/dom-construct',
     "esri/request",
-     "dojo/html",
+    "dojo/html",
     "esri/layers/RasterFunction",
     "dijit/form/Select",
     "dijit/form/HorizontalSlider",
@@ -35,7 +35,7 @@ define([
     "dijit/form/DropDownButton",
     "dijit/Tooltip"
 ],
-        function(
+        function (
                 declare,
                 _WidgetsInTemplateMixin,
                 BaseWidget,
@@ -45,12 +45,12 @@ define([
                 baseClass: 'jimu-widget-ISRenderer',
                 previousImageServiceLayerUrl: null,
                 imageServiceLayer: null,
-                startup: function() {
+                startup: function () {
                     this.inherited(arguments);
                     domConstruct.place('<img id="loadingid" style="position: absolute;top:0;bottom: 0;left: 0;right: 0;margin:auto;z-index:100;" src="' + require.toUrl('jimu') + '/images/loading.gif">', this.domNode);
                     this.hideLoading();
                 },
-                postCreate: function() {
+                postCreate: function () {
                     registry.byId("Gamma").on("change", lang.hitch(this, this.changeGammaLabel));
                     registry.byId("Gamma_label").on("change", lang.hitch(this, this.changeGammaSlider));
 
@@ -62,59 +62,74 @@ define([
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
                     }
                 },
-                onOpen: function() {
+                onOpen: function () {
                     this.refreshData();
-                    if(this.map) 
+                    if (this.map)
                         this.refreshHandler = this.map.on("update-end", lang.hitch(this, this.refreshData));
                 },
-                onClose: function() {
-                    if(this.refreshHandler) {
+                onClose: function () {
+                    if (this.refreshHandler) {
                         this.refreshHandler.remove();
                         this.refreshHandler = null;
                     }
                     this.previousImageServiceLayerUrl = null;
                 },
-                refreshData: function() {
+                refreshData: function () {
                     if (this.map.layerIds) {
-                        if (this.map.getLayer("resultLayer")) {
-                            this.imageServiceLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 2]);
+                        if (this.map.primaryLayer) {
+                            this.imageServiceLayer = this.map.getLayer(this.map.primaryLayer);
                         } else {
-                            this.imageServiceLayer = this.map.getLayer(this.map.layerIds[this.map.layerIds.length - 1]);
-                        }
-                        if(this.imageServiceLayer.url !== this.previousImageServiceLayerUrl) {
-                        this.populateBands();
-                        this.populateServiceFunctions();
-                        }
-                        if (this.imageServiceLayer.bandIds) {
-                            var bands = this.imageServiceLayer.bandIds;
-                            registry.byId("Red").set("value", bands[0]);
-                            registry.byId("Green").set("value", bands[1]);
-                            registry.byId("Blue").set("value", bands[2]);
-                        }
-
-                        if (this.imageServiceLayer.renderingRule) {
-                            var rrule = new RasterFunction(this.imageServiceLayer.renderingRule);
-                            if (rrule.functionName == "Stretch") {
-                                var arguments = rrule.functionArguments;
-                                if (arguments.DRA) {
-                                    registry.byId("DRA").set("checked", arguments.DRA);
-                                }
-                                registry.byId("StretchType").set("value", arguments.StretchType);
-                                if (arguments.MaxPercent) {
-                                    registry.byId("MaxPercent").set("value", arguments.MaxPercent);
-                                }
-                                if (arguments.MinPercent) {
-                                    registry.byId("MaxPercent").set("value", arguments.MinPercent);
-                                }
-                                if (arguments.NumberOfStandardDeviations) {
-                                    registry.byId("NumberOfStandardDeviations").set("value", arguments.NumberOfStandardDeviations);
-                                }
-                                registry.byId("Gamma_label").set("value", arguments.Gamma[0]);
+                            for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
+                                var layerObject = this.map.getLayer(this.map.layerIds[a]);
+                                var title = layerObject.arcgisProps && layerObject.arcgisProps.title ? layerObject.arcgisProps.title : layerObject.title;
+                                if (layerObject && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_")) {
+                                    this.imageServiceLayer = layerObject;
+                                    break;
+                                } else
+                                    this.imageServiceLayer = null;
                             }
+                        }
+                        if (this.imageServiceLayer) {
+                            domStyle.set(this.rendererContainer, "display", "block");
+                            html.set(this.rendererErrorContainer, "");
+                            if (this.imageServiceLayer.url !== this.previousImageServiceLayerUrl) {
+                                this.populateBands();
+                                this.populateServiceFunctions();
+                            }
+                            if (this.imageServiceLayer.bandIds) {
+                                var bands = this.imageServiceLayer.bandIds;
+                                registry.byId("Red").set("value", bands[0]);
+                                registry.byId("Green").set("value", bands[1]);
+                                registry.byId("Blue").set("value", bands[2]);
+                            }
+
+                            if (this.imageServiceLayer.renderingRule) {
+                                var rrule = new RasterFunction(this.imageServiceLayer.renderingRule);
+                                if (rrule.functionName == "Stretch") {
+                                    var arguments = rrule.functionArguments;
+                                    if (arguments.DRA) {
+                                        registry.byId("DRA").set("checked", arguments.DRA);
+                                    }
+                                    registry.byId("StretchType").set("value", arguments.StretchType);
+                                    if (arguments.MaxPercent) {
+                                        registry.byId("MaxPercent").set("value", arguments.MaxPercent);
+                                    }
+                                    if (arguments.MinPercent) {
+                                        registry.byId("MaxPercent").set("value", arguments.MinPercent);
+                                    }
+                                    if (arguments.NumberOfStandardDeviations) {
+                                        registry.byId("NumberOfStandardDeviations").set("value", arguments.NumberOfStandardDeviations);
+                                    }
+                                    registry.byId("Gamma_label").set("value", arguments.Gamma[0]);
+                                }
+                            }
+                        } else {
+                            domStyle.set(this.rendererContainer, "display", "none");
+                            html.set(this.rendererErrorContainer, "No visible Imagery Layers in the map.");
                         }
                     }
                 },
-                populateBands: function() {
+                populateBands: function () {
                     this.previousImageServiceLayerUrl = this.imageServiceLayer.url;
                     var bandCount = this.imageServiceLayer.bandCount;
                     registry.byId("Red").removeOption(registry.byId('Red').getOptions());
@@ -131,13 +146,13 @@ define([
                         registry.byId("Blue").addOption({label: '' + (i + 1) + '', value: '' + i + ''});
                     }
                 },
-                changeGammaLabel: function() {
+                changeGammaLabel: function () {
                     registry.byId("Gamma_label").set("value", parseFloat(Math.pow(10, (registry.byId("Gamma").get("value") / 10))).toFixed(2));
                 },
-                changeGammaSlider: function() {
+                changeGammaSlider: function () {
                     registry.byId("Gamma").set("value", 10 * ((Math.log(registry.byId("Gamma_label").get("value")) / Math.log(10))));
                 },
-                applyParams: function() {
+                applyParams: function () {
                     if (registry.byId("service_functions").get("value") != "None") {
                         var rasterFunction = new RasterFunction();
                         rasterFunction.functionName = registry.byId("service_functions").get("value");
@@ -150,16 +165,16 @@ define([
                             arguments.StretchType = parseInt(registry.byId("StretchType").get("value"));
                             switch (registry.byId("StretchType").get("value")) {
                                 case '3' :
-                                    {
-                                        arguments.NumberOfStandardDeviations = registry.byId("NumberOfStandardDeviations").get("value");
-                                        break;
-                                    }
+                                {
+                                    arguments.NumberOfStandardDeviations = registry.byId("NumberOfStandardDeviations").get("value");
+                                    break;
+                                }
                                 case '6':
-                                    {
-                                        arguments.MaxPercent = registry.byId("MaxPercent").get("value");
-                                        arguments.MinPercent = registry.byId("MinPercent").get("value");
-                                        break;
-                                    }
+                                {
+                                    arguments.MaxPercent = registry.byId("MaxPercent").get("value");
+                                    arguments.MinPercent = registry.byId("MinPercent").get("value");
+                                    break;
+                                }
                             }
                         } else {
                             this.imageServiceLayer.setBandIds([], true);
@@ -173,69 +188,69 @@ define([
 
                     this.imageServiceLayer.refresh();
                 },
-                populateServiceFunctions: function() {
-                    
-                    if(this.imageServiceLayer.rasterFunctionInfos && this.imageServiceLayer.name)
+                populateServiceFunctions: function () {
+
+                    if (this.imageServiceLayer.rasterFunctionInfos && this.imageServiceLayer.name)
                     {
-                       var title = this.imageServiceLayer.title || this.imageServiceLayer.name || "";
-                        html.set(this.activeLayerName,title);
-                    var  data = this.imageServiceLayer.rasterFunctionInfos;
-                    this.rendererRR(data);
-                    }
-                    else
+                        var title = this.imageServiceLayer.title || this.imageServiceLayer.name || "";
+                        html.set(this.activeLayerName, title);
+                        var data = this.imageServiceLayer.rasterFunctionInfos;
+                        this.rendererRR(data);
+                    } else
                     {
-                     var request = esriRequest({
-                        url: this.imageServiceLayer.url,
-                        content: {
-                            f: "json"
-                        },
-                        handleAs: "json",
-                        callbackParamName: "callback"
-                    });   
-                    request.then(lang.hitch(this, function(data) {
+                        var request = esriRequest({
+                            url: this.imageServiceLayer.url,
+                            content: {
+                                f: "json"
+                            },
+                            handleAs: "json",
+                            callbackParamName: "callback"
+                        });
+                        request.then(lang.hitch(this, function (data) {
                             var title = data.title || data.name || "";
-                        html.set(this.activeLayerName,title);
-                 this.rendererRR(data.rasterFunctionInfos);
-                    }),function(error) {
-                      console.log("Request failed");
-                    });
-                    }},
-                rendererRR : function(data){
-                
-                        registry.byId("service_functions").removeOption(registry.byId('service_functions').getOptions());
-                     
-                        if (this.imageServiceLayer) {
-                            for (var i = 0; i < data.length; i++) {
-                                registry.byId("service_functions").addOption({label: data[i].name, value: data[i].name});
-                            }
+                            html.set(this.activeLayerName, title);
+                            this.rendererRR(data.rasterFunctionInfos);
+                        }), function (error) {
+                            console.log("Request failed");
+                        });
+                    }
+                },
+                rendererRR: function (data) {
+
+                    registry.byId("service_functions").removeOption(registry.byId('service_functions').getOptions());
+
+                    if (this.imageServiceLayer) {
+                        for (var i = 0; i < data.length; i++) {
+                            registry.byId("service_functions").addOption({label: data[i].name, value: data[i].name});
                         }
-                        registry.byId("service_functions").addOption({label: "Stretch", value: "Stretch"});
-                        if (this.imageServiceLayer.renderingRule) {
-                            var rrule = new RasterFunction(this.imageServiceLayer.renderingRule);
-                            registry.byId("service_functions").set("value", rrule.functionName);
-                            if (rrule.functionName == "Stretch") {
-                                registry.byId("StretchType").set("value", rrule.functionArguments.StretchType);
-                                registry.byId("DRA").set("checked", rrule.functionArguments.DRA);
-                                registry.byId("Gamma_label").set("value", rrule.functionArguments.Gamma[0]);
-                                switch (rrule.functionArguments.StretchType) {
-                                    case '3' :
-                                        {
-                                            registry.byId("NumberOfStandardDeviations").set("value", rrule.functionArguments.NumberOfStandardDeviations);
-                                            break;
-                                        }
-                                    case '6' :
-                                        {
-                                            registry.byId("MaxPercent").set("value", rrule.functionArguments.MaxPercent);
-                                            registry.byId("MinPercent").set("value", rrule.functionArguments.MinPercent);
-                                            break;
-                                        }
+                    }
+                    registry.byId("service_functions").addOption({label: "Stretch", value: "Stretch"});
+                    if (this.imageServiceLayer.renderingRule) {
+                        var rrule = new RasterFunction(this.imageServiceLayer.renderingRule);
+                        registry.byId("service_functions").set("value", rrule.functionName);
+                        if (rrule.functionName == "Stretch") {
+                            registry.byId("StretchType").set("value", rrule.functionArguments.StretchType);
+                            registry.byId("DRA").set("checked", rrule.functionArguments.DRA);
+                            registry.byId("Gamma_label").set("value", rrule.functionArguments.Gamma[0]);
+                            switch (rrule.functionArguments.StretchType) {
+                                case '3' :
+                                {
+                                    registry.byId("NumberOfStandardDeviations").set("value", rrule.functionArguments.NumberOfStandardDeviations);
+                                    break;
+                                }
+                                case '6' :
+                                {
+                                    registry.byId("MaxPercent").set("value", rrule.functionArguments.MaxPercent);
+                                    registry.byId("MinPercent").set("value", rrule.functionArguments.MinPercent);
+                                    break;
                                 }
                             }
                         }
-                        this.checkStretchDiv();
-                  
+                    }
+                    this.checkStretchDiv();
+
                 },
-                checkStretchDiv: function() {
+                checkStretchDiv: function () {
                     if (registry.byId("service_functions").get("value") == "Stretch") {
                         domStyle.set(this.stretchDiv, "display", "inline");
                         this.checkStretchTypeDiv();
@@ -243,34 +258,34 @@ define([
                         domStyle.set(this.stretchDiv, "display", "none");
                     }
                 },
-                checkStretchTypeDiv: function() {
+                checkStretchTypeDiv: function () {
                     switch (registry.byId("StretchType").get("value")) {
                         case '5':
-                            {
-                                domStyle.set(this.StdDev, "display", "none");
-                                domStyle.set(this.PercentClip, "display", "none");
-                                break;
-                            }
+                        {
+                            domStyle.set(this.StdDev, "display", "none");
+                            domStyle.set(this.PercentClip, "display", "none");
+                            break;
+                        }
                         case '3':
-                            {
-                                domStyle.set(this.StdDev, "display", "inline");
-                                domStyle.set(this.PercentClip, "display", "none");
-                                break;
-                            }
+                        {
+                            domStyle.set(this.StdDev, "display", "inline");
+                            domStyle.set(this.PercentClip, "display", "none");
+                            break;
+                        }
                         case '6':
-                            {
-                                domStyle.set(this.StdDev, "display", "none");
-                                domStyle.set(this.PercentClip, "display", "inline");
-                                break;
-                            }
+                        {
+                            domStyle.set(this.StdDev, "display", "none");
+                            domStyle.set(this.PercentClip, "display", "inline");
+                            break;
+                        }
 
                     }
                 },
-                showLoading: function() {
-                    domStyle.set("loadingid","display","block");
+                showLoading: function () {
+                    domStyle.set("loadingid", "display", "block");
                 },
-                hideLoading: function() {
-                    domStyle.set("loadingid","display","none");
+                hideLoading: function () {
+                    domStyle.set("loadingid", "display", "none");
                 }
 
             });

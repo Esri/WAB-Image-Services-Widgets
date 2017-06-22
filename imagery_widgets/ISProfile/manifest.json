@@ -1,0 +1,17 @@
+{
+  "name": "ISProfile",
+  "label": "IS Profile",
+  "platform": "HTML",
+  "version": "",
+  "author": "Esri",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasLocale" : false,
+    "hasSettingPage" : true,
+    "hasSettingUIFile" : true,
+    "hasSettingLocale" : false,
+    "hasSettingStyle" : true
+  }
+}

@@ -1,28 +1,40 @@
 <div>
-    
     <div id="changeDetectionDisplay" style="display: block;">
-    <label for='method'>Method :</label>
-    <select id="method" data-dojo-type="dijit/form/Select">
-        <option value="difference">Difference</option>
-        <option value="ndvi">Vegetation Index</option>
-        <option value="savi">Soil Adjusted Veg. Index</option>
-        <option value="water">Water Index</option>
-        <option value="burn">Burn Index</option>
-    </select>
-    <button data-dojo-type="dijit/form/Button" type="button" id="changeDetectionApply">Apply</button>
-    <div id="bandInputs" style="display: none;">
-        <br />
-        
-        <table style="border: 0 solid transparent;"><tr><td><div id="bandName1" style="display: inline-block;color: #0080C0;font-weight: bolder;"></div></td>
-                <td><input data-dojo-type="dijit/form/NumberTextBox" id="band1" style="width: 200px;display: inline-block;" placeholder="Enter zero based band"/>
-                </td></tr>
-            <tr><td><div id="bandName2" style="display: inline-block;color: #0080C0;font-weight: bolder;"></div></td>
-                <td><input data-dojo-type="dijit/form/NumberTextBox" id="band2" style="width: 200px;display: inline-block;" placeholder="Enter zero based band" /></td></tr></table>
-                <br />
-                <span style='color:red;'>Note -  Zero based band means the indexed band order value in the service. i.e If Red band order in the image service is 4, then indexed band order will be 3.</span>
-    </div>
+        <label for='method'>Method: </label>
+        <select id="method" data-dojo-type="dijit/form/Select">
+        </select>
+        <div data-dojo-attach-point="changeMode" style="display:none;">
+            <br />
+            <label for="changeModeList">Mode: </label><select id="changeModeList" data-dojo-type="dijit/form/Select">
+                <option value="image">Difference Image</option>
+                <option value="mask">Difference Mask</option>
+                <option value="threshold">Threshold Mask</option>
+            </select>
+        </div>
+        <div id="bandInputs" style="display: none;">
+            <br />
+            <table style="border: 0 solid transparent;"><tr><td><div id="bandName1" style="display: inline-block;font-weight: bolder;"></div></td>
+                    <td><select data-dojo-type="dijit/form/Select" id="band1">
+                        </select>
+                    </td></tr>
+                <tr><td><div id="bandName2" style="display: inline-block;font-weight: bolder;"></div></td>
+                    <td><select data-dojo-type="dijit/form/Select" id="band2">
+                        </select></td></tr></table>
+        </div>
+        <div data-dojo-attach-point="maskRangeSpinners" style="display: none;">
+            <table><tr><td><span style="font-weight: bolder;">Positive Difference: </span></td><td><input id="positiveRangeMin" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:5,place:0.1}, value:0" style="width:60px;height:28px;"/>&nbsp;&nbsp;to&nbsp;&nbsp;<input id="positiveRangeMax" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:5}, value:1" style="width:60px;height:28px;"/>
+                    </td></tr><tr><br/></tr>
+            <tr><td><span style="font-weight: bolder;">Negative Difference: </span></td><td><input id="negativeRangeMin" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:-5,max:0,place:0.1}, value:-1" style="width:60px;height:28px;"/>&nbsp;&nbsp;to&nbsp;&nbsp;<input id="negativeRangeMax" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:-5,max:0}, value:0" style="width:60px;height:28px;"/>
+                    </td></tr></table></div>
+        <div data-dojo-attach-point="thresholdRangeSpinners" style="display: none;">
+            <table><tr><td><span style="font-weight: bolder;">Threshold: </span></td><td><input id="thresholdValue" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:-1,max:1,place:0.1}, value:0" style="width:60px;height:28px;"/>
+                    </td></tr><tr><br/></tr>
+            <tr><td><span style="font-weight: bolder;">Difference: </span></td><td><input id="differenceValue" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:1,place:0.1}, value:0" style="width:60px;height:28px;"/>
+                    </td></tr></table></div>
+        <br/><br />
+        <button data-dojo-type="dijit/form/Button" type="button" id="changeDetectionApply" style="margin-left: 40%;">Apply</button>
     </div>
     <div data-dojo-attach-point="setPrimarySecondaryLayers" style="color: #0080C0;">
     </div>
-   
+
 </div>

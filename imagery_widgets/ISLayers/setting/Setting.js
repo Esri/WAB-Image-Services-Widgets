@@ -17,33 +17,44 @@
 define([
     'dojo/_base/declare',
     'jimu/BaseWidgetSetting',
-    'dijit/_WidgetsInTemplateMixin',
+    'dijit/_WidgetsInTemplateMixin', 'dijit/form/CheckBox', "dijit/registry", "dojo/dom-construct",
     'dijit/form/TextBox',
-    'dijit/form/CheckBox'
-  ],
-  function(
-    declare,
-    BaseWidgetSetting,
-    _WidgetsInTemplateMixin) {
-    return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
-
-      baseClass: 'jimu-widget-ImageLayers-setting',
-
-      startup: function() {
-        this.inherited(arguments);
-        this.setConfig(this.config);
-      },
-
-      setConfig: function(config) {
-        this.config = config;
-        if (config.webmapId !== undefined) {
-          this.webmapId.set('value', config.webmapId);
-        }
-      },
-
-      getConfig: function() {
-        this.config.webmapId = this.webmapId.get('value');
-        return this.config;
-      }
-    });
-  });
+],
+        function (
+                declare,
+                BaseWidgetSetting,
+                _WidgetsInTemplateMixin, CheckBox, registry, domConstruct) {
+            return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
+                baseClass: 'jimu-widget-ImageLayers-setting',
+                startup: function () {
+                    this.inherited(arguments);
+                    this.createConfig();
+                    this.setConfig(this.config);
+                },
+                createConfig: function () {
+                    this.inherited(arguments);
+                    var mainLayers = this.map.itemInfo.itemData.operationalLayers;
+                    registry.byId("primaryLayerSelect").addOption({label: "Select layer", value: ""});
+                    registry.byId("secondaryLayerSelect").addOption({label: "Select layer", value: ""});
+                    for (var a in mainLayers) {
+                        if ((mainLayers[a].layerObject && mainLayers[a].layerObject.serviceDataType.substr(0, 16) === "esriImageService") || (mainLayers[a].layerType && mainLayers[a].layerType === "ArcGISImageServiceLayer")) {
+                            if (((mainLayers[a].title).charAt(mainLayers[a].title.length - 1)) !== "_") //if(!(((mainLayers[a].title).toLowerCase()).includes("_result")))
+                            registry.byId("primaryLayerSelect").addOption({label: mainLayers[a].title, value: mainLayers[a].id});
+                            registry.byId("secondaryLayerSelect").addOption({label: mainLayers[a].title, value: mainLayers[a].id});
+                        }
+                    }
+                },
+                setConfig: function (config) {
+                    this.config = config;
+                },
+                getConfig: function () {
+                    this.config.primaryLayer = registry.byId("primaryLayerSelect").get("value");
+                    this.config.secondaryLayer = registry.byId("secondaryLayerSelect").get("value");
+                    var mainLayers = this.map.itemInfo.itemData.operationalLayers;
+                    this.map.resultLayer = false;
+                    this.map.primaryLayer = this.config.primaryLayer;
+                    this.map.secondaryLayer = this.config.secondaryLayer;
+                    return this.config;
+                }
+            });
+        });
