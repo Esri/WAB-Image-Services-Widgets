@@ -2,11 +2,11 @@
 
 Web AppBuilder for Image Services (WABIS) is a set of custom widgets to be used in Web AppBuilder that are designed to work with image services. 
 
-WABIS 2.0 Beta is provided here for testing. For more extensive documentation on WABIS 1.0, see the Master branch of this GitHub repo. 
+WABIS 2.0 Beta is provided here for testing. For more extensive documentation on WABIS 1.0, see the master branch of this repo. 
 
 ## Requirements
 
-* [Web AppBuilder for ArcGIS (Developer Edition)] (https://developers.arcgis.com/web-appbuilder/)
+* [Web AppBuilder for ArcGIS (Developer Edition)](https://developers.arcgis.com/web-appbuilder/)
 
 ## Issues
 
