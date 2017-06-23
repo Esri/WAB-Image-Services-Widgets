@@ -83,7 +83,8 @@ define([
                         }
                         if (document.getElementById("swipewidget")) {
                             for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
-                                var layerObject = layerObject.arcgisProps && layerObject.arcgisProps.title ? layerObject.arcgisProps.title : layerObject.title;
+                                var layerObject = this.map.getLayer(this.map.layerIds[a]);
+                                var title = layerObject.arcgisProps && layerObject.arcgisProps.title ? layerObject.arcgisProps.title : layerObject.title;
                                 if (layerObject && layerObject.id !== this.primaryLayer.id && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_")) {
                                     this.secondaryLayer = layerObject;
                                     break;
