@@ -91,7 +91,8 @@ define([
                                 } else
                                     this.secondaryLayer = null;
                             }
-                        }
+                        }else
+                            this.secondaryLayer = null;
                     }
                     
                 },
