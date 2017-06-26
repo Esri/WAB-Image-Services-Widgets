@@ -49,7 +49,7 @@ define([
                     this.inherited(arguments);
                     var i = 0, j = 0;
                     for (var a in this.map.layerIds) {
-                        if (this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer') {
+                        if (this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) {
                             var title = (this.map.getLayer(this.map.layerIds[a])).arcgisProps ? (this.map.getLayer(this.map.layerIds[a])).arcgisProps.title : "";
                             if((title.charAt(title.length - 1)) !== "_"){//if (!((title.toLowerCase()).includes("_result"))) {
                                 this.ISLayers[i] = this.map.getLayer(this.map.layerIds[a]);
