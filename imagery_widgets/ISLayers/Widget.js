@@ -217,7 +217,7 @@ define([
                         var skipLayer;
 
                         for (var i = mainLayers.length - 1; i >= 0; i--) {
-                            if ((mainLayers[i].layerObject && mainLayers[i].layerObject.serviceDataType.substr(0, 16) === "esriImageService") || (mainLayers[i].layerType && mainLayers[i].layerType === "ArcGISImageServiceLayer")) {
+                            if ((mainLayers[i].layerObject && mainLayers[i].layerObject.serviceDataType && mainLayers[i].layerObject.serviceDataType.substr(0, 16) === "esriImageService") || (mainLayers[i].layerType && mainLayers[i].layerType === "ArcGISImageServiceLayer")) {
                                 skipLayer = false;
                                 this.map.getLayer(mainLayers[i].layerObject.id).hide();
                                 this.layerList1[k] = mainLayers[i].layerObject;
