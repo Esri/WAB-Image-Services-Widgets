@@ -6,8 +6,8 @@ Web AppBuilder for Image Services (WABIS) is a set of custom widgets to be used 
 
 
 Widgets:
-* The IS Image Selector widget allows the app user to search an imagery layer by a field (chosen during widget configuration), as well as set primary and secondary layers
-* The IS Layers widget sets and changes the primary and secondary imagery layers in the app. After the app user performs analysis, it can also be used to add the Results layer to the secondary layer list.
+* The **IS Image Selector** widget allows the app user to search an imagery layer by a field (chosen during widget configuration), as well as set primary and secondary layers
+* The **IS Layers** widget sets and changes the primary and secondary imagery layers in the app. After the app user performs analysis, it can also be used to add the Results layer to the secondary layer list.
 * The **IS Change Detection** widget allows users to calculate the difference between the primary and secondary layer rasters. The result is added as a new Results layer, which can be added to the dropdown list of image services available to your app using the IS Layers widget.
 * The **IS Compare** widget uses a vertical swipe to compare the topmost imagery layer with a secondary imagery layer. Optionally, users can also use transparency or a horizontal swipe to compare the primary and secondary imagery layers with a Results layer.IS Display Order
 * The **IS Display Order** widget sets the mosaic rule for the primary layer, which determines which image in the mosaic will be visualized if images overlap.
@@ -19,7 +19,7 @@ Widgets:
 * The **IS Export** widget allows the app user to either save the topmost visible imagery layer to the app user’s content in Portal, or to export the same image locally as a TIFF.
 
 Theme: 
-* 	Use the foldable wrapper theme to size the widgets and remove unwanted  white  space. 
+* 	Use the included **Foldable Wrapper** theme to size the widgets and remove unwanted  white  space. 
 
 
 ## Instructions
@@ -36,7 +36,7 @@ Theme:
 
 ## Resources
 
-* [Web App Builder for ArcGIS (Developer Edition)] (https://developers.arcgis.com/web-appbuilder/)
+* [Web App Builder for ArcGIS (Developer Edition)](https://developers.arcgis.com/web-appbuilder/)
 * [Landsat Explorer example web app](http://landsatexplorer.esri.com/)
 
 ## Issues
