@@ -278,10 +278,16 @@ define([
                         case "esriMosaicViewpoint":
                         {
                             domStyle.set(this.attribute, "display", "none");
-                            domStyle.set(this.dropDownDisplayOrderOptions.domNode, "display", "none");
+                            domStyle.set(this.dropDownDisplayOrderOptions.domNode, "display", "inline");
                             domStyle.set(this.lockraster, "display", "none");
                             domStyle.set(this.notseamline, "display", "block");
+                            if (!registry.byId("mosaicOperation").getOptions('MT_MIN')) {
+                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'MT_MIN'});
+                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'MT_MAX'});
+                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'MT_MEAN'});
+                            }
                             this.toolbarDisplayOrder.activate(Draw.POINT);
+                            break;
                         }
                     }
                 },
