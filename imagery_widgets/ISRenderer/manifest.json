@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "sets the service functions and stretch on the primary layer. The dropdown menu in the widget is automatically populated with the service functions associated with the primary layer",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

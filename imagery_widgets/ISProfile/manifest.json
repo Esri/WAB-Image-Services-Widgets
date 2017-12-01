@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "shows a spectral or index profile (NDVI, NDMI Moisture Index, or Urban Index) for a selected point on the primary layer",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "sets and changes the primary and secondary imagery layers in the app. After the app user performs analysis, it can also be used to add the Results layer to the secondary layer list",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

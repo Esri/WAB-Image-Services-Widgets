@@ -16,7 +16,7 @@ Widgets:
 * The **IS Image Date** widget will show the date of the primary or secondary layer (whichever is visible in the app).
 * The **IS Scatterplot** widget allows the user to select two bands from the image service layer and plot their values on a graph. The user can (1) highlight a region on the map by drawing and selecting the points on the plot, (2) click on the map to highlight that point on the scatterplot and get the pixel values, and (3) define an optional area of interest for which the plot should be drawn. Additionally, if both bands selected are the same, the widget will plot the frequency of that band. 
 * The **IS Profile** widget shows a spectral or index profile (NDVI, NDMI Moisture Index, or Urban Index) for a selected point on the primary layer. 
-* The **IS Export** widget allows the app user to either save the topmost visible imagery layer to the app user’s content in Portal, or to export the same image locally as a TIFF.
+* The **IS Export** widget allows the app user to either save the topmost visible imagery layer to the app user's content in Portal, or to export the same image locally as a TIFF.
 
 Theme: 
 * 	Use the included **Foldable Wrapper** theme to size the widgets and remove unwanted  white  space. 
