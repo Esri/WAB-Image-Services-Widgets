@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "allows users to calculate the difference between the primary and secondary layer rasters",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

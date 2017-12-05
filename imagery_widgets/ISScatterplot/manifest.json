@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "allows the user to select two bands from the image service layer and plot their values on a graph",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

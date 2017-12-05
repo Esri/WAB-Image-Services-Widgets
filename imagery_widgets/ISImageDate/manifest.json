@@ -4,7 +4,7 @@
   "platform": "HTML",
   "version": "",
   "author": "Esri",
-  "description": "",
+  "description": "will show the date of the primary or secondary layer (whichever is visible in the app)",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
