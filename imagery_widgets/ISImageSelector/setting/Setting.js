@@ -74,7 +74,7 @@ define([
                 setConfig: function (config) {
                     this.config = config;
                     for (var a in this.ISLayers) {
-                        var label = this.ISLayers[a].url.split('//')[1];
+                        var label = this.ISLayers[a].id;
                         if (config[label]) {
                             if (config[label].imageField !== undefined) {
                                 registry.byId("imageField_" + a).set('value', config[label].imageField);
@@ -96,11 +96,12 @@ define([
                             category: registry.byId("category_" + a).get('value'),
                             title: this.ISLayers[a].title
                         };
-                        this.config[this.ISLayers[a].url.split('//')[1]] = obj;
+                        this.config[this.ISLayers[a].id] = obj;
                     }
                     this.config.display = registry.byId("userInterfaceOption").get("value");
                     this.config.zoomLevel = this.selectorZoomLevelInput.get("value");
                     this.config.searchExtent = this.selectorSearchExtentInput.get("value");
+                    this.config.listImagesSeparate = this.listImagesSeparate.get("value");
                     this.config.autoRefresh = this.selectorAutoRefresh.get("checked");
                     return this.config;
                 },

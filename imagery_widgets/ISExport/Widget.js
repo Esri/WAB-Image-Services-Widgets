@@ -47,7 +47,12 @@ define([
                         if (value === "agol") {
                             domStyle.set("saveAgolContainer", "display", "block");
                             domStyle.set("exportSaveContainer", "display", "none");
-                            this.toolbarForExport.deactivate();
+                            registry.byId("defineExtent").set("checked", false);
+                            
+                            if (registry.byId("defineAgolExtent").checked) {
+                                this.toolbarForExport.activate(Draw.POLYGON);
+                                this.map.setInfoWindowOnClick(false);
+                            }
                             for (var k in this.map.graphics.graphics)
                             {
                                 if (this.map.graphics.graphics[k].geometry.type === "polygon") {
@@ -60,8 +65,12 @@ define([
                             }
                             this.geometry = null;
                         } else {
-                            if (registry.byId("defineExtent").checked)
+                            
+                            registry.byId("defineAgolExtent").set("checked", false);
+                            if (registry.byId("defineExtent").checked) {
                                 this.toolbarForExport.activate(Draw.POLYGON);
+                                this.map.setInfoWindowOnClick(false);
+                            }
                             domStyle.set("saveAgolContainer", "display", "none");
                             domStyle.set("exportSaveContainer", "display", "block");
                         }
@@ -76,6 +85,7 @@ define([
                     }));
                     registry.byId("exportBtn").on("click", lang.hitch(this, this.exportLayer));
                     registry.byId("defineExtent").on("change", lang.hitch(this, this.activatePolygon));
+                    registry.byId("defineAgolExtent").on("change", lang.hitch(this, this.activatePolygon));
                     if (this.map) {
                         this.map.on("update-start", lang.hitch(this, this.showLoading));
                         this.map.on("update-end", lang.hitch(this, this.hideLoading));
@@ -123,10 +133,34 @@ define([
                         var spatialReference = this.map.extent.spatialReference.wkid;
                         var mosaicRule = this.imageServiceLayer.mosaicRule ? this.imageServiceLayer.mosaicRule.toJson() : null;
                         var bandIds = this.imageServiceLayer.bandIds ? [this.imageServiceLayer.bandIds] : [];
-                        var renderingRule = this.imageServiceLayer.renderingRule ? this.imageServiceLayer.renderingRule.toJson() : null;
+                        if (this.imageServiceLayer.id === "resultLayer") {
+                            if (this.imageServiceLayer.changeMode === "mask" || this.imageServiceLayer.changeMode === "threshold") {
+                                var renderer = this.modifyRenderingRule(this.imageServiceLayer.changeMode, this.imageServiceLayer.renderingRule);
+                            } else
+                                var renderer = this.imageServiceLayer.renderingRule;
+                        } else
+                            var renderer = this.imageServiceLayer.renderingRule;
+                        if (registry.byId("defineAgolExtent").checked) {
+
+                            var rasterClip = new RasterFunction();
+                            rasterClip.functionName = "Clip";
+                            var clipArguments = {};
+                            clipArguments.ClippingGeometry = this.geometryClip;
+                            clipArguments.ClippingType = 1;
+                            if (this.imageServiceLayer.renderingRule)
+                                clipArguments.Raster = renderer;
+                            else
+                                clipArguments.Raster = "$$";
+                            rasterClip.functionArguments = clipArguments;
+
+                            var renderingRule = rasterClip.toJson();
+                        } else {
+                            var renderingRule = renderer ? renderer.toJson() : null;
+                        }
+
                         var opacity = this.imageServiceLayer.opacity ? this.imageServiceLayer.opacity : 1;
                         var interpolation = this.imageServiceLayer.interpolation ? this.imageServiceLayer.interpolation : "RSP_NearestNeighbor";
-                        var format = this.imageServiceLayer.format ? this.imageServiceLayer.format : "jpgpng";
+                        var format = this.imageServiceLayer.format && this.imageServiceLayer.id !== "resultLayer" ? this.imageServiceLayer.format : "jpgpng";
                         var compressionQuality = this.imageServiceLayer.compressionQuality ? this.imageServiceLayer.compressionQuality : 100;
                         var itemData = {
                             "id": this.imageServiceLayer.id,
@@ -203,11 +237,12 @@ define([
                     this.getUTMZones();
                 },
                 activatePolygon: function () {
-                    if (registry.byId("defineExtent").checked) {
+                    if (registry.byId("defineExtent").checked || registry.byId("defineAgolExtent").checked) {
                         this.toolbarForExport.activate(Draw.POLYGON);
-
+                        this.map.setInfoWindowOnClick(false);
                     } else {
                         this.toolbarForExport.deactivate();
+                        this.map.setInfoWindowOnClick(true);
                         for (var k in this.map.graphics.graphics)
                         {
                             if (this.map.graphics.graphics[k].geometry.type === "polygon") {
@@ -328,8 +363,18 @@ define([
                             document.getElementById("errorPixelSize").innerHTML = "";
 
                             if (this.imageServiceLayer.renderingRule) {
-                                var raster = registry.byId("renderer").checked ? this.imageServiceLayer.renderingRule : new RasterFunction({"rasterFunction": "None"});
+                                
+                                if (this.imageServiceLayer.id === "resultLayer") {
+                                    if (this.imageServiceLayer.changeMode === "mask" || this.imageServiceLayer.changeMode === "threshold")
+                                        var renderer = this.modifyRenderingRule(this.imageServiceLayer.changeMode, this.imageServiceLayer.renderingRule);
+                                    else
+                                        var renderer = this.imageServiceLayer.renderingRule;
+                                } else
+                                    var renderer = this.imageServiceLayer.renderingRule;
+
+                                var raster = registry.byId("renderer").checked ? renderer : new RasterFunction({"rasterFunction": "None"});
                                 var renderingRule = raster;
+
                             } else
                                 var renderingRule = null;
                             if (registry.byId("defineExtent").checked) {
@@ -389,6 +434,138 @@ define([
                         document.getElementById("errorPixelSize").innerHTML = "Error! No Imagery Layer visible on the map.";
                     }
                 },
+                modifyRenderingRule: function (mode, renderer) {
+                    if (mode === "mask") {
+                        var positiveRange = registry.byId("positiveRange").get("value");
+                        var negativeRange = registry.byId("negativeRange").get("value");
+
+                        var remap = new RasterFunction();
+                        remap.functionName = "Remap";
+                        var remapArg = {};
+                        remapArg.InputRanges = [-5, negativeRange, positiveRange, 5];
+                        remapArg.OutputValues = [0, 1];
+                        remapArg.AllowUnmatched = false;
+                        remapArg.Raster = renderer;
+                        remap.outputPixelType = "U8";
+                        remap.functionArguments = remapArg;
+                        var raster3 = remap;
+                    } else {
+                        if (renderer.rasterFunction)
+                            var rendererTemp = renderer.rasterFunction;
+                        else
+                            var rendererTemp = renderer.functionName;
+
+                        if (rendererTemp === "CompositeBand") {
+                            var raster1 = renderer.functionArguments.Rasters[0];
+                            var raster2 = renderer.functionArguments.Rasters[1];
+                        } else
+                        {
+                            var raster1 = renderer.functionArguments.Raster.functionArguments.Rasters[0];
+                            var raster2 = renderer.functionArguments.Raster.functionArguments.Rasters[1];
+                        }
+                        var thresholdValue = registry.byId("thresholdValue").get("value");
+                        var differenceValue = registry.byId("differenceValue").get("value");
+                        var remapRaster1 = new RasterFunction();
+                        remapRaster1.functionName = "Remap";
+                        var remapRaster1Arg = {};
+                        remapRaster1Arg.InputRanges = [-1, thresholdValue, thresholdValue, 1];
+                        remapRaster1Arg.OutputValues = [0, 1];
+                        remapRaster1Arg.AllowUnmatched = false;
+                        remapRaster1Arg.Raster = raster1;
+                        remapRaster1.functionArguments = remapRaster1Arg;
+                        remapRaster1.outputPixelType = "U8";
+
+                        var remapRaster2 = new RasterFunction();
+                        remapRaster2.functionName = "Remap";
+                        var remapRaster2Arg = {};
+                        remapRaster2Arg.InputRanges = [-1, thresholdValue, thresholdValue, 1];
+                        remapRaster2Arg.OutputValues = [0, 1];
+                        remapRaster2Arg.AllowUnmatched = false;
+                        remapRaster2Arg.Raster = raster2;
+                        remapRaster2.functionArguments = remapRaster2Arg;
+                        remapRaster2.outputPixelType = "U8";
+
+                        var arithmetic = new RasterFunction();
+                        arithmetic.functionName = "Arithmetic";
+                        var arithmeticArg = {};
+                        arithmeticArg.Operation = 2;
+                        arithmeticArg.ExtentType = 1;
+                        arithmeticArg.CellsizeType = 0;
+                        arithmeticArg.Raster = remapRaster1;
+                        arithmeticArg.Raster2 = remapRaster2;
+                        arithmetic.functionArguments = arithmeticArg;
+                        arithmetic.outputPixelType = "F32";
+
+                        var remapArithmetic = new RasterFunction();
+                        remapArithmetic.functionName = "Remap";
+                        var remapArithmeticArg = {};
+                        remapArithmeticArg.InputRanges = [-1.1, -0.01];
+                        remapArithmeticArg.OutputValues = [1];
+                        remapArithmeticArg.NoDataRanges = [0, 0];
+                        remapArithmeticArg.AllowUnmatched = true;
+                        remapArithmeticArg.Raster = arithmetic;
+                        remapArithmetic.functionArguments = remapArithmeticArg;
+                        remapArithmetic.outputPixelType = "F32";
+                        var arithmetic2 = new RasterFunction();
+                        arithmetic2.functionName = "Arithmetic";
+                        arithmetic2.outputPixelType = "F32";
+                        var arithmeticArg2 = {};
+                        arithmeticArg2.Raster = raster1;
+                        arithmeticArg2.Raster2 = raster2;
+                        arithmeticArg2.Operation = 2;
+                        arithmeticArg2.ExtentType = 1;
+                        arithmeticArg2.CellsizeType = 0;
+                        arithmetic2.functionArguments = arithmeticArg2;
+
+
+                        var remapDifference = new RasterFunction();
+                        remapDifference.functionName = "Remap";
+                        remapDifference.outputPixelType = "F32";
+                        var remapDifferenceArg = {};
+                        remapDifferenceArg.NoDataRanges = [(-1 * differenceValue), differenceValue];
+                        remapDifferenceArg.AllowUnmatched = true;
+                        remapDifferenceArg.Raster = arithmetic2;
+                        remapDifference.functionArguments = remapDifferenceArg;
+
+                        var arithmetic3 = new RasterFunction();
+                        arithmetic3.functionName = "Arithmetic";
+                        arithmetic3.outputPixelType = "F32";
+                        var arithmeticArg3 = {};
+                        arithmeticArg3.Raster = remapArithmetic;
+                        arithmeticArg3.Raster2 = remapDifference;
+                        arithmeticArg3.Operation = 3;
+                        arithmeticArg3.ExtentType = 1;
+                        arithmeticArg3.CellsizeType = 0;
+                        arithmetic3.functionArguments = arithmeticArg3;
+
+                        var remapArithmetic3 = new RasterFunction();
+                        remapArithmetic3.functionName = "Remap";
+                        remapArithmetic3.outputPixelType = "U8";
+                        var remapArithmeticArg3 = {};
+                        remapArithmeticArg3.InputRanges = [-5, 0, 0, 5];
+                        remapArithmeticArg3.OutputValues = [0, 1];
+                        remapArithmeticArg3.AllowUnmatched = false;
+                        remapArithmeticArg3.Raster = arithmetic3;
+                        remapArithmetic3.functionArguments = remapArithmeticArg3;
+
+
+                        if (rendererTemp === "Clip") {
+                            var tempRenderer = lang.clone(renderer);
+                            tempRenderer.functionArguments.Raster = remapArithmetic3;
+                            var raster3 = tempRenderer;
+                        } else
+                            var raster3 = remapArithmetic3;
+                    }
+                    var colormap = new RasterFunction();
+                    colormap.functionName = "Colormap";
+                    var colormapArg = {};
+                    colormapArg.Colormap = this.imageServiceLayer.changeMethod === "burn" ? [[0, 255, 69, 0], [1, 0, 252, 0]] : [[0, 255, 0, 255], [1, 0, 252, 0]];
+                    colormapArg.Raster = raster3;
+                    colormap.outputPixelType = "U8";
+                    colormap.functionArguments = colormapArg;
+
+                    return colormap;
+                },
                 refreshData: function () {
                     if (this.map.layerIds) {
                         this.imageServiceLayer = null;
@@ -409,6 +586,7 @@ define([
 
                         }
                     }
+
                     if (this.imageServiceLayer) {
                         html.set(this.exportLayerTitle, "Layer: <b>" + (this.imageServiceLayer.arcgisProps ? this.imageServiceLayer.arcgisProps.title : (this.imageServiceLayer.title || this.imageServiceLayer.name || this.imageServiceLayer.id)) + "</b>");
                         this.setSavingType();

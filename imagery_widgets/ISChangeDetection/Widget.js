@@ -24,7 +24,7 @@ define([
     "esri/layers/RasterFunction",
     "dojo/html", "esri/request", "esri/tasks/query", "esri/geometry/geometryEngine",
     "esri/tasks/QueryTask",
-    "esri/layers/ArcGISImageServiceLayer",
+    "esri/layers/ArcGISImageServiceLayer", "esri/layers/RasterLayer",
     "esri/layers/ImageServiceParameters",
     "dojo/dom-construct",
     "dojo/i18n!./nls/strings",
@@ -49,7 +49,7 @@ define([
                 dom,
                 RasterFunction,
                 html, esriRequest, Query, geometryEngine, QueryTask,
-                ArcGISImageServiceLayer,
+                ArcGISImageServiceLayer, RasterLayer,
                 ImageServiceParameters,
                 domConstruct, strings, domStyle) {
 
@@ -100,6 +100,7 @@ define([
                                 if (this.primaryLayer.url !== this.prevPrimaryLayer) {
                                     this.populateChangeModes();
                                     this.populateBands();
+                                    html.set(this.areaValue,"");
                                 }
                                 domStyle.set("changeDetectionDisplay", "display", "block");
                                 html.set(this.setPrimarySecondaryLayers, "");
@@ -117,7 +118,7 @@ define([
                 populateChangeModes: function () {
                     registry.byId("method").removeOption(registry.byId("method").getOptions());
                     registry.byId("method").addOption({label: "Difference", value: "difference"});
-                    
+
                     for (var a in this.config) {
                         if (a === this.primaryLayer.url.split('//')[1]) {
                             if (this.config[a].veg) {
@@ -137,8 +138,8 @@ define([
                         }
                     }
                     domStyle.set("bandInputs", "display", "none");
-                    domStyle.set(this.maskRangeSpinners, "display", "none");
-                    domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                    domStyle.set(this.changeMode, "display", "none");
+                    registry.byId("changeModeList").set("value", "image");
                 },
                 populateBands: function () {
                     this.bandNames = [];
@@ -221,7 +222,11 @@ define([
                             domStyle.set(this.changeMode, "display", "none");
                             domStyle.set(this.maskRangeSpinners, "display", "none");
                             domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                            domStyle.set(this.areaValueContainer, "display", "none");
                         } else {
+                            domStyle.set(this.areaValue, "color", "magenta");
+                            html.set(this.areaValueLabel, "Area Decrease / Increase:");
+
                             if (value === "ndvi" || value === "savi") {
                                 document.getElementById("bandName1").innerHTML = "Infrared Band";
                                 document.getElementById("bandName2").innerHTML = "Red Band";
@@ -231,22 +236,44 @@ define([
                             } else {
                                 document.getElementById("bandName1").innerHTML = "Infrared Band";
                                 document.getElementById("bandName2").innerHTML = "Short-wave Infrared Band";
+                                html.set(this.areaValueLabel, "Burnt / Post Fire Regrowth Area:");
+                                domStyle.set(this.areaValue, "color", "#fc6d31");
                             }
+
                             domStyle.set(this.changeMode, "display", "block");
                             domStyle.set("bandInputs", "display", "block");
                             if (registry.byId("changeModeList").get("value") === "mask")
                             {
                                 domStyle.set(this.maskRangeSpinners, "display", "block");
                                 domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                                domStyle.set(this.areaValueContainer, "display", "block");
                             } else if (registry.byId("changeModeList").get("value") === "threshold") {
                                 domStyle.set(this.maskRangeSpinners, "display", "none");
                                 domStyle.set(this.thresholdRangeSpinners, "display", "block");
+                                domStyle.set(this.areaValueContainer, "display", "block")
                             } else {
                                 domStyle.set(this.maskRangeSpinners, "display", "none");
                                 domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                                domStyle.set(this.areaValueContainer, "display", "none")
                             }
                             this.setBands(value);
                         }
+                    }));
+                    registry.byId("positiveRange").on("change", lang.hitch(this, function () {
+                        if (this.map.getLayer("resultLayer"))
+                            this.map.getLayer("resultLayer").redraw();
+                    }));
+                    registry.byId("negativeRange").on("change", lang.hitch(this, function () {
+                        if (this.map.getLayer("resultLayer"))
+                            this.map.getLayer("resultLayer").redraw();
+                    }));
+                    registry.byId("thresholdValue").on("change", lang.hitch(this, function () {
+                        if (this.map.getLayer("resultLayer"))
+                            this.map.getLayer("resultLayer").redraw();
+                    }));
+                    registry.byId("differenceValue").on("change", lang.hitch(this, function () {
+                        if (this.map.getLayer("resultLayer"))
+                            this.map.getLayer("resultLayer").redraw();
                     }));
                     registry.byId("changeDetectionApply").on("click", lang.hitch(this, this.getMinMaxCheck));
                     if (this.map) {
@@ -270,12 +297,15 @@ define([
                         if (value === "mask") {
                             domStyle.set(this.maskRangeSpinners, "display", "block");
                             domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                            domStyle.set(this.areaValueContainer, "display", "block")
                         } else if (value === "threshold") {
                             domStyle.set(this.maskRangeSpinners, "display", "none");
                             domStyle.set(this.thresholdRangeSpinners, "display", "block");
+                            domStyle.set(this.areaValueContainer, "display", "block")
                         } else {
                             domStyle.set(this.maskRangeSpinners, "display", "none");
                             domStyle.set(this.thresholdRangeSpinners, "display", "none");
+                            domStyle.set(this.areaValueContainer, "display", "none")
                         }
                     }));
                 },
@@ -434,121 +464,23 @@ define([
                             stretch.functionArguments = stretchArg;
                             raster3 = stretch;
                         } else if (changeMode === "mask") {
-                            var arithmetic = new RasterFunction();
-                            arithmetic.functionName = "Arithmetic";
+                            var raster3 = new RasterFunction();
                             var arithmeticArg = {};
-                            arithmeticArg.Operation = 2;
-                            arithmeticArg.ExtentType = 1;
-                            arithmeticArg.CellsizeType = 0;
+                            raster3.functionName = "Arithmetic";
                             arithmeticArg.Raster = raster1;
                             arithmeticArg.Raster2 = raster2;
-                            arithmetic.functionArguments = arithmeticArg;
-                            arithmetic.outputPixelType = "F32";
-
-                            var positiveRange = [registry.byId("positiveRangeMin").get("value"), registry.byId("positiveRangeMax").get("value")];
-                            var negativeRange = [registry.byId("negativeRangeMin").get("value"), registry.byId("negativeRangeMax").get("value")];
-                            if (positiveRange[0] > positiveRange[1])
-                                positiveRange = this.swapMinMax(positiveRange[0], positiveRange[1]);
-                            if (negativeRange[0] > negativeRange[1])
-                                negativeRange = this.swapMinMax(negativeRange[0], negativeRange[1]);
-
-                            var remap = new RasterFunction();
-                            remap.functionName = "Remap";
-                            var remapArg = {};
-                            remapArg.InputRanges = [negativeRange[0], negativeRange[1], positiveRange[0], positiveRange[1]];
-                            remapArg.OutputValues = [0, 1];
-                            remapArg.AllowUnmatched = false;
-                            remapArg.Raster = arithmetic;
-                            remap.outputPixelType = "U8";
-                            remap.functionArguments = remapArg;
-                            raster3 = remap;
-                        } else {
-                            var thresholdValue = registry.byId("thresholdValue").get("value");
-                            var differenceValue = registry.byId("differenceValue").get("value");
-                            var remapRaster1 = new RasterFunction();
-                            remapRaster1.functionName = "Remap";
-                            var remapRaster1Arg = {};
-                            remapRaster1Arg.InputRanges = [-1, thresholdValue, thresholdValue, 1];
-                            remapRaster1Arg.OutputValues = [0, 1];
-                            remapRaster1Arg.AllowUnmatched = false;
-                            remapRaster1Arg.Raster = raster1;
-                            remapRaster1.functionArguments = remapRaster1Arg;
-                            remapRaster1.outputPixelType = "U8";
-
-                            var remapRaster2 = new RasterFunction();
-                            remapRaster2.functionName = "Remap";
-                            var remapRaster2Arg = {};
-                            remapRaster2Arg.InputRanges = [-1, thresholdValue, thresholdValue, 1];
-                            remapRaster2Arg.OutputValues = [0, 1];
-                            remapRaster2Arg.AllowUnmatched = false;
-                            remapRaster2Arg.Raster = raster2;
-                            remapRaster2.functionArguments = remapRaster2Arg;
-                            remapRaster2.outputPixelType = "U8";
-
-                            var arithmetic = new RasterFunction();
-                            arithmetic.functionName = "Arithmetic";
-                            var arithmeticArg = {};
                             arithmeticArg.Operation = 2;
                             arithmeticArg.ExtentType = 1;
                             arithmeticArg.CellsizeType = 0;
-                            arithmeticArg.Raster = remapRaster1;
-                            arithmeticArg.Raster2 = remapRaster2;
-                            arithmetic.functionArguments = arithmeticArg;
-                            arithmetic.outputPixelType = "F32";
-
-                            var remapArithmetic = new RasterFunction();
-                            remapArithmetic.functionName = "Remap";
-                            var remapArithmeticArg = {};
-                            remapArithmeticArg.InputRanges = [-1.1, -0.01];
-                            remapArithmeticArg.OutputValues = [1];
-                            remapArithmeticArg.NoDataRanges = [0, 0];
-                            remapArithmeticArg.AllowUnmatched = true;
-                            remapArithmeticArg.Raster = arithmetic;
-                            remapArithmetic.functionArguments = remapArithmeticArg;
-                            remapArithmetic.outputPixelType = "F32";
-                            var arithmetic2 = new RasterFunction();
-                            arithmetic2.functionName = "Arithmetic";
-                            arithmetic2.outputPixelType = "F32";
-                            var arithmeticArg2 = {};
-                            arithmeticArg2.Raster = raster1;
-                            arithmeticArg2.Raster2 = raster2;
-                            arithmeticArg2.Operation = 2;
-                            arithmeticArg2.ExtentType = 1;
-                            arithmeticArg2.CellsizeType = 0;
-                            arithmetic2.functionArguments = arithmeticArg2;
-
-
-                            var remapDifference = new RasterFunction();
-                            remapDifference.functionName = "Remap";
-                            remapDifference.outputPixelType = "F32";
-                            var remapDifferenceArg = {};
-                            remapDifferenceArg.NoDataRanges = [(-1 * differenceValue), differenceValue];
-                            remapDifferenceArg.AllowUnmatched = true;
-                            remapDifferenceArg.Raster = arithmetic2;
-                            remapDifference.functionArguments = remapDifferenceArg;
-
-                            var arithmetic3 = new RasterFunction();
-                            arithmetic3.functionName = "Arithmetic";
-                            arithmetic3.outputPixelType = "F32";
-                            var arithmeticArg3 = {};
-                            arithmeticArg3.Raster = remapArithmetic;
-                            arithmeticArg3.Raster2 = remapDifference;
-                            arithmeticArg3.Operation = 3;
-                            arithmeticArg3.ExtentType = 1;
-                            arithmeticArg3.CellsizeType = 0;
-                            arithmetic3.functionArguments = arithmeticArg3;
-
-                            var remapArithmetic3 = new RasterFunction();
-                            remapArithmetic3.functionName = "Remap";
-                            remapArithmetic3.outputPixelType = "U8";
-                            var remapArithmeticArg3 = {};
-                            remapArithmeticArg3.InputRanges = [-5, 0, 0, 5];
-                            remapArithmeticArg3.OutputValues = [0, 1];
-                            remapArithmeticArg3.AllowUnmatched = false;
-                            remapArithmeticArg3.Raster = arithmetic3;
-                            remapArithmetic3.functionArguments = remapArithmeticArg3;
-                            
-                            raster3 = remapArithmetic3;
+                            raster3.outputPixelType = "F32";
+                            raster3.functionArguments = arithmeticArg;
+                        } else {
+                            var raster3 = new RasterFunction();
+                            var compositeArg = {};
+                            raster3.functionName = "CompositeBand";
+                            compositeArg.Rasters = [raster1, raster2];
+                            raster3.outputPixelType = "F32";
+                            raster3.functionArguments = compositeArg;
                         }
                     }
 
@@ -564,7 +496,6 @@ define([
                             intersectGeometry.cache = undefined;
                             var rasterClip = new RasterFunction();
                             rasterClip.functionName = "Clip";
-                            // rasterClip.outputPixelType = "U8";
                             var clipArguments = {};
                             clipArguments.ClippingGeometry = intersectGeometry;
                             clipArguments.ClippingType = 1;
@@ -572,53 +503,136 @@ define([
                             rasterClip.functionArguments = clipArguments;
                             raster3 = rasterClip;
                         }
-                        
-                        if(changeMode !== "image" && method !== "difference"){
-                            var colormap = new RasterFunction();
-                            colormap.functionName = "Colormap";
-                            var colormapArg = {};
-                            colormapArg.Colormap = [[0, 255, 0, 255], [1, 0, 252, 0]];
-                            colormapArg.Raster = raster3;
-                            colormap.outputPixelType = "U8";
-                            colormap.functionArguments = colormapArg;
-                            raster3 = colormap;
-                        }
-                        params = new ImageServiceParameters();
-                        params.renderingRule = raster3;
-                        changeDetectionLayer = new ArcGISImageServiceLayer(
-                                this.primaryLayer.url,
-                                {
-                                    id: "resultLayer",
-                                    imageServiceParameters: params
-                                });
-                        this.number++;
-                        changeDetectionLayer.title = "Result__Change_" + this.number;
-                        for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
-                            if (this.primaryLayer.id === this.map.layerIds[a]) {
-                                var index = a + 1;
-                                break;
-                            }
-                        }
-                        this.map.addLayer(changeDetectionLayer, index);
+                        this.addChangeLayer(raster3, method, changeMode);
                     }), lang.hitch(this, function () {
-                        params = new ImageServiceParameters();
-                        params.renderingRule = raster3;
+                        this.addChangeLayer(raster3, method, changeMode);
+                    }));
+                },
+                addChangeLayer: function (raster3, method, changeMode) {
+                    var params = new ImageServiceParameters();
+                    params.renderingRule = raster3;
+                    console.log(raster3);
+                    if (changeMode === "image" || method === "difference") {
                         changeDetectionLayer = new ArcGISImageServiceLayer(
                                 this.primaryLayer.url,
                                 {
                                     id: "resultLayer",
                                     imageServiceParameters: params
                                 });
-                        this.number++;
-                        changeDetectionLayer.title = "ChangeLayer_" + this.number;
-                        for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
-                            if (this.primaryLayer.id === this.map.layerIds[a]) {
-                                var index = a + 1;
-                                break;
+                    } else {
+                        var xdistance = this.map.extent.xmax - this.map.extent.xmin;
+                        var ydistance = this.map.extent.ymax - this.map.extent.ymin;
+                        this.pixelSizeX = xdistance / this.map.width;
+                        this.pixelSizeY = ydistance / this.map.height;
+                        var latitude = ((this.map.extent.getCenter()).getLatitude() * Math.PI) / 180;
+                        this.scale = Math.pow((1 / Math.cos(latitude)), 2);
+                        params.format = "lerc";
+                        var changeDetectionLayer = new RasterLayer(
+                                this.primaryLayer.url,
+                                {
+                                    id: "resultLayer",
+                                    imageServiceParameters: params,
+                                    pixelFilter: lang.hitch(this, this.maskPixels)
+                                });
+                        changeDetectionLayer.on("load", lang.hitch(this, function () {
+                            changeDetectionLayer.pixelType = "F32";
+                        }));
+                    }
+                    changeDetectionLayer.title = "Result__Change_" + this.number;
+                    changeDetectionLayer.changeMethod = method;
+                    changeDetectionLayer.changeMode = changeMode;
+
+                    for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
+                        if (this.primaryLayer.id === this.map.layerIds[a]) {
+                            var index = a + 1;
+                            break;
+                        }
+                    }
+                    this.map.addLayer(changeDetectionLayer, index);
+                },
+                maskPixels: function (pixelData) {
+
+
+                    if (pixelData === null || pixelData.pixelBlock === null)
+                        return;
+                    var numPixels = pixelData.pixelBlock.width * pixelData.pixelBlock.height;
+                    if (!pixelData.pixelBlock.mask) {
+                        pixelData.pixelBlock.mask = new Uint8Array(numPixels);
+                    }
+
+                    if (pixelData.pixelBlock.pixels === null)
+                        return;
+                    var pr = new Uint8Array(numPixels);
+                    var pg = new Uint8Array(numPixels);
+                    var pb = new Uint8Array(numPixels);
+                    var areaLeft = 0, areaRight = 0;
+                    var color = registry.byId("method").get("value") === "burn" ? [255, 69, 0] : [255, 0, 255];
+                    if (registry.byId("changeModeList").get("value") === "mask") {
+                        var pixelScene = pixelData.pixelBlock.pixels[0];
+                        var nodata = (pixelData.pixelBlock.statistics[0] && pixelData.pixelBlock.statistics[0].noDataValue) ? pixelData.pixelBlock.statistics[0].noDataValue : 0;
+                        var positiveDif = registry.byId("positiveRange").get("value");
+                        var negativeDif = registry.byId("negativeRange").get("value");
+
+                        for (var i = 0; i < numPixels; i++) {
+
+                            if (pixelScene[i] === nodata) {
+                                pixelData.pixelBlock.mask[i] = 0;
+                            } else if (pixelScene[i] <= negativeDif) {
+
+                                pr[i] = color[0];
+                                pg[i] = color[1];
+                                pb[i] = color[2];
+                                pixelData.pixelBlock.mask[i] = 1;
+                                areaLeft++;
+                            } else if (pixelScene[i] >= positiveDif) {
+                                pr[i] = 0;
+                                pg[i] = 252;
+                                pb[i] = 0;
+                                pixelData.pixelBlock.mask[i] = 1;
+                                areaRight++;
+                            } else
+                                pixelData.pixelBlock.mask[i] = 0;
+                        }
+                    } else {
+                        var pixelScene1 = pixelData.pixelBlock.pixels[0];
+                        var pixelScene2 = pixelData.pixelBlock.pixels[1];
+                        var threshold = registry.byId("thresholdValue").get("value");
+                        var differenceThreshold = registry.byId("differenceValue").get("value");
+                        var noData1 = (pixelData.pixelBlock.statistics[0] && pixelData.pixelBlock.statistics[0].noDataValue) ? pixelData.pixelBlock.statistics[0].noDataValue : 0;
+                        var noData2 = (pixelData.pixelBlock.statistics[1] && pixelData.pixelBlock.statistics[1].noDataValue) ? pixelData.pixelBlock.statistics[1].noDataValue : 0;
+
+
+                        for (var i = 0; i < numPixels; i++) {
+                            if (pixelScene1[i] === noData1 || pixelScene2[i] === noData2) {
+                                pixelData.pixelBlock.mask[i] = 0;
+                            } else {
+                                if (pixelScene1[i] > 10)
+                                    pixelScene1[i] = 0;
+                                if (pixelScene2[i] > 10)
+                                    pixelScene2[i] = 0;
+                                if (pixelScene1[i] < threshold && pixelScene2[i] > threshold && (pixelScene2[i] - pixelScene1[i]) > differenceThreshold) {
+                                    pixelData.pixelBlock.mask[i] = 1;
+                                    pr[i] = color[0];
+                                    pg[i] = color[1];
+                                    pb[i] = color[2];
+                                    areaLeft++;
+                                } else if (pixelScene1[i] > threshold && pixelScene2[i] < threshold && (pixelScene1[i] - pixelScene2[i]) > differenceThreshold) {
+                                    pixelData.pixelBlock.mask[i] = 1;
+
+                                    pr[i] = 0;
+                                    pg[i] = 252;
+                                    pb[i] = 0;
+                                    areaRight++;
+
+                                } else
+                                    pixelData.pixelBlock.mask[i] = 0;
                             }
                         }
-                        this.map.addLayer(changeDetectionLayer, index);
-                    }));
+                    }
+                    html.set(this.areaValue, ((areaLeft * this.pixelSizeX * this.pixelSizeY) / (1000000 * this.scale)).toFixed(3) + " km<sup>2</sup> <span style='color:black;'>/</span> <span style='color:green;'>" + ((areaRight * this.pixelSizeX * this.pixelSizeY) / (1000000 * this.scale)).toFixed(3) + " km<sup>2</sup></span>");
+                    pixelData.pixelBlock.pixels = [pr, pg, pb];
+                    pixelData.pixelBlock.pixelType = "U8";
+
                 },
                 checkMinMax: function (min, max) {
                     var temp = min;

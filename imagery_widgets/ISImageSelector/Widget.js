@@ -194,8 +194,9 @@ define([
                         }
 
                         if (this.primaryLayer) {
+
                             this.prevMosaicBackup = this.mosaicBackup;
-                            this.label = this.primaryLayer.url.split('//')[1];
+                            this.label = this.primaryLayer.id;
                             this.defaultMosaicRule = this.primaryLayer.defaultMosaicRule;
                             if (!this.prevPrimary || this.prevPrimary.url !== this.primaryLayer.url) {
                                 this.mosaicBackup = this.primaryLayer.mosaicRule;
@@ -261,6 +262,7 @@ define([
                                 this.imageSliderShow();
                             } else {
                                 if (this.primaryLayer && this.prevPrimary !== this.primaryLayer) {
+                                    this.previousValue = null;
                                     registry.byId("imageSelector").set("checked", false);
                                     if (this.prevPrimary) {
                                         if (this.prevMosaicBackup)
@@ -284,7 +286,6 @@ define([
                     }
                 },
                 mapExtentChange: function (evt) {
-
                     var validZoomLevel = (evt.lod.level >= this.config.zoomLevel);
                     if (validZoomLevel) {
                         var needsUpdate = false;
@@ -299,15 +300,15 @@ define([
                                     needsUpdate = true;
                                 }
                             }
-                        } else {
-
-                            var panDistance = Math.abs(mathUtils.getLength(evt.extent.getCenter(), this.previousInfo.extent.getCenter()));
-                            var previousMapWidth = (this.previousInfo.extent.getWidth() * this.mapWidthPanFactor);
-                            if (panDistance > previousMapWidth) {
-                                console.info("LARGE pan: ", evt);
-                                needsUpdate = true;
-                            }
                         }
+
+                        var panDistance = Math.abs(mathUtils.getLength(evt.extent.getCenter(), this.previousInfo.extent.getCenter()));
+                        var previousMapWidth = (this.previousInfo.extent.getWidth() * this.mapWidthPanFactor);
+                        if (panDistance > previousMapWidth) {
+                            console.info("LARGE pan: ", evt);
+                            needsUpdate = true;
+                        }
+
                         if (needsUpdate) {
                             this.imageSliderRefresh();
                         }
@@ -401,18 +402,22 @@ define([
                             if (this.orderedFeatures.length > 0) {
                                 this.orderedDates = [];
                                 for (var a in this.orderedFeatures) {
-                                    if (parseInt(a) < 1)
-                                        this.orderedDates.push(this.orderedFeatures[a].attributes[this.imageField]);
-                                    else {
-                                        if (this.imageFieldType === "esriFieldTypeDate") {
-                                            var tempValue = locale.format(new Date(this.orderedDates[this.orderedDates.length - 1]), {selector: "date", formatLength: "short"});
-                                            var tempCurrentValue = locale.format(new Date(this.orderedFeatures[a].attributes[this.imageField]), {selector: "date", formatLength: "short"});
-                                            if (tempValue !== tempCurrentValue)
-                                                this.orderedDates.push(this.orderedFeatures[a].attributes[this.imageField]);
-                                        } else {
-                                            if (this.orderedDates[this.orderedDates.length - 1] !== this.orderedFeatures[a].attributes[this.imageField])
-                                                this.orderedDates.push(this.orderedFeatures[a].attributes[this.imageField]);
+                                    if (!this.config.listImagesSeparate) {
+                                        if (parseInt(a) < 1)
+                                            this.orderedDates.push({value: this.orderedFeatures[a].attributes[this.imageField], id: this.orderedFeatures[a].attributes[this.objectID]});
+                                        else {
+                                            if (this.imageFieldType === "esriFieldTypeDate") {
+                                                var tempValue = locale.format(new Date(this.orderedDates[this.orderedDates.length - 1].value), {selector: "date", formatLength: "short"});
+                                                var tempCurrentValue = locale.format(new Date(this.orderedFeatures[a].attributes[this.imageField]), {selector: "date", formatLength: "short"});
+                                                if (tempValue !== tempCurrentValue)
+                                                    this.orderedDates.push({value: this.orderedFeatures[a].attributes[this.imageField], id: this.orderedFeatures[a].attributes[this.objectID]});
+                                            } else {
+                                                if (this.orderedDates[this.orderedDates.length - 1].value !== this.orderedFeatures[a].attributes[this.imageField])
+                                                    this.orderedDates.push({value: this.orderedFeatures[a].attributes[this.imageField], id: this.orderedFeatures[a].attributes[this.objectID]});
+                                            }
                                         }
+                                    } else {
+                                        this.orderedDates.push({value: this.orderedFeatures[a].attributes[this.imageField], id: this.orderedFeatures[a].attributes[this.objectID]});
                                     }
                                 }
                                 this.featureLength = this.orderedDates.length;
@@ -431,12 +436,12 @@ define([
                                 if (this.imageFieldType === "esriFieldTypeDate") {
 
                                     for (var i = 0; i < this.orderedDates.length; i++) {
-                                        labels[i] = locale.format(new Date(this.orderedDates[i]), {selector: "date", formatLength: "short"});
+                                        labels[i] = locale.format(new Date(this.orderedDates[i].value), {selector: "date", formatLength: "short"});
                                     }
                                 } else {
 
                                     for (var i = 0; i < this.orderedDates.length; i++) {
-                                        labels[i] = this.orderedDates[i];
+                                        labels[i] = this.orderedDates[i].value;
                                     }
                                 }
 
@@ -463,100 +468,27 @@ define([
                                 registry.byId("imageSelectorDropDown").removeOption(registry.byId("imageSelectorDropDown").getOptions());
 
                                 for (var v = this.orderedDates.length - 1; v >= 0; v--) {
-                                    registry.byId("imageSelectorDropDown").addOption({label: (this.imageFieldType === "esriFieldTypeDate" ? locale.format(new Date(this.orderedDates[v]), {selector: "date", formatLength: "long"}) : this.orderedDates[v].toString()), value: "" + v + ""});
+                                    registry.byId("imageSelectorDropDown").addOption({label: (this.imageFieldType === "esriFieldTypeDate" ? locale.format(new Date(this.orderedDates[v].value), {selector: "date", formatLength: "long"}) : this.orderedDates[v].value.toString()), value: "" + v + ""});
                                 }
 
-                                var request = new esriRequest({
-                                    url: this.primaryLayer.url + "/getSamples",
-                                    content: {
-                                        geometry: JSON.stringify(this.map.extent.getCenter()),
-                                        geometryType: "esriGeometryPoint",
-                                        returnGeometry: false,
-                                        sampleCount: 1,
-                                        mosaicRule: this.mosaicBackup ? JSON.stringify(this.mosaicBackup) : this.defaultMosaicRule ? JSON.stringify(this.defaultMosaicRule) : null,
-                                        outFields: this.imageField,
-                                        f: "json"
-                                    },
-                                    handleAs: "json",
-                                    callbackParamName: "callback"
-                                });
-                                request.then(lang.hitch(this, function (bestScene) {
-                                    var maxVisible = bestScene.samples[0].attributes[this.imageField];
-                                    for (var z in this.orderedDates) {
-                                        if (this.orderedDates[z] === maxVisible) {
-                                            var index = z;
+
+                                if (this.previousValue) {
+                                    var index = null;
+                                    for (var i in this.orderedDates) {
+                                        if (this.orderedDates[i].value === this.previousValue.value && this.orderedDates[i].id === this.previousValue.id) {
+                                            var index = i;
                                             break;
+                                        } else if (this.orderedDates[i].value <= this.previousValue.value) {
+                                            var index = i;
                                         }
                                     }
-                                    if (!index)
-                                        var index = this.orderedDates.length - 1;
-                                    if (this.previousValue !== null) {
-                                        for (var i in this.orderedDates) {
-                                            if (this.orderedDates[i] === this.previousValue) {
-                                                var index = i;
-                                            }
-                                        }
-                                    }
-                                    this.imageDisplayFormat2();
-                                    registry.byId("imageSelectorDropDown").set("value", index);
-                                    this.slider.set("value", index);
-                                    if (this.imageFieldType === "esriFieldTypeDate")
-                                        html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(this.orderedDates[index]), {selector: "date", formatLength: "long"}) + "</b>");
+                                    if (index)
+                                        this.setSliderValue(index);
                                     else
-                                        html.set(this.imageRange, this.imageField + ": <b>" + this.orderedDates[index] + "</b>");
-                                    html.set(this.imageCount, "1");
-                                    this.hideLoading();
-                                }), lang.hitch(this, function () {
-
-
-                                    var imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
-                                    var imageParams = new ImageServiceIdentifyParameters();
-                                    imageParams.geometry = this.map.extent.getCenter();
-
-                                    imageParams.mosaicRule = this.mosaicBackup ? this.mosaicBackup : this.defaultMosaicRule ? this.defaultMosaicRule : null;
-                                    imageParams.returnGeometry = false;
-                                    imageTask.execute(imageParams, lang.hitch(this, function (data) {
-                                        if (data.catalogItems.features[0]) {
-                                            var maxVisible = data.catalogItems.features[0].attributes[this.imageField];
-                                            for (var z in this.orderedDates) {
-                                                if (this.orderedDates[z] === maxVisible) {
-                                                    var index = z;
-                                                }
-                                            }
-                                        }
-                                        if (!index)
-                                            var index = this.orderedDates.length - 1;
-                                        if (this.previousValue !== null) {
-                                            for (var i in this.orderedDates) {
-                                                if (this.orderedDates[i] === this.previousValue) {
-                                                    var index = i;
-                                                }
-                                            }
-                                        }
-                                        this.imageDisplayFormat2();
-                                        registry.byId("imageSelectorDropDown").set("value", index);
-                                        this.slider.set("value", index);
-                                        if (this.imageFieldType === "esriFieldTypeDate")
-                                            html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(this.orderedDates[index]), {selector: "date", formatLength: "long"}) + "</b>");
-                                        else
-                                            html.set(this.imageRange, this.imageField + ": <b>" + this.orderedDates[index] + "</b>");
-                                        html.set(this.imageCount, "1");
-                                        this.hideLoading();
-                                    }), lang.hitch(this, function (error) {
-                                        this.hideLoading();
-                                        if (this.previousValue !== null) {
-                                            for (var i in this.orderedDates) {
-                                                if (this.orderedDates[i] === this.previousValue) {
-                                                    var index = i;
-                                                }
-                                            }
-                                        } else
-                                            var index = 0;
-                                        this.imageDisplayFormat2();
-                                        this.slider.set("value", index);
-                                        registry.byId("imageSelectorDropDown").set("value", index);
-                                    }));
-                                }));
+                                        this.selectDisplayedImage();
+                                } else {
+                                    this.selectDisplayedImage();
+                                }
                             } else {
                                 html.set(this.errorDiv, "No scenes in current extent.");
                                 domStyle.set(this.selectorDiv, "display", "none");
@@ -567,6 +499,75 @@ define([
                         }));
 
                     }
+                },
+                selectDisplayedImage: function () {
+                    var request = new esriRequest({
+                        url: this.primaryLayer.url + "/getSamples",
+                        content: {
+                            geometry: JSON.stringify(this.map.extent.getCenter()),
+                            geometryType: "esriGeometryPoint",
+                            returnGeometry: false,
+                            sampleCount: 1,
+                            mosaicRule: this.layerInfos[this.primaryLayer.id].defaultMosaicRule ? JSON.stringify(this.layerInfos[this.primaryLayer.id].defaultMosaicRule.toJson()) : null,
+                            outFields: this.imageField,
+                            f: "json"
+                        },
+                        handleAs: "json",
+                        callbackParamName: "callback"
+                    });
+                    request.then(lang.hitch(this, function (bestScene) {
+                        var maxVisible = bestScene.samples[0].attributes[this.imageField];
+                        var index = null;
+                        for (var z in this.orderedDates) {
+                            if (this.orderedDates[z].value === maxVisible) {
+                                index = z;
+                                break;
+                            }
+                        }
+
+                        if (!index)
+                            var index = this.orderedDates.length - 1;
+
+                        this.setSliderValue(index);
+                    }), lang.hitch(this, function () {
+
+
+                        var imageTask = new ImageServiceIdentifyTask(this.primaryLayer.url);
+                        var imageParams = new ImageServiceIdentifyParameters();
+                        imageParams.geometry = this.map.extent.getCenter();
+
+                        imageParams.mosaicRule = this.layerInfos[this.primaryLayer.id].defaultMosaicRule;
+                        imageParams.returnGeometry = false;
+                        imageTask.execute(imageParams, lang.hitch(this, function (data) {
+                            var index;
+
+                            if (data.catalogItems.features[0]) {
+                                var maxVisible = data.catalogItems.features[0].attributes[this.imageField];
+                                for (var z in this.orderedDates) {
+                                    if (this.orderedDates[z].value === maxVisible) {
+                                        index = z;
+                                    }
+                                }
+                            }
+                            if (!index)
+                                var index = this.orderedDates.length - 1;
+
+                            this.setSliderValue(index);
+                        }), lang.hitch(this, function (error) {
+                            this.setSliderValue(this.orderedDates.length - 1);
+                        }));
+                    }));
+                },
+                setSliderValue: function (index) {
+                    this.imageDisplayFormat2();
+                    registry.byId("imageSelectorDropDown").set("value", index);
+                    this.slider.set("value", index);
+                    if (this.imageFieldType === "esriFieldTypeDate")
+                        html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(this.orderedDates[index].value), {selector: "date", formatLength: "long"}) + "</b>");
+                    else
+                        html.set(this.imageRange, this.imageField + ": <b>" + this.orderedDates[index].value + "</b>");
+                    html.set(this.imageCount, "1");
+                    this.hideLoading();
                 },
                 imageSliderHide: function () {
                     if (this.slider) {
@@ -591,8 +592,8 @@ define([
                 },
                 sliderChange: function () {
                     if (registry.byId("imageSelector").get("checked")) {
-                        var aqDate = this.orderedDates[this.valueSelected];
-                        this.previousValue = aqDate;
+                        var aqDate = this.orderedDates[this.valueSelected].value;
+                        this.previousValue = this.orderedDates[this.valueSelected];
                         var featureSelect = [];
                         this.featureIds = [];
                         if (this.imageFieldType === "esriFieldTypeDate") {
@@ -632,14 +633,22 @@ define([
 
                                 html.set(this.imageRange, "Date(s): <b>" + locale.format(compareDate, {selector: "date", formatLength: "long"}) + " - " + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
                             } else {
-                                for (var c in this.orderedFeatures) {
-                                    var tempValue = locale.format(new Date(this.orderedDates[this.valueSelected]), {selector: "date", formatLength: "short"});
-                                    var tempCurrentValue = locale.format(new Date(this.orderedFeatures[c].attributes[this.imageField]), {selector: "date", formatLength: "short"});
 
-                                    if (tempValue === tempCurrentValue) {
-                                        featureSelect.push(this.orderedFeatures[c]);
-                                        this.featureIds.push(this.orderedFeatures[c].attributes[this.objectID]);
+                                if (!this.config.listImagesSeparate) {
+                                    for (var c in this.orderedFeatures) {
+                                        var tempValue = locale.format(new Date(this.orderedDates[this.valueSelected].value), {selector: "date", formatLength: "short"});
+                                        var tempCurrentValue = locale.format(new Date(this.orderedFeatures[c].attributes[this.imageField]), {selector: "date", formatLength: "short"});
+
+                                        if (tempValue === tempCurrentValue) {
+                                            featureSelect.push(this.orderedFeatures[c]);
+                                            this.featureIds.push(this.orderedFeatures[c].attributes[this.objectID]);
+                                        }
                                     }
+                                } else {
+
+                                    featureSelect.push(this.orderedFeatures[this.valueSelected]);
+
+                                    this.featureIds.push(this.orderedFeatures[this.valueSelected].attributes[this.objectID]);
                                 }
                                 html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
 
@@ -647,11 +656,17 @@ define([
                         } else
                         {
                             domStyle.set("ageDiv", "display", "none");
-                            for (var c in this.orderedFeatures) {
-                                if (this.orderedFeatures[c].attributes[this.imageField] === this.orderedDates[this.valueSelected]) {
-                                    featureSelect.push(this.orderedFeatures[c]);
-                                    this.featureIds.push(this.orderedFeatures[c].attributes[this.objectID]);
+                            if (!this.config.listImagesSeparate) {
+                                for (var c in this.orderedFeatures) {
+                                    if (this.orderedFeatures[c].attributes[this.imageField] === this.orderedDates[this.valueSelected].value) {
+                                        featureSelect.push(this.orderedFeatures[c]);
+                                        this.featureIds.push(this.orderedFeatures[c].attributes[this.objectID]);
+                                    }
                                 }
+                            } else {
+
+                                featureSelect.push(this.orderedFeatures[this.valueSelected]);
+                                this.featureIds.push(this.orderedFeatures[this.valueSelected].attributes[this.objectID]);
                             }
                             html.set(this.imageRange, this.imageField + ": <b>" + aqDate + "</b>");
                         }
@@ -738,11 +753,11 @@ define([
                                 visible: true,
                                 infoTemplate: popupInfo
                             });
-                            var title = (layer.arcgisProps && layer.arcgisProps.title) ? layer.arcgisProps.title : (layer.title || layer.name || layer.id);
-                            if(this.imageFieldType !== "esriFieldTypeDate")
-                    secondLayer.title = title + "_2";
+                    var title = (layer.arcgisProps && layer.arcgisProps.title) ? layer.arcgisProps.title : (layer.title || layer.name || layer.id);
+                    if (this.imageFieldType !== "esriFieldTypeDate")
+                        secondLayer.title = title + "_2";
                     else
-                    secondLayer.title = title +"-"+ locale.format(new Date(this.previousValue), {selector: "date", formatLength: "long"});
+                        secondLayer.title = title + "-" + locale.format(new Date(this.previousValue.value), {selector: "date", formatLength: "long"});
 
                     for (var a in this.map.layerIds) {
                         if (this.map.layerIds[a] === layer.id)
