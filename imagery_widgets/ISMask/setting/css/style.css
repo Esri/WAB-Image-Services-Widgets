@@ -1,0 +1,32 @@
+.jimu-widget-ISMask-setting{
+  margin:0;
+  padding:0;
+  font-size:15px;
+}
+.jimu-widget-ISMask-setting .dijitArrowButtonContainer{
+  width: 17px;
+}
+.jimu-widget-ISMask-setting .dijitSelect{
+  height: 30px;
+  width: 100%;
+}
+.jimu-widget-ISMask-setting .setting-table > thead > tr > th,
+.jimu-widget-ISMask-setting .setting-table > tbody > tr > td{
+  height:40px;
+  line-height:40px;
+  vertical-align:middle;
+}
+
+.jimu-widget-ISMask-setting .input-table > tbody > tr > .first{
+  width:auto;
+ margin-top: 10px;
+ margin-left: 10px;
+}
+
+.jimu-widget-ISMask-setting .input-table > tbody > tr > .second{
+  width:250px;
+}
+
+.jimu-widget-ISMask-setting .input-table > tbody > tr > .third{
+  width:35px;
+}

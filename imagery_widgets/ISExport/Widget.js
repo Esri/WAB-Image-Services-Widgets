@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2013 Esri. All Rights Reserved.
+// Copyright 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ define([
                             domStyle.set("saveAgolContainer", "display", "block");
                             domStyle.set("exportSaveContainer", "display", "none");
                             registry.byId("defineExtent").set("checked", false);
-                            
+
                             if (registry.byId("defineAgolExtent").checked) {
                                 this.toolbarForExport.activate(Draw.POLYGON);
                                 this.map.setInfoWindowOnClick(false);
@@ -65,7 +65,7 @@ define([
                             }
                             this.geometry = null;
                         } else {
-                            
+
                             registry.byId("defineAgolExtent").set("checked", false);
                             if (registry.byId("defineExtent").checked) {
                                 this.toolbarForExport.activate(Draw.POLYGON);
@@ -136,6 +136,8 @@ define([
                         if (this.imageServiceLayer.id === "resultLayer") {
                             if (this.imageServiceLayer.changeMode === "mask" || this.imageServiceLayer.changeMode === "threshold") {
                                 var renderer = this.modifyRenderingRule(this.imageServiceLayer.changeMode, this.imageServiceLayer.renderingRule);
+                            } else if (this.imageServiceLayer.maskMethod) {
+                                var renderer = this.modifyRenderer(this.imageServiceLayer.maskMethod, this.imageServiceLayer.renderingRule);
                             } else
                                 var renderer = this.imageServiceLayer.renderingRule;
                         } else
@@ -363,11 +365,13 @@ define([
                             document.getElementById("errorPixelSize").innerHTML = "";
 
                             if (this.imageServiceLayer.renderingRule) {
-                                
+
                                 if (this.imageServiceLayer.id === "resultLayer") {
                                     if (this.imageServiceLayer.changeMode === "mask" || this.imageServiceLayer.changeMode === "threshold")
                                         var renderer = this.modifyRenderingRule(this.imageServiceLayer.changeMode, this.imageServiceLayer.renderingRule);
-                                    else
+                                    else if (this.imageServiceLayer.maskMethod) {
+                                        var renderer = this.modifyRenderer(this.imageServiceLayer.maskMethod, this.imageServiceLayer.renderingRule);
+                                    } else
                                         var renderer = this.imageServiceLayer.renderingRule;
                                 } else
                                     var renderer = this.imageServiceLayer.renderingRule;
@@ -563,6 +567,35 @@ define([
                     colormapArg.Raster = raster3;
                     colormap.outputPixelType = "U8";
                     colormap.functionArguments = colormapArg;
+
+                    return colormap;
+                },
+                modifyRenderer: function (maskProperties, renderer) {
+                    var remap = new RasterFunction();
+                    remap.functionName = "Remap";
+                    var argsRemap = {};
+                    argsRemap.Raster = renderer;
+                    if (maskProperties.method === "less") {
+                        argsRemap.InputRanges = [maskProperties.range[0], maskProperties.value];
+                        argsRemap.NoDataRanges = [maskProperties.value, maskProperties.range[1]];
+                    } else {
+                        argsRemap.InputRanges = [maskProperties.value, maskProperties.range[1]];
+                        argsRemap.NoDataRanges = [maskProperties.range[0], maskProperties.value];
+                    }
+                    argsRemap.OutputValues = [1];
+                    remap.functionArguments = argsRemap;
+                    remap.outputPixelType = 'U8';
+
+                    var color = maskProperties.color;
+                    var colorMask = [[1, parseInt(color[0]), parseInt(color[1]), parseInt(color[2])]];
+
+                    var colormap = new RasterFunction();
+                    colormap.functionName = "Colormap";
+                    colormap.outputPixelType = "U8";
+                    var argsColor = {};
+                    argsColor.Colormap = colorMask;
+                    argsColor.Raster = remap;
+                    colormap.functionArguments = argsColor;
 
                     return colormap;
                 },

@@ -1,0 +1,14 @@
+{
+  "name": "ISMask",
+  "label": "IS Mask",
+  "platform": "HTML",
+  "version": "",
+  "author": "Esri",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasLocale" : false,
+    "hasSettingLocale" : false
+  }
+}
