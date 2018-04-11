@@ -61,7 +61,7 @@
     box-shadow: none;
 }
 .mask-histogram {
-    idth: 100%; height: 9rem;
+    width: 100%; height: 9rem;
     display: none;
 }
 .mask-centerBtn {
