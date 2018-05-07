@@ -20,7 +20,7 @@ define([
     'jimu/BaseWidget', "dojo/html",
     "dijit/registry",
     "dojo/_base/lang",
-    "dojo/dom-style", "esri/geometry/webMercatorUtils",
+    "dojo/dom-style", "esri/SpatialReference", "esri/geometry/webMercatorUtils",
     "esri/request",
     "dojo/i18n!esri/nls/jsapi",
     'dojo/dom-construct', "esri/arcgis/Portal", "esri/Color", "esri/toolbars/draw", "dojo/dom-attr", "esri/layers/RasterFunction", "dijit/form/SimpleTextarea", "dijit/form/TextBox", "dijit/form/CheckBox"
@@ -31,7 +31,7 @@ define([
                 template,
                 BaseWidget, html,
                 registry,
-                lang, domStyle, webMercatorUtils, esriRequest, bundle, domConstruct, arcgisPortal, Color, Draw, domAttr, RasterFunction) {
+                lang, domStyle, SpatialReference, webMercatorUtils, esriRequest, bundle, domConstruct, arcgisPortal, Color, Draw, domAttr, RasterFunction) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISExport',
@@ -286,10 +286,11 @@ define([
                 },
                 getUTMZones: function () {
                     var mapCenter = this.map.extent.getCenter();
-                    if (this.map.extent.spatialReference.wkid !== 102100 && this.map.extent.spatialReference.wkid !== 3857) {
-                        var mapCenter = webMercatorUtils.project(mapCenter, new SpatailReference({wkid: 102100}));
-                    }
-
+                    var isMercator = this.map.extent.spatialReference.wkid == 102100 || this.map.extent.spatialReference.wkid == 3857;
+                    var canProjectToMercator = !isMercator && webMercatorUtils.canProject(this.map.extent.spatialReference.wkid,new SpatialReference({wkid: 102100}));
+                    if (canProjectToMercator)
+                        var mapCenter = webMercatorUtils.project(mapCenter, new SpatialReference({wkid: 102100}));
+                    if (isMercator || canProjectToMercator){
                     var y = Math.pow(2.718281828, (mapCenter.y / 3189068.5));
 
                     var sinvalue = (y - 1) / (y + 1);
@@ -326,6 +327,13 @@ define([
                             temp = wkid;
                     }
                     registry.byId("outputSp").set("value", temp);
+                    } else {
+                        if (registry.byId("outputSp").getOptions())
+                            registry.byId("outputSp").removeOption(registry.byId('outputSp').getOptions());
+                        var wkid = this.map.extent.spatialReference.wkid;
+                        registry.byId("outputSp").addOption({label: "WKID : " + wkid, value: wkid});
+                        registry.byId("outputSp").set("value", wkid);
+                    }
                 },
                 exportLayer: function () {
                     this.refreshData();
