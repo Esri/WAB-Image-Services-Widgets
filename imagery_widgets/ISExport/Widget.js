@@ -119,9 +119,18 @@ define([
                         var info = {};
                         info.levelChange = true;
                         this.updateValues(info);
-                        this.extentchangeHandler = this.map.on("extent-change", lang.hitch(this, this.updateValues));
+                        if (!this.extentchangeHandler)
+                            this.extentchangeHandler = this.map.on("extent-change", lang.hitch(this, this.updateValues));
                     }
 
+                },
+                onClose: function () {
+                    if (this.extentchangeHandler) {
+                        this.extentchangeHandler.remove();
+                        this.extentchangeHandler = null;
+                    }
+                    registry.byId("defineExtent").set("checked", false);
+                    registry.byId("defineAgolExtent").set("checked", false);
                 },
                 saveLayerToArcGIS: function () {
 
@@ -239,9 +248,10 @@ define([
                                 var ps = parseFloat(ps) + 0.001;
                                 registry.byId("pixelSize").set("value", ps.toFixed(3));
                             }
-                            this.previousSpatialReference = registry.byId("outputSp").get("value");
-                            this.getUTMZones(extent);
                         }
+                        this.previousSpatialReference = registry.byId("outputSp").get("value");
+                        this.getUTMZones(extent);
+
                     }));
                 },
                 activatePolygon: function () {
@@ -295,12 +305,11 @@ define([
                     }));
                 },
                 getUTMZones: function (extent) {
-
-                    var mapCenter = extent.getCenter();
-
                     if (registry.byId("outputSp").getOptions())
                         registry.byId("outputSp").removeOption(registry.byId('outputSp').getOptions());
-                    if (mapCenter !== "error") {
+
+                    if (extent !== "error") {
+                        var mapCenter = extent.getCenter();
                         var y = Math.pow(2.718281828, (mapCenter.y / 3189068.5));
 
                         var sinvalue = (y - 1) / (y + 1);
