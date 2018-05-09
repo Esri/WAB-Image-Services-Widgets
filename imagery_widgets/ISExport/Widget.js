@@ -20,7 +20,7 @@ define([
     'jimu/BaseWidget', "dojo/html",
     "dijit/registry",
     "dojo/_base/lang",
-    "dojo/dom-style", "esri/geometry/webMercatorUtils",
+    "dojo/dom-style", "esri/geometry/webMercatorUtils", "esri/SpatialReference", "esri/tasks/GeometryService", "esri/tasks/ProjectParameters", "dojo/Deferred", "esri/geometry/Extent", "esri/geometry/Polygon",
     "esri/request",
     "dojo/i18n!esri/nls/jsapi",
     'dojo/dom-construct', "esri/arcgis/Portal", "esri/Color", "esri/toolbars/draw", "dojo/dom-attr", "esri/layers/RasterFunction", "dijit/form/SimpleTextarea", "dijit/form/TextBox", "dijit/form/CheckBox"
@@ -31,7 +31,7 @@ define([
                 template,
                 BaseWidget, html,
                 registry,
-                lang, domStyle, webMercatorUtils, esriRequest, bundle, domConstruct, arcgisPortal, Color, Draw, domAttr, RasterFunction) {
+                lang, domStyle, webMercatorUtils, SpatialReference, GeometryService, ProjectParameters, Deferred, Extent, Polygon, esriRequest, bundle, domConstruct, arcgisPortal, Color, Draw, domAttr, RasterFunction) {
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
                 name: 'ISExport',
@@ -95,7 +95,7 @@ define([
                         this.toolbarForExport = new Draw(this.map);
                         dojo.connect(this.toolbarForExport, "onDrawComplete", lang.hitch(this, this.getExtent));
                     }
-
+                    this.geometryService = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
                 },
                 setSavingType: function () {
                     if (this.config.exportMode === "both") {
@@ -221,22 +221,28 @@ define([
                     }
                 },
                 updateValues: function (info) {
-                    if (info.levelChange && !this.geometry) {
-                        this.refreshData();
-                        var widthMax = this.map.width;
+                    this.getMapPointInWebMercator(this.map.extent, "extent").then(lang.hitch(this, function (extent) {
 
-                        var width = (this.map.extent.xmax - this.map.extent.xmin);
-                        var height = (this.map.extent.ymax - this.map.extent.ymin);
+                        if (extent !== "error") {
+                            this.mapExtent = extent;
+                            if (info.levelChange && !this.geometry) {
+                                this.refreshData();
+                                var widthMax = this.map.width;
 
-                        var psx = width / widthMax;
-                        var psy = height / widthMax;
-                        var servicePixel = (this.imageServiceLayer && this.imageServiceLayer.pixelSizeX) ? this.imageServiceLayer.pixelSizeX : 0;
-                        var ps = Math.max(psx, psy, servicePixel);
-                        var ps = parseFloat(ps) + 0.001;
-                        registry.byId("pixelSize").set("value", ps.toFixed(3));
-                    }
-                    this.previousSpatialReference = registry.byId("outputSp").get("value");
-                    this.getUTMZones();
+                                var width = (extent.xmax - extent.xmin);
+                                var height = (extent.ymax - extent.ymin);
+
+                                var psx = width / widthMax;
+                                var psy = height / widthMax;
+                                var servicePixel = (this.imageServiceLayer && this.imageServiceLayer.pixelSizeX) ? this.imageServiceLayer.pixelSizeX : 0;
+                                var ps = Math.max(psx, psy, servicePixel);
+                                var ps = parseFloat(ps) + 0.001;
+                                registry.byId("pixelSize").set("value", ps.toFixed(3));
+                            }
+                            this.previousSpatialReference = registry.byId("outputSp").get("value");
+                            this.getUTMZones(extent);
+                        }
+                    }));
                 },
                 activatePolygon: function () {
                     if (registry.byId("defineExtent").checked || registry.byId("defineAgolExtent").checked) {
@@ -273,48 +279,58 @@ define([
                     var symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new Color([200, 0, 0]), 2);
                     var graphic = new esri.Graphic(geometry, symbol);
                     this.map.graphics.add(graphic);
-                    this.geometryClip = geometry;
-                    this.geometry = geometry.getExtent();
-                    var width = (this.geometry.xmax - this.geometry.xmin);
-                    var height = (this.geometry.ymax - this.geometry.ymin);
-                    var psx = width / this.map.width;
-                    var psy = height / this.map.width;
-                    var servicePixel = (this.imageServiceLayer && this.imageServiceLayer.pixelSizeX) ? this.imageServiceLayer.pixelSizeX : 0;
-                    var ps = Math.max(psx, psy, servicePixel);
-                    var ps = parseFloat(ps) + 0.001;
-                    registry.byId("pixelSize").set("value", ps.toFixed(3));
+                    this.getMapPointInWebMercator(geometry, "polygon").then(lang.hitch(this, function (geometry) {
+                        if (geometry !== "error") {
+                            this.geometryClip = geometry;
+                            this.geometry = geometry.getExtent();
+                            var width = (this.geometry.xmax - this.geometry.xmin);
+                            var height = (this.geometry.ymax - this.geometry.ymin);
+                            var psx = width / this.map.width;
+                            var psy = height / this.map.width;
+                            var servicePixel = (this.imageServiceLayer && this.imageServiceLayer.pixelSizeX) ? this.imageServiceLayer.pixelSizeX : 0;
+                            var ps = Math.max(psx, psy, servicePixel);
+                            var ps = parseFloat(ps) + 0.001;
+                            registry.byId("pixelSize").set("value", ps.toFixed(3));
+                        }
+                    }));
                 },
-                getUTMZones: function () {
-                    var mapCenter = this.map.extent.getCenter();
-                    if (this.map.extent.spatialReference.wkid !== 102100 && this.map.extent.spatialReference.wkid !== 3857) {
-                        var mapCenter = webMercatorUtils.project(mapCenter, new SpatailReference({wkid: 102100}));
-                    }
+                getUTMZones: function (extent) {
 
-                    var y = Math.pow(2.718281828, (mapCenter.y / 3189068.5));
+                    var mapCenter = extent.getCenter();
 
-                    var sinvalue = (y - 1) / (y + 1);
-                    var y1 = Math.asin(sinvalue) / 0.017453292519943295;
-
-                    var x = mapCenter.x / 6378137.0;
-                    x = x / 0.017453292519943295;
-                    var utm = parseInt((x + 180) / 6) + 1;
-                    if (y1 > 0)
-                        var wkid = 32600 + utm;
-                    else
-                        var wkid = 32500 + utm;
                     if (registry.byId("outputSp").getOptions())
                         registry.byId("outputSp").removeOption(registry.byId('outputSp').getOptions());
-                    if (utm !== 1) {
-                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm - 1) + "", value: wkid - 1});
-                    } else
-                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 59) + "", value: wkid + 59});
-                    registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm + "", value: wkid});
-                    if (utm !== 60)
-                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 1) + "", value: wkid + 1});
-                    else
-                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm - 59 + "", value: wkid - 59});
+                    if (mapCenter !== "error") {
+                        var y = Math.pow(2.718281828, (mapCenter.y / 3189068.5));
 
+                        var sinvalue = (y - 1) / (y + 1);
+                        var y1 = Math.asin(sinvalue) / 0.017453292519943295;
+
+                        var x = mapCenter.x / 6378137.0;
+                        x = x / 0.017453292519943295;
+                        var utm = parseInt((x + 180) / 6) + 1;
+                        if (y1 > 0)
+                            var wkid = 32600 + utm;
+                        else
+                            var wkid = 32500 + utm;
+
+                        if (utm !== 1) {
+                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm - 1) + "", value: wkid - 1});
+                        } else
+                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 59) + "", value: wkid + 59});
+                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm + "", value: wkid});
+                        if (utm !== 60)
+                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 1) + "", value: wkid + 1});
+                        else
+                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm - 59 + "", value: wkid - 59});
+
+                    } else {
+                        var wkid = this.map.extent.spatialReference.wkid;
+                        registry.byId("outputSp").addOption({label: "WKID : " + wkid, value: wkid});
+                    }
                     registry.byId("outputSp").addOption({label: "WebMercatorAS", value: 102100});
+                    if (this.imageServiceLayer.hasOwnProperty("spatialReference") && this.imageServiceLayer.spatialReference.wkid !== 102100)
+                        registry.byId("outputSp").addOption({label: "Default", value: this.imageServiceLayer.spatialReference.wkid});
                     var srsList = registry.byId("outputSp").getOptions();
                     var temp;
                     for (var a in srsList) {
@@ -326,6 +342,32 @@ define([
                             temp = wkid;
                     }
                     registry.byId("outputSp").set("value", temp);
+
+                },
+                getMapPointInWebMercator: function (geometry, type) {
+                    var dfd = new Deferred();
+                    if (this.map.extent.spatialReference.wkid !== 102100 && this.map.extent.spatialReference.wkid !== 3857) {
+                        if (webMercatorUtils.canProject(this.map.extent.spatialReference.wkid, new SpatialReference(102100))) {
+                            geometry = webMercatorUtils.project(geometry, new SpatialReference({wkid: 102100}));
+                        } else {
+                            var params = new ProjectParameters();
+                            params.geometries = [geometry];
+                            params.outSR = new SpatialReference(102100);
+                            this.geometryService.project(params, lang.hitch(this, function (response) {
+
+                                if (response && response.length > 0) {
+                                    response[0].spatialReference = {"wkid": 102100};
+                                    response[0] = type === "extent" ? new Extent(response[0]) : new Polygon(response[0]);
+                                    return dfd.resolve(response[0]);
+                                } else
+                                    return dfd.resolve("error");
+                            }), lang.hitch(this, function () {
+                                return dfd.resolve("error");
+                            }));
+                        }
+                    } else
+                        return dfd.resolve(geometry);
+                    return dfd.promise;
                 },
                 exportLayer: function () {
                     this.refreshData();
@@ -335,13 +377,14 @@ define([
                             var bbox = (this.geometry.xmin + ", " + this.geometry.ymin + ", " + this.geometry.xmax + ", " + this.geometry.ymax).toString();
                             var width = (this.geometry.xmax - this.geometry.xmin);
                             var height = (this.geometry.ymax - this.geometry.ymin);
-
+                            var bboxSR = this.geometry.spatialReference;
 
                         } else
                         {
-                            var bbox = (this.map.extent.xmin + ", " + this.map.extent.ymin + ", " + this.map.extent.xmax + ", " + this.map.extent.ymax).toString();
-                            var width = (this.map.extent.xmax - this.map.extent.xmin);
-                            var height = (this.map.extent.ymax - this.map.extent.ymin);
+                            var bbox = (this.mapExtent.xmin + ", " + this.mapExtent.ymin + ", " + this.mapExtent.xmax + ", " + this.mapExtent.ymax).toString();
+                            var width = (this.mapExtent.xmax - this.mapExtent.xmin);
+                            var height = (this.mapExtent.ymax - this.mapExtent.ymin);
+                            var bboxSR = this.mapExtent.spatialReference;
                         }
 
                         var pixelsize = parseFloat(registry.byId("pixelSize").get("value"));
@@ -408,6 +451,7 @@ define([
                                 content: {
                                     f: "json",
                                     bbox: bbox,
+                                    bboxSR: JSON.stringify(bboxSR),
                                     size: size,
                                     compression: compression,
                                     format: format,
