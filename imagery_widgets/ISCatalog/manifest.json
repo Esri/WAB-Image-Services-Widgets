@@ -1,0 +1,13 @@
+{
+    "name": "ISCatalog",
+	"label": "IS Catalog",
+    "2D": true,
+    "3D": true,
+    "platform": "HTML",
+    "version": "1.15",
+    "wabVersion": "1.15",
+    "author": "Esri",
+    "description": "This widget lets you search, analyze, and export imagery",
+    "copyright": "",
+    "license": "http://www.apache.org/licenses/LICENSE-2.0"
+}
