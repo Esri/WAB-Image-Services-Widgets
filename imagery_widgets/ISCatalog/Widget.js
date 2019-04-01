@@ -39,9 +39,9 @@ define([
         "esri/tasks/BufferParameters",
         "./base/SearchByBoundsWidget/SearchByBoundsWidget",
         "esri/config",        
-        "./widgets/ISCatalog/lib/filesaver/Blob.js",
-        "./widgets/ISCatalog/lib/filesaver/FileSaver.js",
-        "./widgets/ISCatalog/lib/papa_parse.js"
+        "./lib/filesaver/Blob",
+        "./lib/filesaver/FileSaver",
+        "./lib/papa_parse"
     ],
     function (declare, BaseWidget, lang, domStyle, domConstruct, ModelSupport, window, BaseDiscoveryMixin, DrawManager, IconSearch, ArchiveSearch, ArchiveResultProcessorMixin, IconResultProcessorMixin, CheckoutWidget, ResultsWidget, urlUtils, SearchFilter, IconSearchFilter, SearchSourcesWidget, UserAwareMixin, Point, BufferParameters, SearchByBoundsWidget, esriConfig) {
         return declare([BaseWidget, UserAwareMixin, ModelSupport, ArchiveResultProcessorMixin, IconResultProcessorMixin, BaseDiscoveryMixin], {

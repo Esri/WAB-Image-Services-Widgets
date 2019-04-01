@@ -21,7 +21,7 @@
   },
   "csvExportEnabled": true,
   "utmSearchConfiguration": {
-    "utmLookupJsonUrl": "widgets/ISCatalog/base/SearchByBoundsWidget/config/UTMWKIDLookup.json"
+    "utmLookupJsonUrl": "./base/SearchByBoundsWidget/config/UTMWKIDLookup.json"
   },
   "noResultsMessage": "There is currently no imagery available for your search area."
 }

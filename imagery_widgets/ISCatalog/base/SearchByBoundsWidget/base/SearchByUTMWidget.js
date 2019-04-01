@@ -18,6 +18,7 @@ define([
         "dojo/_base/declare",
         "dojo/topic",
         "dojo/text!./templates/SearchByUTMTemplate.html",
+        "dojo/text!../config/UTMWKIDLookup.json",
         "dojo/_base/lang",
         "./BaseSearchByWidget",
         "../../BaseDiscoveryMixin",
@@ -28,7 +29,7 @@ define([
         "esri/SpatialReference"
 
     ],
-    function (declare, topic, template, lang, BaseSearchByWidget, BaseDiscoveryMixin, NumberTextBox, RadioButton, Select, Point, SpatialReference) {
+    function (declare, topic, template, utmJson,lang, BaseSearchByWidget, BaseDiscoveryMixin, NumberTextBox, RadioButton, Select, Point, SpatialReference) {
         return declare(
             [BaseSearchByWidget, BaseDiscoveryMixin],
             {
@@ -49,7 +50,8 @@ define([
                 },
                 postCreate: function () {
                     this.inherited(arguments);
-                    this.loadJson(this.utmLookupJsonUrl, lang.hitch(this, this.handleUtmZoneLookupLoaded), lang.hitch(this, this.handleUtmZoneLookupLoadError));
+                    this.handleUtmZoneLookupLoaded(JSON.parse(utmJson));
+                    //this.loadJson(this.utmLookupJsonUrl, lang.hitch(this, this.handleUtmZoneLookupLoaded), lang.hitch(this, this.handleUtmZoneLookupLoadError));
                 },
                 /**
                  * called when the UTM lookup configuration file has been loaded

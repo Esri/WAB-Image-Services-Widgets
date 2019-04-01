@@ -107,7 +107,7 @@ define([
                             },
                             "csvExportEnabled": true,
                             "showLayerManipulation": true,
-                            "thumbnailLoadErrorImage": "widgets/ISCatalog/base/Results/images/archive_thumb.png",
+                            "thumbnailLoadErrorImage": "./base/Results/images/archive_thumb.png",
                             "minDateRangeFilterDelta": 86400000,
                             "defaultCloudCover": 100,
                             "sortOptions": [],
@@ -116,7 +116,7 @@ define([
                                 "disabled": false
                             },
                             "utmSearchConfiguration": {
-                                "utmLookupJsonUrl": "widgets/ISCatalog/base/SearchByBoundsWidget/config/UTMWKIDLookup.json"
+                                "utmLookupJsonUrl": "./base/SearchByBoundsWidget/config/UTMWKIDLookup.json"
                             },
                             searchServices: []
                         }
