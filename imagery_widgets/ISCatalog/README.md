@@ -1,5 +1,5 @@
-# Image Discovery
-The Image Discovery widget allows users to search and discover imagery contained across multiple image services.
+# ISCatalog
+The ISCatalog widget allows users to search and discover imagery contained across multiple image services.
 ## Sections
 
 * [Features](#features)
@@ -14,7 +14,7 @@ The Image Discovery widget allows users to search and discover imagery contained
 ## Features
 * Search for imagery contained across multiple image services
 * Preview imagery
-* Filter search results
+* Filter and sort search results
 * Perform analysis on discovered imagery
 * Download imagery (if supported by image service)
 * Export imagery to web map
@@ -28,23 +28,31 @@ In order to develop and test widgets you need to deploy the ISCatalog directory 
 
 ## Configuration
 
-In edit mode of WebApp Builder click "configure this widget" near the bottom of the Image Discovery widget icon.
+In edit mode of WebApp Builder click "configure this widget" near the bottom of the ISCatalog widget icon.
 
 **Service Configuration**
 
-Use the list below to load the image services you want to add to the Image Discovery Widget. The steps are repeated for each image service you would like to add.
+Use the list below to load the image services you want to add to the ISCatalog Widget. The steps are repeated for each image service you would like to add.
 
 * Inside of the configuration window paste a URL to an image service and click "Load"
 * The image service will now be loaded into the configuration window with fields and labelling options displayed
  * *Display Name* - Label used to identify which service the search results come from
  * *Sort Configuration* - allow the user to sort the service's search results by these fields. If the service does not contain these fields please leave them unchecked. Sortng can be done regardless on the basis of Sensor name.
 * Display fields are all of the fields associated with each row in the image service
- * Click the checkbox next to the field name to enable the field in the Image Discovery Widget
+ * Click the checkbox next to the field name to enable the field in the ISCatalog Widget
  * *Display In* - Radio buttons either display the field value in the result itself ("Entry") or in a popup ("Info Popup") for the result
  * *Label* - The label to display to the user for the field in each result. The default is the field name in the image service.
  * *Value Append* - allows you to add to the field after the value. For instance, you can add a % or &deg; symbol to the end of a field value.
  * *Float Precision* - sets the precision of the decimal value (for decimal field types only)
  * *Bold* - Display the field as bold in the search results
+
+
+**Improvements in version 1.15**
+
+* A zooming functionality has been added to limit the set of imagery to search so that the results come faster.
+* Requst for only 8-10 icon thumbnails is being made at a time.
+* Sorting based on sensor name.
+* Improved UI.
 
 
 ## Issues
