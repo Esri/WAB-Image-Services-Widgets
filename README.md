@@ -24,9 +24,11 @@ Theme:
 
 ## Instructions
 
-1. Download and unzip the .zip file.
-2. Browse to the documentation folder.
-3. Open and follow instructions in the "WABIS_V2_UserDoc.docx" 
+1. Install Web AppBuilder for ArcGIS (Developer Edition) 
+2. Download and unzip the WAB- Image-Services-Widgets repo zip file.
+3. Copy the WABIS widget folders into the **...\WebAppBuilderForArcGIS\client\stemapp\widgets** Web AppBuilder for ArcGIS (Developer Edition) directory 
+4. Copy the WABIS FoldableWrapperTheme folder into **...\WebAppBuilderForArcGIS\client\stemapp\themes** Web AppBuilder for ArcGIS (Developer Edition) directory
+5. Open Web AppBuilder (Developer Edition) and begin building your imagery app.
 
 ## Requirements
 
