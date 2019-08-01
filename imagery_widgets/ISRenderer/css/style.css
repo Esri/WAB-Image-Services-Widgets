@@ -4,6 +4,25 @@
 .esriLegendLayer{
   font-size: 12px;
 }
-.red{
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 10px;
+}
+.red-swatch{
     background-image: url(../images/red.png);
+}
+.green-swatch{
+  background-image: url(../images/green.PNG);
+}
+.blue-swatch{
+  background-image: url(../images/blue.png);
+}
+.props-btn{
+  background-image: url(../images/props.png);
+  background-size: contain;
+  width: 15px;
+  height: 15px;
 }
