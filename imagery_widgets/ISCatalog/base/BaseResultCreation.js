@@ -141,7 +141,7 @@ define([
                         }
                         currentEntryDetailElement = domConstruct.create("li");
                         if (!isNaN(value)) {
-                            value = parseFloat(value).toFixed(2);
+                            value = parseFloat(value).toFixed(displayField.precision);
                         }
                         domAttr.set(currentEntryDetailElement, "innerHTML", displayField.label + (displayField.label.length > 0 ? ": " : "") + value);
                         if (displayField.cssClasses) {

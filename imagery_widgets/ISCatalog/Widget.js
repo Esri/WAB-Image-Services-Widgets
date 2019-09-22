@@ -39,9 +39,9 @@ define([
         "esri/tasks/BufferParameters",
         "./base/SearchByBoundsWidget/SearchByBoundsWidget",
         "esri/config",        
-        "./lib/filesaver/Blob",
-        "./lib/filesaver/FileSaver",
-        "./lib/papa_parse"
+        "./widgets/ISCatalog/lib/filesaver/Blob.js",
+        "./widgets/ISCatalog/lib/filesaver/FileSaver.js",
+        "./widgets/ISCatalog/lib/papa_parse.js"
     ],
     function (declare, BaseWidget, lang, domStyle, domConstruct, ModelSupport, window, BaseDiscoveryMixin, DrawManager, IconSearch, ArchiveSearch, ArchiveResultProcessorMixin, IconResultProcessorMixin, CheckoutWidget, ResultsWidget, urlUtils, SearchFilter, IconSearchFilter, SearchSourcesWidget, UserAwareMixin, Point, BufferParameters, SearchByBoundsWidget, esriConfig) {
         return declare([BaseWidget, UserAwareMixin, ModelSupport, ArchiveResultProcessorMixin, IconResultProcessorMixin, BaseDiscoveryMixin], {
@@ -384,7 +384,7 @@ define([
                 startDate = this.searchFilter.getStartDate();
                 endDate = this.searchFilter.getEndDate();
                 userQueryParameters[this.SEARCH_FIELDS.ACQUISITION_DATE] = [startDate, endDate];
-                if (cloudCover !== 100) {
+                if (cloudCover !== 100) {                    
                     userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER] = cloudCover;
                 }
                 this._iconResults = null;

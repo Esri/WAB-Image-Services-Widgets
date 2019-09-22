@@ -35,7 +35,9 @@ define({
         checkoutConfiguration: "Checkout Configuration",
         enableCSVCheckout: "CSV Export",
         sensorAZ: "A-Z Sensor",
-        sensorZA: "Z-A Sensor"
+        sensorZA: "Z-A Sensor",
+        cloudcoverConfiguration: "Cloud Cover Configuration",
+        showCloudCoverValue: "If cloud cover values are between 0 to 1, check here"
     }),
     fr: 1
 });

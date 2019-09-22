@@ -200,7 +200,7 @@ define([
                             "name": "__serviceLabel"
                         }
                     ];
-
+                    this.config.cloudCoverValueFlag = this.cloudCoverValue.checked;
                     this.config.url = this.serviceUrl;
                     this.config.label = (this.serviceDisplayNameInput.value ? this.serviceDisplayNameInput.value : this.serviceDescription.name);
                     for (var i = 0; i < this.serviceFields.length; i++) {
@@ -233,6 +233,11 @@ define([
                     if (config) {
                         this.serviceDisplayNameInput.value = config.label;
                         this.serviceUrl = config.url;
+                        if (config.cloudCoverValueFlag) {
+                            this.cloudCoverValue.checked = config.cloudCoverValueFlag;
+                        } else {
+                            this.cloudCoverValue.checked = false;
+                        }
                     }
                     var i, currentField, currentFieldWidget;
                     if (config.displayFields) {

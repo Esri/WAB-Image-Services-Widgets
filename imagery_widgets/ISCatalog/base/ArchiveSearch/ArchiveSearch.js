@@ -85,7 +85,12 @@ define([
                 }
                 if (userQueryParameters && searchService.commonFields) {
                     if (searchService.commonFields.cloudCover && (userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER] || userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER] === 0)) {
-                        queryParmeters.push(searchService.commonFields.cloudCover + " <= " + userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER]);
+                        if (searchService.cloudCoverValueFlag) {
+                            queryParmeters.push(searchService.commonFields.cloudCover + " <= " + (userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER])/100.00);
+                        } else {
+                            queryParmeters.push(searchService.commonFields.cloudCover + " <= " + userQueryParameters[this.SEARCH_FIELDS.CLOUD_COVER]);
+                        }
+                        
                     }
                     if (searchService.commonFields.acquisitionDate && userQueryParameters[this.SEARCH_FIELDS.ACQUISITION_DATE]) {
                         var acquisitionDateQueryPart = "(";
