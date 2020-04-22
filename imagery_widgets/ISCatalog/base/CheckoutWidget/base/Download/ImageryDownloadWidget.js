@@ -110,6 +110,7 @@ define([
                             params = {
                                 f: "json",
                                 rasterIds: currentDownloadItemObj.objectIds.join(",")
+                               
                             };
                             if (cred) {
                                 params.token = cred.token;
@@ -152,6 +153,11 @@ define([
                                 }
                                 else {
                                     currentRasterFileRasterId = currentDownloadItem.rasterIds[0];
+                                    if (currentDownloadItem.id.startsWith('https')) {
+                                        currentDownloadItem.id = currentDownloadItem.id.replace('https', 'http');
+                                    } else if (currentDownloadItem.id.startsWith('.\\')) {
+                                        currentDownloadItem.id = currentDownloadItem.id.replace(/\\/g, '%5C');
+                                    }
                                     downloadUrl = this.joinUrl(serviceUrl, ("file?id=" + currentDownloadItem.id)) + "&rasterId=" + currentRasterFileRasterId;
                                 }
                                 var addDownloadItem = {
