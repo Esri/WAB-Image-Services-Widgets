@@ -133,7 +133,7 @@ define([
                     } else {
                         registry.byId("imageSelector").set("checked", false);
                         registry.byId("imageSelector").set("disabled", true);
-                        html.set(this.errorDiv, this,nls.zoomImage);
+                        html.set(this.errorDiv, this.nls.zoomImage);
                     }
                 },
                 checkField: function (currentVersion)
