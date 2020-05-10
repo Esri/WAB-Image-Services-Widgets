@@ -334,10 +334,10 @@ define([
                     }
                 } else {
                     domStyle.set("scatterplotNode", "display", "none");
-                    html.set(this.scatterplotErrorContainer, "No visible imagery Layers in the map.");
+                    html.set(this.scatterplotErrorContainer, this.nls.error);
                 }
                 if (this.layer) {
-                    html.set(this.scatterPlotLayerTitle, "Layer: <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
+                    html.set(this.scatterPlotLayerTitle, this.nls.layer + ": <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
                 }
             }));
             this.mapClickHandler = this.map.on("click", lang.hitch(this, function (e) {
@@ -496,12 +496,12 @@ define([
                     }
                 }
                 if (this.layer) {
-                    html.set(this.scatterPlotLayerTitle, "Layer: <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
+                    html.set(this.scatterPlotLayerTitle, this.nls.layer +": <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
                     domStyle.set("scatterplotNode", "display", "block");
                     html.set(this.scatterplotErrorContainer, "");
                 } else {
                     domStyle.set("scatterplotNode", "display", "none");
-                    html.set(this.scatterplotErrorContainer, "No visible imagery Layers in the map.");
+                    html.set(this.scatterplotErrorContainer, this.nls.error);
                 }
             } else {
                 domStyle.set(dom.byId('scatterplotNode'), 'display', 'none');
@@ -549,16 +549,16 @@ define([
                             }
                         } else {
                             var num = i + 1;
-                            this.xSelect.addOption({"value": i, "label": "Band_" + num.toString()});
-                            this.ySelect.addOption({"value": i, "label": "Band_" + num.toString()});
+                            this.xSelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
+                            this.ySelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
                             this.bandNames.push("Band_" + num.toString());
                         }
                     }
                 } else {
                     for (var i = 0; i < this.layer.bandCount; i++) {
                         var num = i + 1;
-                        this.xSelect.addOption({"value": i, "label": "Band_" + num.toString()});
-                        this.ySelect.addOption({"value": i, "label": "Band_" + num.toString()});
+                        this.xSelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
+                        this.ySelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
                         this.bandNames.push("Band_" + num.toString());
                     }
                 }
@@ -585,8 +585,8 @@ define([
                 if (this.layer.bandCount) {
                     for (var i = 0; i < this.layer.bandCount; i++) {
                         var num = i + 1;
-                        this.xSelect.addOption({"value": i, "label": "Band_" + num.toString()});
-                        this.ySelect.addOption({"value": i, "label": "Band_" + num.toString()});
+                        this.xSelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
+                        this.ySelect.addOption({"value": i, "label": this.nls.band + "_" + num.toString()});
                         this.bandNames.push("Band_" + num.toString());
                     }
                     if (!this.prevLayer || this.prevLayer.url !== this.layer.url) {

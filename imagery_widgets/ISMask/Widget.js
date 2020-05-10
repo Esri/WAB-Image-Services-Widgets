@@ -81,9 +81,9 @@ define([
                             html.set(this.errorNotification, "");
                             if (this.primaryLayer.id !== this.prevPrimaryLayer) {
                                 if (this.config[this.primaryLayer.id])
-                                    html.set(this.layerTitle, "<b>Layer:</b> " + this.config[this.primaryLayer.id].title);
+                                    html.set(this.layerTitle, "<b>" + this.nls.layer + ":</b> " + this.config[this.primaryLayer.id].title);
                                 else
-                                    html.set(this.layerTitle, "<b>Layer:</b> " + (this.primaryLayer.title || this.primaryLayer.name || this.primaryLayer.id));
+                                    html.set(this.layerTitle, "<b>" + this.nls.layer + ":</b> " + (this.primaryLayer.title || this.primaryLayer.name || this.primaryLayer.id));
                                 dojo.empty(this.maskHistogram);
                                 domStyle.set(this.maskHistogram, "display", "none");
                                 if (this.slider) {
@@ -100,7 +100,7 @@ define([
                             this.prevPrimaryLayer = this.primaryLayer.id;
                         } else {
                             domStyle.set(this.maskContainer, "display", "none");
-                            html.set(this.errorNotification, "No visible imagery layer available on the map.");
+                            html.set(this.errorNotification, this.nls.error);
                         }
 
                     }
@@ -111,24 +111,24 @@ define([
                         if (a === this.primaryLayer.id) {
 
                             if (this.config[a].veg) {
-                                this.method.addOption({label: "Vegetation Index", value: "ndvi"});
+                                this.method.addOption({label: this.nls.ndvi, value: "ndvi"});
 
                             }
                             if (this.config[a].savi) {
-                                this.method.addOption({label: "Soil Adjusted Veg. Index", value: "savi"});
+                                this.method.addOption({label: this.nls.savi, value: "savi"});
                             }
                             if (this.config[a].water) {
-                                this.method.addOption({label: "Water Index", value: "water"});
+                                this.method.addOption({label: this.nls.water, value: "water"});
                             }
                             if (this.config[a].burn) {
-                                this.method.addOption({label: "Burn Index", value: "burn"});
+                                this.method.addOption({label: this.nls.burn, value: "burn"});
                             }
                             break;
                         }
                     }
-                    this.method.addOption({label: "Custom Index", value: "custom"});
-                    this.method.addOption({label: "Less than value", value: "less"});
-                    this.method.addOption({label: "Greater than value", value: "more"});
+                    this.method.addOption({label: this.nls.customIndex, value: "custom"});
+                    this.method.addOption({label: this.nls.lessThanValue, value: "less"});
+                    this.method.addOption({label: this.nls.greaterThanValue, value: "more"});
                 },
                 populateBands: function () {
                     this.bandNames = [];
@@ -150,14 +150,14 @@ define([
                                     this.bandNames[i] = bandProp[i].BandName;
                                 } else {
                                     var num = i + 1;
-                                    this.bandNames[i] = "Band_" + num.toString();
+                                    this.bandNames[i] = this.nls.band + "_" + num.toString();
                                 }
 
                             }
                         } else {
                             for (var i = 0; i < this.primaryLayer.bandCount; i++) {
                                 var num = i + 1;
-                                this.bandNames[i] = "Band_" + num.toString();
+                                this.bandNames[i] = this.nls.band + "_" + num.toString();
                             }
                         }
                         this.populateBandsContinue();
@@ -165,7 +165,7 @@ define([
                     }), lang.hitch(this, function () {
                         for (var i = 0; i < this.primaryLayer.bandCount; i++) {
                             var num = i + 1;
-                            this.bandNames[i] = "Band_" + num.toString();
+                            this.bandNames[i] = this.nls.band + "_" + num.toString();
                         }
                         this.populateBandsContinue();
                     }));
@@ -264,19 +264,19 @@ define([
                 setProperties: function (value) {
                     domStyle.set(this.band2.domNode, "display", "inline-table");
                     if (value === "ndvi" || value === "savi") {
-                        html.set(this.bandName1, "Infrared Band");
-                        html.set(this.bandName2, "Red Band");
+                        html.set(this.bandName1, this.nls.infraredBand);
+                        html.set(this.bandName2, this.nls.redBand);
                     } else if (value === "water") {
-                        html.set(this.bandName1, "Green Band");
-                        html.set(this.bandName2, "Short-wave Infrared Band");
+                        html.set(this.bandName1, this.nls.greenBand);
+                        html.set(this.bandName2, this.nls.shortWaveInfraredBand);
                     } else if (value === "burn") {
-                        html.set(this.bandName1, "Infrared Band");
-                        html.set(this.bandName2, "Short-wave Infrared Band");
+                        html.set(this.bandName1, this.nls.infraredBand);
+                        html.set(this.bandName2, this.nls.shortWaveInfraredBand);
                     } else if (value === "custom") {
-                        html.set(this.bandName1, "Band A");
-                        html.set(this.bandName2, "Band B");
+                        html.set(this.bandName1, this.nls.bandA);
+                        html.set(this.bandName2, this.nls.bandB);
                     } else {
-                        html.set(this.bandName1, "Band");
+                        html.set(this.bandName1, this.nls.band);
                         html.set(this.bandName2, "");
                         domStyle.set(this.band2.domNode, "display", "none");
                     }

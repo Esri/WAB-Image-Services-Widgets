@@ -152,7 +152,7 @@ define([
 
                             if (this.primaryLayer !== this.prevprimaryLayer) {
                                 if (this.layerInfos[this.label]) {
-                                    dom.byId("profileLayerTitle").innerHTML = "Layer: <b>" + this.layerInfos[this.label].title + "</b>";
+                                    dom.byId("profileLayerTitle").innerHTML = this.nls.layer + ": <b>" + this.layerInfos[this.label].title + "</b>";
                                     domStyle.set(dom.byId("selectType"), 'display', 'block');
                                     domStyle.set(dom.byId("error-message"), 'display', 'none');
                                     for (var a in this.primaryLayer.fields) {
@@ -163,20 +163,20 @@ define([
                                     }
                                     registry.byId("type").removeOption(registry.byId("type").getOptions());
                                     if (this.layerInfos[this.label].bandCount === 1) {
-                                        var options = [{"label": "Identify", "value": "nonTemporal"}];
-                                        html.set(this.profileTypeInstruction, "Click on the map for Identify.");
+                                        var options = [{"label": thi.nls.identify, "value": "nonTemporal"}];
+                                        html.set(this.profileTypeInstruction, this.nls.clickOnMapIdentify);
                                     } else{
-                                        var options = [{"label": "Spectral Profile", "value": "nonTemporal"}];
-                                         html.set(this.profileTypeInstruction, "Click on the map for Spectral Profile.");
+                                        var options = [{"label": this.nls.spectralProfile, "value": "nonTemporal"}];
+                                         html.set(this.profileTypeInstruction, this.nls.clickOnMapSpectral);
                                     }
                                     if (this.layerInfos[this.label].hasOverlap)
-                                        options.push({"label": "Temporal Profile", "value": "temporal"});
+                                        options.push({"label": this.nls.temporalProfile, "value": "temporal"});
                                     if (this.layerInfos[this.label].hasNDVI)
-                                        options.push({"label": "Index Profile", "value": "NDVI"});
+                                        options.push({"label": this.nls.indexProfile, "value": "NDVI"});
                                     registry.byId("type").addOption(options);
                                 }
                                 if (!this.layerInfos[this.label]) {
-                                    dom.byId("profileLayerTitle").innerHTML = "Layer: <b>" + (this.primaryLayer.title || this.primaryLayer.arcgisProps.title || this.primaryLayer.name || this.primaryLayer.id) + "</b>";
+                                    dom.byId("profileLayerTitle").innerHTML = this.nls.layer + ": <b>" + (this.primaryLayer.title || this.primaryLayer.arcgisProps.title || this.primaryLayer.name || this.primaryLayer.id) + "</b>";
                                     domStyle.set(dom.byId("selectType"), 'display', 'none');
                                     this.showLoading();
                                     this.layerObj = {
@@ -224,7 +224,7 @@ define([
                                                             this.layerObj.bandNames[i] = bandProp[i].BandName;
                                                         } else {
                                                             var num = i + 1;
-                                                            this.layerObj.bandNames[i] = "Band_" + num.toString();
+                                                            this.layerObj.bandNames[i] = this.nls.band + "_" + num.toString();
                                                         }
                                                     }
                                                 }
@@ -269,7 +269,7 @@ define([
                             }
                         } else {
                             domStyle.set(this.profileContainer, "display", "none");
-                            html.set(this.profileErrorContainer, "No visible Imagery Layers in the map.");
+                            html.set(this.profileErrorContainer, this.nls.profileError);
                         }
                     }
                 },
@@ -297,16 +297,16 @@ define([
                         domStyle.set(dom.byId("error-message"), 'display', 'none');
                         registry.byId("type").removeOption(registry.byId("type").getOptions());
                         if (this.layerInfos[this.label].bandCount === 1){
-                             html.set(this.profileTypeInstruction, "Click on the map for Identify.");
-                            var options = [{"label": "Identify", "value": "nonTemporal"}];
+                             html.set(this.profileTypeInstruction, this.nls.clickOnMapIdentify);
+                            var options = [{"label": this.nls.identify, "value": "nonTemporal"}];
                         }else
-                        { var options = [{"label": "Spectral Profile", "value": "nonTemporal"}];
-                             html.set(this.profileTypeInstruction, "Click on the map for Spectral Profile.");
+                        { var options = [{"label": this.nls.spectralProfile, "value": "nonTemporal"}];
+                             html.set(this.profileTypeInstruction, this.nls.clickOnMapSpectral);
                         }
                         if (this.layerInfos[this.label].hasOverlap)
-                            options.push({"label": "Temporal Profile", "value": "temporal"});
+                            options.push({"label": this.nls.temporalProfile, "value": "temporal"});
                         if (this.layerInfos[this.label].hasNDVI)
-                            options.push({"label": "Index Profile", "value": "NDVI"});
+                            options.push({"label": this.nls.indexProfile, "value": "NDVI"});
                         registry.byId("type").addOption(options);
                     }
                 },
@@ -328,7 +328,7 @@ define([
                     this.toolbarSpectralProfile = new Draw(this.map);
                     dojo.connect(this.toolbarSpectralProfile, "onDrawEnd", lang.hitch(this, this.addGraphic));
                     this.toolbarSpectralProfile.activate(Draw.POINT);
-                    this.toolbarSpectralProfile._tooltip.innerHTML = "Pick a point";
+                    this.toolbarSpectralProfile._tooltip.innerHTML = this.nls.pickPoint;
                     bundle.toolbars.draw.addPoint = "Pick a point";
                     registry.byId("type").on("change", lang.hitch(this, this.clear));
                     var node = document.createElement("div");
@@ -364,13 +364,13 @@ define([
                     var type = registry.byId("type").get("value");
                     if (type === "nonTemporal") {
                         if (this.layerInfos[this.label].bandCount === 1)
-                            html.set(this.profileTypeInstruction, "Click on the map for Identify.");
+                            html.set(this.profileTypeInstruction, this.nls.clickOnMapIdentify);
                         else
-                            html.set(this.profileTypeInstruction, "Click on the map for Spectral Profile.");
+                            html.set(this.profileTypeInstruction, this.nls.clickOnMapSpectral);
                     } else if (type === "temporal")
-                        html.set(this.profileTypeInstruction, "Click on the map for Temporal Profile.");
+                        html.set(this.profileTypeInstruction, this.nls.clickOnMapTemporal);
                     else
-                        html.set(this.profileTypeInstruction, "Click on the map for Index Profile(s).");
+                        html.set(this.profileTypeInstruction, this.nls.clickOnMapIndex);
                 },
                 iconSelected: function () {
                     if (registry.byId("type").get("value") === "temporal" || registry.byId("type").get("value") === "NDVI") {
@@ -486,7 +486,7 @@ define([
                                 this.hideLoading();
                                 console.log(error);
                                 if (error.message !== "Request canceled") {
-                                    dom.byId("identify-error").innerHTML = "Error performing task. Try another point.<br><br>" + error;
+                                    dom.byId("identify-error").innerHTML = this.nls.error + "<br><br>" + error;
                                     domStyle.set(dom.byId("identify-error"), 'display', 'block');
                                 }
                             }));
@@ -721,17 +721,17 @@ define([
 
                     if (registry.byId("type").get("value") === "nonTemporal") {
                         if (this.chartData.length > 1) {
-                            this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
+                            this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: this.nls.spectralBands, titleOrientation: "away", minorTicks: false, majorTickStep: 1});
                             this.chart.addSeries("Selected Point", this.chartData);
                             this.count++;
                         } else if (this.chartData.length === 1) {
                             registry.byId("chartDialog").hide();
-                            dom.byId("single-value").innerHTML = "Data Value: <span style='font-weight:bolder;'>" + this.chartData[0].tooltip + "</span>";
+                            dom.byId("single-value").innerHTML = this.nls.dataValue + ": <span style='font-weight:bolder;'>" + this.chartData[0].tooltip + "</span>";
                             domStyle.set(dom.byId("single-value"), 'display', 'block');
                         }
                     } else if (registry.byId("type").get("value") === "temporal") {
                         if (this.layerInfos[this.label].bandCount > 1) {
-                            this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: "Spectral Bands", titleOrientation: "away", minorTicks: false, majorTickStep: 1});
+                            this.chart.addAxis("x", {labels: this.axesParams, labelSizeChange: true, title: this.nls.spectralBands, titleOrientation: "away", minorTicks: false, majorTickStep: 1});
                             for (var x in this.temporalData) {
 
                                 this.chart.addSeries((this.fieldType === "esriFieldTypeDate" ? locale.format(new Date(this.temporalData[x].acqDate), {selector: "date", formatLength: "long"}) : this.temporalData[x].acqDate), this.temporalData[x].values);
@@ -745,7 +745,7 @@ define([
                             this.chart.addSeries(this.axesParams[0].text, this.tempData);
                         } else if (this.layerInfos[this.label].bandCount === 1 && this.temporalData.length === 1) {
                             registry.byId("chartDialog").hide();
-                            dom.byId("single-value").innerHTML = "No overlapping scenes at this point.<br>Data Value on " + this.temporalData[0].acqDate + ": <span style='font-weight:bolder;'>" + this.temporalData[0].values[0].y + "</span>";
+                            dom.byId("single-value").innerHTML = this.nls.noOverlappingScenes + "<br>" +  this.nls.data + this.temporalData[0].acqDate + ": <span style='font-weight:bolder;'>" + this.temporalData[0].values[0].y + "</span>";
                             domStyle.set(dom.byId("single-value"), 'display', 'block');
                         }
                     } else if (registry.byId("type").get("value") === "NDVI") {
@@ -762,11 +762,11 @@ define([
                             registry.byId("chartDialog").hide();
                             domConstruct.empty(dom.byId("single-value"));
                             if (this.layerInfos[this.label].ndmi)
-                                dom.byId("single-value").innerHTML = "NDMI Data Value on " + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues1[0].y.toFixed(2) + "</span>";
+                                dom.byId("single-value").innerHTML = this.nls.ndmi + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues1[0].y.toFixed(2) + "</span>";
                             if (this.layerInfos[this.label].urban)
-                                dom.byId("single-value").innerHTML = dom.byId("single-value").innerHTML + "<br>Urban Data Value on " + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues2[0].y.toFixed(2) + "</span>";
+                                dom.byId("single-value").innerHTML = dom.byId("single-value").innerHTML + "<br>" + this.nls.urban + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues2[0].y.toFixed(2) + "</span>";
                             if (this.layerInfos[this.label].ndvi)
-                                dom.byId("single-value").innerHTML = dom.byId("single-value").innerHTML + "<br>NDVI Data Value on " + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues[0].y.toFixed(2) + "</span>";
+                                dom.byId("single-value").innerHTML = dom.byId("single-value").innerHTML + "<br>" + this.nls.ndvi + this.NDVIDates[0].text + ": <span style='font-weight:bolder;'>" + this.NDVIValues[0].y.toFixed(2) + "</span>";
                             domStyle.set(dom.byId("single-value"), 'display', 'block');
                         }
                     }

@@ -1,7 +1,7 @@
 <div>
     <div data-dojo-attach-point="rendererContainer">
         <br/>
-        Current Layer:&nbsp;<div data-dojo-attach-point="activeLayerName" style="display: inline-block;color: #0080C0;font-weight: bold;"></div>
+        ${nls.currentLayer}:&nbsp;<div data-dojo-attach-point="activeLayerName" style="display: inline-block;color: #0080C0;font-weight: bold;"></div>
         <br/>
         <br/>
         <select id="service_functions" data-dojo-type="dijit/form/Select" style="width:80px;height:12px;">
@@ -10,34 +10,34 @@
             <div data-dojo-type="dijit/form/DropDownButton">
                 <span><div  class="props-btn"></div></span>
                 <div data-dojo-type="dijit/TooltipDialog">
-                    <h4>Stretch Parameters</h4>
+                    <h4>${nls.stretchParameters}</h4>
                     <hr>
                     <br />
-                    <div class="swatch red-swatch"></div><div style="width:10px;display:inline-block">R</div> 
+                    <div class="swatch red-swatch"></div><div style="width:10px;display:inline-block">${nls.r}</div> 
                     <select data-dojo-type="dijit/form/Select" id="Red" style="width:20px;height:12px;position: relative;top: -2px;;">
                     </select>
-                    <div class="swatch green-swatch"></div>  <div style="width:10px;display:inline-block;">G</div>
+                    <div class="swatch green-swatch"></div>  <div style="width:10px;display:inline-block;">${nls.g}</div>
                     <select data-dojo-type="dijit/form/Select" id="Green" style="width:20px;height:12px;position: relative;top: -2px;">
                     </select>
-                    <div class="swatch blue-swatch"></div>  <div style="width:10px;display:inline-block;">B</div>
+                    <div class="swatch blue-swatch"></div>  <div style="width:10px;display:inline-block;">${nls.b}</div>
                     <select data-dojo-type="dijit/form/Select" id="Blue" style="width:20px;height:12px;position: relative;top: -2px;">
                     </select>
                     <br/>
                     <br/>
-                    <div style="width:80px;display:inline-block;"><label for="StretchType">Stretch Type</label></div>:
+                    <div style="width:80px;display:inline-block;"><label for="StretchType">${nls.stretchType}</label></div>:
                     <select id="StretchType" data-dojo-type="dijit/form/Select" style="width:100px;height:12px;">
-                        <option value=5>Minimum and Maximum</option>
-                        <option value=3>Standard Deviation</option>
-                        <option value=6>Percent Clip</option>
+                        <option value=5>${nls.minmax}</option>
+                        <option value=3>${nls.standardDeviation}</option>
+                        <option value=6>${nls.percentClip}</option>
                     </select>
 
-                    <input id="DRA" data-dojo-type="dijit/form/CheckBox" style="margin-left:10px;"/> <label for="DRA">DRA</label>
+                    <input id="DRA" data-dojo-type="dijit/form/CheckBox" style="margin-left:10px;"/> <label for="DRA">${nls.dra}</label>
                     <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'DRA',position:['below']">
-                        Dynamic Range Adjustment updates enhancement based on current view
+                        ${nls.dynamicRangeAdjustment}
                     </div>
                     <br/>
                     <br/>
-                    <div style="width:80px;display:inline-block;"><label for="Gamma">Gamma</label></div>:
+                    <div style="width:80px;display:inline-block;"><label for="Gamma">${nls.gamma}</label></div>:
                     <div style="width:150px;display:inline-block;position: relative;top: 8px;" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="value:0,minimum:-10,maximum:10,intermediateChanges:true,showButtons:true" id="Gamma">
                         <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration" style="height:1em;font-size:75%;color:gray;">
                             <li>0.1</li>
@@ -47,28 +47,28 @@
                     <div data-dojo-attach-point="StdDev">
                         <br/>      
                         <br/>
-                        <div style="width:80px;display:inline-block;"><label for="NumberOfStandardDeviations"># of Std. Dev.</label></div>:
+                        <div style="width:80px;display:inline-block;"><label for="NumberOfStandardDeviations">${nls.noOfStdDev}</label></div>:
                         <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0}, value:2" id="NumberOfStandardDeviations" style="width:65px;height:25px;"></div>
                     </div>
                     <div data-dojo-attach-point="PercentClip">
                         <br/>
                         <br/>
-                        <div style="width:80px;display:inline-block;"><label for="MaxPercent">Exclude top</label></div>:
+                        <div style="width:80px;display:inline-block;"><label for="MaxPercent">${nls.excludeTop}</label></div>:
                         <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:100}, value:2" id="MaxPercent" style="width:65px;height:25px;"></div>
                         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'MaxPercent',position:['below']">
-                            Exclude top x percentage of histogram
+                            ${nls.excludeTopHistogram}
                         </div>
-                        <div style="width:90px;display:inline-block;"> <label for="MinPercent">Exclude bottom</label></div>:
+                        <div style="width:90px;display:inline-block;"> <label for="MinPercent">${nls.excludeBottom}</label></div>:
                         <div data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:100}, value:2" id="MinPercent" style="width:65px;height:25px;"></div>
                         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'MinPercent',position:['below']">
-                            Exclude bottom x percentage of histogram
+                            ${nls.excludeBottomHistogram}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div style="display:inline-block;">
-            <button data-dojo-type="dijit/form/Button" type="button" id="idapply">Apply</button>
+            <button data-dojo-type="dijit/form/Button" type="button" id="idapply">${nls.apply}</button>
             <div>
             </div>
         </div>

@@ -138,9 +138,9 @@ define([
                             var priTitle = "Basemap";
                         if (this.resultLayer) {
                             if (this.config.compareTool === "slider")
-                                html.set(this.resultLayerDescription, "Transparency Slider: <b>" + (this.resultLayer.title || this.resultLayer.name || this.resultLayer.id) + "</b> and <b>" + ((priTitle === "Basemap" && secTitle !== priTitle) ? secTitle : priTitle) + "</b><br>");
+                                html.set(this.resultLayerDescription, this.nls.slider + ": <b>" + (this.resultLayer.title || this.resultLayer.name || this.resultLayer.id) + "</b> " + this.nls.and + " <b>" + ((priTitle === "Basemap" && secTitle !== priTitle) ? secTitle : priTitle) + "</b><br>");
                             else
-                                html.set(this.resultLayerDescription, "Horizontal Swipe: <b>" + (this.resultLayer.title || this.resultLayer.name || this.resultLayer.id) + "</b> and <b>" + ((priTitle === "Basemap" && secTitle !== priTitle) ? secTitle : priTitle) + "</b><br>");
+                                html.set(this.resultLayerDescription, this.nls.horizontalSwipe + ": <b>" + (this.resultLayer.title || this.resultLayer.name || this.resultLayer.id) + "</b> " + this.nls.and + " <b>" + ((priTitle === "Basemap" && secTitle !== priTitle) ? secTitle : priTitle) + "</b><br>");
                             registry.byId("resultOpacity").set("value", 1 - this.resultLayer.opacity);
                         } else
                             html.set(this.resultLayerDescription, "");
@@ -149,17 +149,17 @@ define([
                                 this.layerSwipe.destroy();
                             html.set(this.compareLayerDescription, "");
                         } else if(priTitle === secTitle && this.primaryLayer.id === this.secondaryLayer.id){
-                            html.set(this.compareLayerDescription, "Vertical Swipe: <b>" + priTitle + "</b> and <b>Basemap</b><br>");
+                            html.set(this.compareLayerDescription, this.nls.verticalSwipe + ": <b>" + priTitle + "</b> " + this.nls.and + " <b>" + this.nls.basemap + "</b><br>");
                         }
                         else {
                             if (priTitle !== "Basemap")
-                                html.set(this.compareLayerDescription, "Vertical Swipe: <b>" + priTitle + "</b> and <b>" + secTitle + "</b><br>");
+                                html.set(this.compareLayerDescription, this.nls.verticalSwipe + ": <b>" + priTitle + "</b> " + this.nls.and + " <b>" + secTitle + "</b><br>");
                             else
-                                html.set(this.compareLayerDescription, "Vertical Swipe: <b>" + secTitle + "</b> and <b>" + priTitle + "</b><br>");
+                                html.set(this.compareLayerDescription, this.nls.verticalSwipe + ": <b>" + secTitle + "</b> " + this.nls.and + " <b>" + priTitle + "</b><br>");
                         }
 
                         if (!this.primaryLayer && !this.secondaryLayer && !this.resultLayer)
-                            html.set(this.noLayerNotification, "No visible Imagery Layers available for comparison.");
+                            html.set(this.noLayerNotification, this.nls.noLayer);
                         else
                             html.set(this.noLayerNotification, "");
                     }
@@ -225,7 +225,7 @@ define([
                             layers.push(this.primaryLayer);
                             layers.push(this.secondaryLayer);
                             var priTitle = (this.primaryLayer.arcgisProps && this.primaryLayer.arcgisProps.title) ? this.primaryLayer.arcgisProps.title : (this.primaryLayer.title || this.primaryLayer.name || this.primaryLayer.id);
-                            html.set(this.compareLayerDescription, "Vertical Swipe: <b>" + priTitle + "</b> and <b>Basemap</b><br>");
+                            html.set(this.compareLayerDescription, this.nls.verticalSwipe + ": <b>" + priTitle + "</b> " + this.nls.and + " <b>" + this.nls.basemap + "</b><br>");
                         }else if (this.primaryLayer)
                             layers.push(this.primaryLayer);
                         else if (this.secondaryLayer)

@@ -9,10 +9,10 @@
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
-    "hasLocale" : false,
+    "hasLocale" : true,
     "hasSettingPage" : true,
     "hasSettingUIFile" : true,
-    "hasSettingLocale" : false,
+    "hasSettingLocale" : true,
     "hasSettingStyle" : true
   }
 }

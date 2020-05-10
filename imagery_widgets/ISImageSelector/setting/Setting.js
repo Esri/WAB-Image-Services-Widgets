@@ -64,7 +64,7 @@ define([
                             } else if (this.map.getLayer(this.map.layerIds[a]).id) {
                                 this.ISLayers[i].title = this.map.getLayer(this.map.layerIds[a]).id;
                             } else {
-                                this.ISLayers[i].title = "Layer" + i;
+                                this.ISLayers[i].title = this.nls.layer + i;
                             }
                             i++;
                         }
@@ -111,9 +111,9 @@ define([
                             innerHTML: '<tr><td>' + this.ISLayers[a].title + '</td></tr>' +
                                     '<tr style="display:none;"><td class="first">Object ID</td><td class="second">' +
                                     '<select id="objectID_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr><td class="first">Select using</td><td class="second">' +
+                                    '</td></tr>' + '<tr><td class="first">' + this.nls.selectUsing + '</td><td class="second">' +
                                     '<select id="imageField_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr style="display:none;"><td class="first">Category</td><td class="second">' +
+                                    '</td></tr>' + '<tr style="display:none;"><td class="first">' + this.nls.category + '</td><td class="second">' +
                                     '<select id="category_' + a + '"></select>' +
                                     '</td></tr>'
                         });
@@ -139,7 +139,7 @@ define([
                     }
                 },
                 _populateDropDown: function (node, fields, dataType, regExpr) {
-                    var options = [{"label": "Select field", "value": ""}];
+                    var options = [{"label": this.nls.selectField, "value": ""}];
                     var j = 1;
                     var initialVal = "";
                     if (fields) {

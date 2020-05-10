@@ -125,14 +125,14 @@ define([
                         if (this.imageServiceLayer) {
                             domStyle.set(this.displayOrderContainer, "display", "block");
                             html.set(this.displayOrderErrorContainer, "");
-                            html.set(this.displayOrderLayerTitle, "Layer: <b>" + (this.imageServiceLayer.title || this.imageServiceLayer.arcgisProps.title || this.imageServiceLayer.name || this.imageServiceLayer.id) + "</b>");
+                            html.set(this.displayOrderLayerTitle, this.nls.layer + ": <b>" + (this.imageServiceLayer.title || this.imageServiceLayer.arcgisProps.title || this.imageServiceLayer.name || this.imageServiceLayer.id) + "</b>");
                             if (this.previousImageServiceLayerUrl !== this.imageServiceLayer.url) {
                                 this.populateAttributes();
                                 this.checkFields();
                             }
                         } else {
                             domStyle.set(this.displayOrderContainer, "display", "none");
-                            html.set(this.displayOrderErrorContainer, "No visible Imagery Layers in the map.");
+                            html.set(this.displayOrderErrorContainer, this.nls.error);
                         }
                     }
                 },
@@ -183,7 +183,7 @@ define([
                             }
                             this.displaymosaic();
                         }), function (error) {
-                            console.log("Request failed");
+                            console.log(this.nls.requestFailed);
                         });
                     }
                 },
@@ -227,9 +227,9 @@ define([
                             domStyle.set(this.lockraster, "display", "none");
                             domStyle.set(this.notseamline, "display", "block");
                             if (!registry.byId("mosaicOperation").getOptions('MT_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'MT_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'MT_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'MT_MEAN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.minimumPixel, value: 'MT_MIN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.maximumPixel, value: 'MT_MAX'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.averagePixel, value: 'MT_MEAN'});
                             }
                             break;
                         }
@@ -246,9 +246,9 @@ define([
                             domStyle.set(this.lockraster, "display", "none");
                             domStyle.set(this.notseamline, "display", "block");
                             if (!registry.byId("mosaicOperation").getOptions('MT_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'MT_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'MT_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'MT_MEAN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.minimumPixel, value: 'MT_MIN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.maximumPixel, value: 'MT_MAX'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.averagePixel, value: 'MT_MEAN'});
                             }
                             break;
                         }
@@ -269,9 +269,9 @@ define([
                             domStyle.set(this.lockraster, "display", "block");
                             domStyle.set(this.notseamline, "display", "block");
                             if (!registry.byId("mosaicOperation").getOptions('MT_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'MT_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'MT_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'MT_MEAN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.minimumPixel, value: 'MT_MIN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.maximumPixel, value: 'MT_MAX'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.averagePixel, value: 'MT_MEAN'});
                             }
                             break;
                         }
@@ -282,9 +282,9 @@ define([
                             domStyle.set(this.lockraster, "display", "none");
                             domStyle.set(this.notseamline, "display", "block");
                             if (!registry.byId("mosaicOperation").getOptions('MT_MIN')) {
-                                registry.byId("mosaicOperation").addOption({label: 'Minimum of pixel values', value: 'MT_MIN'});
-                                registry.byId("mosaicOperation").addOption({label: 'Maximum of pixel values', value: 'MT_MAX'});
-                                registry.byId("mosaicOperation").addOption({label: 'Average of pixel values', value: 'MT_MEAN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.minimumPixel, value: 'MT_MIN'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.maximumPixel, value: 'MT_MAX'});
+                                registry.byId("mosaicOperation").addOption({label: this.nls.averagePixel, value: 'MT_MEAN'});
                             }
                             this.toolbarDisplayOrder.activate(Draw.POINT);
                             break;
