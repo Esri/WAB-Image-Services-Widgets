@@ -46,6 +46,7 @@ define([
       
       setConfig: function(config) {
         this.config = config;
+		registry.byId("compareToolOption").set("value", this.config.compareTool);
       },
 
       getConfig: function() {

@@ -214,19 +214,19 @@ define([
                                 callbackParamName: "callback"
                             }, {usePost: true});
                             addItemRequest.then(lang.hitch(this, function (result) {
-                                html.set(this.successNotification, "<br />Layer saved.");
+                                html.set(this.successNotification, "<br />" + this.nls.layerSaved);
                                 setTimeout(lang.hitch(this, function () {
                                     html.set(this.successNotification, "");
                                 }), 4000);
                                 domStyle.set("loadingISExport", "display", "none");
 
                             }), lang.hitch(this, function (error) {
-                                html.set(this.successNotification, "Error! " + error);
+                                html.set(this.successNotification, this.nls.error + error);
                                 domStyle.set("loadingISExport", "display", "none");
                             }));
                         }));
                     } else {
-                        html.set(this.successNotification, "Error! No Imagery Layer visible on the map.");
+                        html.set(this.successNotification, this.nls.errorNotification);
                     }
                 },
                 updateValues: function (info) {
@@ -324,22 +324,22 @@ define([
                             var wkid = 32500 + utm;
 
                         if (utm !== 1) {
-                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm - 1) + "", value: wkid - 1});
+                            registry.byId("outputSp").addOption({label: this.nls.utmZone + (utm - 1) + "", value: wkid - 1});
                         } else
-                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 59) + "", value: wkid + 59});
-                        registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm + "", value: wkid});
+                            registry.byId("outputSp").addOption({label: this.nls.utmZone + (utm + 59) + "", value: wkid + 59});
+                        registry.byId("outputSp").addOption({label: this.nls.utmZone + utm + "", value: wkid});
                         if (utm !== 60)
-                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + (utm + 1) + "", value: wkid + 1});
+                            registry.byId("outputSp").addOption({label: this.nls.utmZone + (utm + 1) + "", value: wkid + 1});
                         else
-                            registry.byId("outputSp").addOption({label: "WGS84 UTM Zone " + utm - 59 + "", value: wkid - 59});
+                            registry.byId("outputSp").addOption({label: this.nls.utmZone + (utm - 59) + "", value: wkid - 59});
 
                     } else {
                         var wkid = this.map.extent.spatialReference.wkid;
-                        registry.byId("outputSp").addOption({label: "WKID : " + wkid, value: wkid});
-                    }
-                    registry.byId("outputSp").addOption({label: "WebMercatorAS", value: 102100});
+                        registry.byId("outputSp").addOption({label: this.nls.WKID + wkid, value: wkid});
+                   
+                    registry.byId("outputSp").addOption({label: this.nls.webMercatorAs, value: 102100});
                     if (this.imageServiceLayer.hasOwnProperty("spatialReference") && this.imageServiceLayer.spatialReference.wkid !== 102100)
-                        registry.byId("outputSp").addOption({label: "Default", value: this.imageServiceLayer.spatialReference.wkid});
+                        registry.byId("outputSp").addOption({label: this.nls.default, value: this.imageServiceLayer.spatialReference.wkid});
                     var srsList = registry.byId("outputSp").getOptions();
                     var temp;
                     for (var a in srsList) {
@@ -352,7 +352,8 @@ define([
                     }
                     registry.byId("outputSp").set("value", temp);
 
-                },
+                }
+				},
                 getMapPointInWebMercator: function (geometry, type) {
                     var dfd = new Deferred();
                     if (this.map.extent.spatialReference.wkid !== 102100 && this.map.extent.spatialReference.wkid !== 3857) {
@@ -410,7 +411,7 @@ define([
 
                         if ((width / pixelsize) > widthMax || (height / pixelsize) > widthMax) {
                             var size = "";
-                            document.getElementById("errorPixelSize").innerHTML = "PixelSize of export is restricted to " + ps.toFixed(3) + " for this extent.";
+                            document.getElementById("errorPixelSize").innerHTML = this.nls.pixelSizeRestricted + ps.toFixed(3) + this.nls.thisExtent;
                             domStyle.set("loadingISExport", "display", "none");
                         } else {
                             var size = (parseInt(width / ps)).toString() + ", " + (parseInt(height / ps)).toString();
@@ -488,7 +489,7 @@ define([
                             }));
                         }
                     } else {
-                        document.getElementById("errorPixelSize").innerHTML = "Error! No Imagery Layer visible on the map.";
+                        document.getElementById("errorPixelSize").innerHTML = this.nls.errorPixelSize;
                     }
                 },
                 modifyRenderingRule: function (mode, renderer) {
@@ -674,11 +675,11 @@ define([
                     }
 
                     if (this.imageServiceLayer) {
-                        html.set(this.exportLayerTitle, "Layer: <b>" + (this.imageServiceLayer.arcgisProps ? this.imageServiceLayer.arcgisProps.title : (this.imageServiceLayer.title || this.imageServiceLayer.name || this.imageServiceLayer.id)) + "</b>");
+                        html.set(this.exportLayerTitle, this.nls.layer + ": <b>" + (this.imageServiceLayer.arcgisProps ? this.imageServiceLayer.arcgisProps.title : (this.imageServiceLayer.title || this.imageServiceLayer.name || this.imageServiceLayer.id)) + "</b>");
                         this.setSavingType();
 
                     } else {
-                        html.set(this.exportLayerTitle, "No visible imagery layers on the map.");
+                        html.set(this.exportLayerTitle, this.nls.exportLayerMsg);
                         domStyle.set("exportSaveContainer", "display", "none");
                         domStyle.set("saveAgolContainer", "display", "none");
                         domStyle.set("selectExportDisplay", "display", "none");

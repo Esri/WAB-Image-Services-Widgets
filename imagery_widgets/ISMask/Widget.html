@@ -1,7 +1,7 @@
 <div>
     <div data-dojo-attach-point="maskContainer">
     <div data-dojo-attach-point="layerTitle"></div><br/>
-    <span class="mask-label">Method: </span><select data-dojo-type="dijit/form/Select"  data-dojo-attach-point="method"></select><div data-dojo-type="dijit/form/DropDownButton" class="mask-btn" data-dojo-attach-point="colorButton">
+    <span class="mask-label">${nls.method}: </span><select data-dojo-type="dijit/form/Select"  data-dojo-attach-point="method"></select><div data-dojo-type="dijit/form/DropDownButton" class="mask-btn" data-dojo-attach-point="colorButton">
         <span><img src="./widgets/ISMask/images/ColorPicker.png" width="15" height="15" /></span>
         <div data-dojo-type="dijit/TooltipDialog" data-dojo-attach-point="colorDialog">
             <div data-dojo-attach-point="colorPalette" data-dojo-type="dijit/ColorPalette" data-dojo-props="palette:'7x10'"></div>
@@ -22,12 +22,12 @@
     <div class="mask-align mask-histogram" data-dojo-attach-point="maskHistogram"></div><br />
     <div data-dojo-attach-point="maskSlider"></div>
     <div style="margin-top: 14px;">
-    <div class="mask-label" style="display: inline-block;">Area Covered:</div><div style="display: inline-block;color: indianred;" class="mask-label" data-dojo-attach-point="areaValue"></div>
+    <div class="mask-label" style="display: inline-block;">${nls.areaCovered}:</div><div style="display: inline-block;color: indianred;" class="mask-label" data-dojo-attach-point="areaValue"></div>
     </div>
     <div class="mask-align">
-    <input data-dojo-attach-point="aoiExtent" data-dojo-type="dijit/form/CheckBox" /><span class="mask-label">Define Area Of Interest</span>
+    <input data-dojo-attach-point="aoiExtent" data-dojo-type="dijit/form/CheckBox" /><span class="mask-label">${nls.defineAreaOfInterest}</span>
     </div>
-    <button data-dojo-type="dijit/form/Button" type="button" data-dojo-attach-point="maskApply" class="mask-align mask-btn mask-centerBtn">Apply</button>
+    <button data-dojo-type="dijit/form/Button" type="button" data-dojo-attach-point="maskApply" class="mask-align mask-btn mask-centerBtn">${nls.apply}</button>
     </div>
     <div data-dojo-attach-point="errorNotification" style="color: red;"></div>
 </div>

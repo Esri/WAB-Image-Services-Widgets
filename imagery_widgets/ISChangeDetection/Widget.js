@@ -117,22 +117,22 @@ define([
                 },
                 populateChangeModes: function () {
                     registry.byId("method").removeOption(registry.byId("method").getOptions());
-                    registry.byId("method").addOption({label: "Difference", value: "difference"});
+                    registry.byId("method").addOption({label: this.nls.difference, value: "difference"});
 
                     for (var a in this.config) {
                         if (a === this.primaryLayer.url.split('//')[1]) {
                             if (this.config[a].veg) {
-                                registry.byId("method").addOption({label: "Vegetation Index", value: "ndvi"});
+                                registry.byId("method").addOption({label: this.nls.ndvi, value: "ndvi"});
 
                             }
                             if (this.config[a].savi) {
-                                registry.byId("method").addOption({label: "Soil Adjusted Veg. Index", value: "savi"});
+                                registry.byId("method").addOption({label: this.nls.savi, value: "savi"});
                             }
                             if (this.config[a].water) {
-                                registry.byId("method").addOption({label: "Water Index", value: "water"});
+                                registry.byId("method").addOption({label: this.nls.water, value: "water"});
                             }
                             if (this.config[a].burn) {
-                                registry.byId("method").addOption({label: "Burn Index", value: "burn"});
+                                registry.byId("method").addOption({label: this.nls.burn, value: "burn"});
                             }
                             break;
                         }
@@ -225,18 +225,18 @@ define([
                             domStyle.set(this.areaValueContainer, "display", "none");
                         } else {
                             domStyle.set(this.areaValue, "color", "magenta");
-                            html.set(this.areaValueLabel, "Area Decrease / Increase:");
+                            html.set(this.areaValueLabel, this.nls.area);
 
                             if (value === "ndvi" || value === "savi") {
-                                document.getElementById("bandName1").innerHTML = "Infrared Band";
-                                document.getElementById("bandName2").innerHTML = "Red Band";
+                                document.getElementById("bandName1").innerHTML = this.nls.infraredBand;
+                                document.getElementById("bandName2").innerHTML = this.nls.redBand;
                             } else if (value === "water") {
-                                document.getElementById("bandName1").innerHTML = "Green Band";
-                                document.getElementById("bandName2").innerHTML = "Short-wave Infrared Band";
+                                document.getElementById("bandName1").innerHTML = this.nls.greenBand;
+                                document.getElementById("bandName2").innerHTML = this.nls.shortWaveInfraredBand;
                             } else {
-                                document.getElementById("bandName1").innerHTML = "Infrared Band";
-                                document.getElementById("bandName2").innerHTML = "Short-wave Infrared Band";
-                                html.set(this.areaValueLabel, "Burnt / Post Fire Regrowth Area:");
+                                document.getElementById("bandName1").innerHTML = this.nls.InfraredBand;
+                                document.getElementById("bandName2").innerHTML = this.nls.shortWaveInfraresBand;
+                                html.set(this.areaValueLabel, this.nls.burntArea);
                                 domStyle.set(this.areaValue, "color", "#fc6d31");
                             }
 

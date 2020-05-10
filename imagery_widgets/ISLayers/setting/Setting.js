@@ -34,8 +34,8 @@ define([
                 createConfig: function () {
                     this.inherited(arguments);
                     var mainLayers = this.map.itemInfo.itemData.operationalLayers;
-                    registry.byId("primaryLayerSelect").addOption({label: "Select layer", value: ""});
-                    registry.byId("secondaryLayerSelect").addOption({label: "Select layer", value: ""});
+                    registry.byId("primaryLayerSelect").addOption({label: this.nls.selectLayer, value: ""});
+                    registry.byId("secondaryLayerSelect").addOption({label: this.nls.selectLayer, value: ""});
                     for (var a in mainLayers) {
                         if ((mainLayers[a].layerObject && mainLayers[a].layerObject.serviceDataType && mainLayers[a].layerObject.serviceDataType.substr(0, 16) === "esriImageService") || (mainLayers[a].layerType && mainLayers[a].layerType === "ArcGISImageServiceLayer")) {
                             if (((mainLayers[a].title).charAt(mainLayers[a].title.length - 1)) !== "_") //if(!(((mainLayers[a].title).toLowerCase()).includes("_result")))

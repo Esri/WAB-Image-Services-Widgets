@@ -80,7 +80,7 @@ define([
                             } else if (this.map.getLayer(this.map.layerIds[a]).id) {
                                 this.ISLayers[i].title = this.map.getLayer(this.map.layerIds[a]).id;
                             } else {
-                                this.ISLayers[i].title = "Layer" + i;
+                                this.ISLayers[i].title = this.nls.layer + i;
                             }
                             i++;
                         }
@@ -140,7 +140,7 @@ define([
                             ndvi: registry.byId("ndvi_" + a).get('checked'),
                             ndmi: registry.byId("ndvi_" + a).get('checked'),
                             urban: registry.byId("ndvi_" + a).get('checked'),
-                            yAxisLabel: registry.byId("yAxisLabel_"+a).get("value") ? registry.byId("yAxisLabel_"+a).get("value") : "Data Values",
+                            yAxisLabel: registry.byId("yAxisLabel_"+a).get("value") ? registry.byId("yAxisLabel_"+a).get("value") : this.nls.dataValues,
                             bandCount: parseInt(registry.byId("bandCount_" + a).get('value')),
                             bandNames: this.bandNames,
                             field: registry.byId("acquisitionDate_" + a).get('value'),
@@ -176,23 +176,23 @@ define([
                     for (var a in this.ISLayers) {
                         var layerSetting = domConstruct.create("tbody", {
                             innerHTML: '<tr><td>' + this.ISLayers[a].title + '</td></tr>' +
-                                    '<tr><td class="first">Temporal Profile<input id="overlap_' + a + '"/>' +
-                                    '</td><td class="first">Index Profile<input id="ndvi_' + a + '"/>' +
-                                    '</td></tr>' + '<tr id="count_' + a + '"><td class="first">*Band Count</td><td class="second">' +
+                                    '<tr><td class="first">' + this.nls.temporalProfile + '<input id="overlap_' + a + '"/>' +
+                                    '</td><td class="first">' + this.nls.indexProfile + '<input id="ndvi_' + a + '"/>' +
+                                    '</td></tr>' + '<tr id="count_' + a + '"><td class="first">*' + this.nls.bandCount + '</td><td class="second">' +
                                     '<input id="bandCount_' + a + '"/>' +
-                                    '</td></tr>' + '<tr id="names_' + a + '" style="display:none;"><td class="first">*Band Names</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="names_' + a + '" style="display:none;"><td class="first">*' + this.nls.bandNames + '</td><td class="second">' +
                                     '<textarea id="bandNames_' + a + '"></textarea>' +
-                                    '</td></tr>' + '<tr><td class="first">y-axis Label: </td><td class="second">' +
+                                    '</td></tr>' + '<tr><td class="first">' + this.nls.yaxisLabel + ': </td><td class="second">' +
                                     '<textarea id="yAxisLabel_' + a + '"></textarea>' +
-                                    '</td></tr>' + '<tr id="cat_' + a + '" style="display:none;"><td class="first">Category</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="cat_' + a + '" style="display:none;"><td class="first">' + this.nls.category + '</td><td class="second">' +
                                     '<select id="category_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr id="acqDate_' + a + '" style="display:none;"><td class="first">*Field</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="acqDate_' + a + '" style="display:none;"><td class="first">*' + this.nls.field + '</td><td class="second">' +
                                     '<select id="acquisitionDate_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr id="nir_' + a + '" style="display:none;"><td class="first">Near-IR Band</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="nir_' + a + '" style="display:none;"><td class="first">' + this.nls.nearIRBand +'</td><td class="second">' +
                                     '<select id="nirIndex_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr id="red_' + a + '" style="display:none;"><td class="first">Red Band</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="red_' + a + '" style="display:none;"><td class="first">' + this.nls.redBand + '</td><td class="second">' +
                                     '<select id="redIndex_' + a + '"></select>' +
-                                    '</td></tr>' + '<tr id="swir_' + a + '" style="display:none;"><td class="first">Shortwave-IR Band</td><td class="second">' +
+                                    '</td></tr>' + '<tr id="swir_' + a + '" style="display:none;"><td class="first">' + this.nls.shortwaveIRBand + '</td><td class="second">' +
                                     '<select id="swirIndex_' + a + '"></select>' +
                                     '</td></tr>'
                         });
@@ -208,15 +208,15 @@ define([
                         }, "acquisitionDate_" + a).startup();
                         var nirIndex = new Select({
                             style: "margin:10px;",
-                            options: [{"label": "No value", "value": ""}]
+                            options: [{"label": this.nls.noValue, "value": ""}]
                         }, "nirIndex_" + a).startup();
                         var redIndex = new Select({
                             style: "margin:10px;",
-                            options: [{"label": "No value", "value": ""}]
+                            options: [{"label": this.nls.noValue, "value": ""}]
                         }, "redIndex_" + a).startup();
                         var swirIndex = new Select({
                             style: "margin:10px;",
-                            options: [{"label": "No value", "value": ""}]
+                            options: [{"label": this.nls.noValue, "value": ""}]
                         }, "swirIndex_" + a).startup();
                         var ndvi = new CheckBox({
                             style: "margin:10px;",
@@ -252,17 +252,18 @@ define([
                             required: true,
                             style: "margin:10px;"
                         }, "bandCount_" + a).startup();
+						var global = this;
                         var bandNames = new Textarea({
                             required: true,
-                            title: "Enter names of all the bands separated by commas",
+                            title: this.nls.title,
                             style: "margin:10px;",
                             onChange: function (value) {
                                 registry.byId("nirIndex_" + this.id.slice(-1)).removeOption(registry.byId("nirIndex_" + this.id.slice(-1)).getOptions());
                                 registry.byId("redIndex_" + this.id.slice(-1)).removeOption(registry.byId("redIndex_" + this.id.slice(-1)).getOptions());
                                 registry.byId("swirIndex_" + this.id.slice(-1)).removeOption(registry.byId("swirIndex_" + this.id.slice(-1)).getOptions());
-                                registry.byId("nirIndex_" + this.id.slice(-1)).addOption({"label": "No value", "value": ""});
-                                registry.byId("redIndex_" + this.id.slice(-1)).addOption({"label": "No value", "value": ""});
-                                registry.byId("swirIndex_" + this.id.slice(-1)).addOption({"label": "No value", "value": ""});
+                                registry.byId("nirIndex_" + this.id.slice(-1)).addOption({"label": global.nls.noValue, "value": ""});
+                                registry.byId("redIndex_" + this.id.slice(-1)).addOption({"label": global.nls.noValue, "value": ""});
+                                registry.byId("swirIndex_" + this.id.slice(-1)).addOption({"label": global.nls.noValue, "value": ""});
                                 var j = 1;
                                 var initialVal_nir = "";
                                 var initialVal_red = "";
@@ -303,7 +304,7 @@ define([
                     this.saveValue = a;
                     domStyle.set("loadingSpectralProfile", 'display', 'block');
                     var layersRequest = esriRequest({
-                        url: this.ISLayers[a].url + "/1/info/keyProperties",
+                        url: this.ISLayers[a].url + "/keyProperties",
                         content: {f: "json"},
                         handleAs: "json",
                         callbackParamName: "callback"
@@ -392,7 +393,7 @@ define([
                         this.loopRequest(0);
                 },
                 _populateDropDown: function (node, fields, dataType, regExpr) {
-                    var options = [{"label": "Select a field", "value": ""}];
+                    var options = [{"label": this.nls.selectField, "value": ""}];
                     var j = 1;
                     var initialVal = "";
                     if (fields) {

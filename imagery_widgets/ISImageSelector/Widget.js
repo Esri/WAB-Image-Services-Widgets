@@ -133,7 +133,7 @@ define([
                     } else {
                         registry.byId("imageSelector").set("checked", false);
                         registry.byId("imageSelector").set("disabled", true);
-                        html.set(this.errorDiv, "Zoom in to select images.");
+                        html.set(this.errorDiv, this.nls.zoomImage);
                     }
                 },
                 checkField: function (currentVersion)
@@ -157,22 +157,22 @@ define([
                                 registry.byId("imageSelector").set("checked", false);
                                 registry.byId("imageSelector").set("disabled", true);
                                 if (!this.layerInfos[this.label].imageField) {
-                                    html.set(this.errorDiv, "Field is not specified.");
+                                    html.set(this.errorDiv, this.nls.fieldNotSpecified);
                                 } else if (!this.layerInfos[this.label].objectID) {
-                                    html.set(this.errorDiv, "No ObjectID field.");
+                                    html.set(this.errorDiv, this.nls.noObjectIdField);
                                 } else {
-                                    html.set(this.errorDiv, "No Category field.");
+                                    html.set(this.errorDiv, this.nls.noCategoryField);
                                 }
                             }
                         } else {
                             registry.byId("imageSelector").set("checked", false);
                             registry.byId("imageSelector").set("disabled", true);
-                            html.set(this.errorDiv, "Cannot perform action for layer.");
+                            html.set(this.errorDiv, this.nls.error);
                         }
                     } else {
                         registry.byId("imageSelector").set("checked", false);
                         registry.byId("imageSelector").set("disabled", true);
-                        html.set(this.errorDiv, "Services pre 10.2.1 not supported.");
+                        html.set(this.errorDiv, this.nls.serviceNotSupported);
                     }
                 },
                 refreshData: function () {
@@ -214,9 +214,9 @@ define([
                             {
                                 var currentVersion = this.primaryLayer.currentVersion;
                                 this.checkField(currentVersion);
-                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? ("Layer: <b>" + this.layerInfos[this.label].title + "</b>") : "Layer: <b>" + this.layerInfos[this.label].title + " (Visibility Off)</b>";
+                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? (this.nls.layer + ": <b>" + this.layerInfos[this.label].title + "</b>") : this.nls.layer + ": <b>" + this.layerInfos[this.label].title + " (" + this.nls.visibilityOff + ")</b>";
                             } else if (this.layerInfos[this.label] && !this.primaryLayer.currentVersion) {
-                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? "Layer: <b>" + this.layerInfos[this.label].title + "</b>" : "Layer: <b>" + this.layerInfos[this.label].title + " (Visibility Off)</b>";
+                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? this.nls.layer + ": <b>" + this.layerInfos[this.label].title + "</b>" : + this.nls.layer + ": <b>" + this.layerInfos[this.label].title + " (" + this.nls.visibilityOff + ")</b>";
                                 var layersRequest = esriRequest({
                                     url: this.primaryLayer.url,
                                     content: {f: "json"},
@@ -228,7 +228,7 @@ define([
                                     this.checkField(currentVersion);
                                 }));
                             } else if (!this.layerInfos[this.label]) {
-                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? ("Layer: <b>" + this.primaryLayer.name || this.primaryLayer.id + "</b>") : ("Layer: <b>" + this.primaryLayer.name || this.primaryLayer.id + " (Visibility Off)</b>");
+                                dom.byId("imageSelectorLayerTitle").innerHTML = this.primaryLayer.visible ? (this.nls.layer + ": <b>" + this.primaryLayer.name || this.primaryLayer.id + "</b>") : (this.nls.layer + ": <b>" + this.primaryLayer.name || this.primaryLayer.id + " (" + this.nls.visibilityOff + ")</b>");
                                 var layersRequest = esriRequest({
                                     url: this.primaryLayer.url,
                                     content: {f: "json"},
@@ -281,7 +281,7 @@ define([
                             }
                             registry.byId("imageSelector").set("checked", false);
                             registry.byId("imageSelector").set("disabled", true);
-                            html.set(this.errorDiv, "No visible Imagery Layers in the map.");
+                            html.set(this.errorDiv, this.nls.noVisibleImageryLayer);
                         }
                     }
                 },
@@ -315,7 +315,7 @@ define([
                     } else {
                         registry.byId("imageSelector").set("checked", false);
                         registry.byId("imageSelector").set("disabled", true);
-                        html.set(this.errorDiv, "Zoom in to select images.");
+                        html.set(this.errorDiv, this.nls.zoomImage);
                     }
                     this.previousExtentChangeLevel = evt.lod.level;
                 },
@@ -346,11 +346,11 @@ define([
                     if (domClass.contains(registry.byId("dropDownImageList").domNode, "dropDownSelected")) {
 
                         domClass.remove(registry.byId("dropDownImageList").domNode, "dropDownSelected");
-                        document.getElementById("switchDisplayTooltip").innerHTML = "Show images in drop down list.";
+                        document.getElementById("switchDisplayTooltip").innerHTML = this.nls.showImageInDropdown;
                         document.getElementById("switchDisplayImage").src = "./widgets/ISImageSelector/images/dropdownlist.png";
                     } else {
                         domClass.add(registry.byId("dropDownImageList").domNode, "dropDownSelected");
-                        document.getElementById("switchDisplayTooltip").innerHTML = "Show images on slider.";
+                        document.getElementById("switchDisplayTooltip").innerHTML = this.nls.showImageOnSlider;
                         document.getElementById("switchDisplayImage").src = "./widgets/ISImageSelector/images/slider.png";
                     }
                     this.imageDisplayFormat2();
@@ -490,7 +490,7 @@ define([
                                     this.selectDisplayedImage();
                                 }
                             } else {
-                                html.set(this.errorDiv, "No scenes in current extent.");
+                                html.set(this.errorDiv, this.nls.noSceneInCurrentExtent);
                                 domStyle.set(this.selectorDiv, "display", "none");
                                 html.set(this.imageRange, "");
                                 html.set(this.imageCount, "");
@@ -563,7 +563,7 @@ define([
                     registry.byId("imageSelectorDropDown").set("value", index);
                     this.slider.set("value", index);
                     if (this.imageFieldType === "esriFieldTypeDate")
-                        html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(this.orderedDates[index].value), {selector: "date", formatLength: "long"}) + "</b>");
+                        html.set(this.imageRange, this.nls.date + ": <b>" + locale.format(new Date(this.orderedDates[index].value), {selector: "date", formatLength: "long"}) + "</b>");
                     else
                         html.set(this.imageRange, this.imageField + ": <b>" + this.orderedDates[index].value + "</b>");
                     html.set(this.imageCount, "1");
@@ -631,7 +631,7 @@ define([
                                     }
                                 }
 
-                                html.set(this.imageRange, "Date(s): <b>" + locale.format(compareDate, {selector: "date", formatLength: "long"}) + " - " + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
+                                html.set(this.imageRange, this.nls.date + ": <b>" + locale.format(compareDate, {selector: "date", formatLength: "long"}) + " - " + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
                             } else {
 
                                 if (!this.config.listImagesSeparate) {
@@ -650,7 +650,7 @@ define([
 
                                     this.featureIds.push(this.orderedFeatures[this.valueSelected].attributes[this.objectID]);
                                 }
-                                html.set(this.imageRange, "Date(s): <b>" + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
+                                html.set(this.imageRange, this.nls.date + ": <b>" + locale.format(new Date(aqDate), {selector: "date", formatLength: "long"}) + "</b>");
 
                             }
                         } else
@@ -686,7 +686,7 @@ define([
                                     this.map.graphics.add(graphic);
                                     if (count === 19) {
                                         if (!this.responseAlert) {
-                                            this.responseAlert = confirm("Number of footprints selected exceed 20. Only first 20 will be displayed. Press OK not to warn again.");
+                                            this.responseAlert = confirm(this.nls.warning);
                                         }
                                         count++;
                                         break;

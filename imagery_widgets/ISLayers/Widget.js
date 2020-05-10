@@ -211,8 +211,8 @@ define([
                         this.layerList1 = [];
                         registry.byId("imageView").removeOption(registry.byId('imageView').getOptions());
                         registry.byId("secondary").removeOption(registry.byId('secondary').getOptions());
-                        registry.byId("imageView").addOption({label: "Select primary layer", value: "select"});
-                        registry.byId("secondary").addOption({label: "Select secondary layer", value: "select"});
+                        registry.byId("imageView").addOption({label: this.nls.selectPrimaryLayer, value: "select"});
+                        registry.byId("secondary").addOption({label: this.nls.selectSecondaryLayer, value: "select"});
                         var k = 0;
                         var skipLayer;
 
@@ -230,8 +230,8 @@ define([
                         }
                         if (registry.byId("imageView").getOptions().length < 1)
                         {
-                            registry.byId("imageView").addOption({label: "No Imagery layer", value: "select"});
-                            registry.byId("secondary").addOption({label: "No Imagery layer", value: "select"});
+                            registry.byId("imageView").addOption({label: this.nls.noImageryLayer, value: "select"});
+                            registry.byId("secondary").addOption({label: this.nls.noImageryLayer, value: "select"});
                         }
                         for (var b in this.layerList1) {
                             if (this.config.primaryLayer && this.config.primaryLayer === this.layerList1[b].id)

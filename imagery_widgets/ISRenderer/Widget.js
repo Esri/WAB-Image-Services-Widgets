@@ -125,7 +125,7 @@ define([
                             }
                         } else {
                             domStyle.set(this.rendererContainer, "display", "none");
-                            html.set(this.rendererErrorContainer, "No visible Imagery Layers in the map.");
+                            html.set(this.rendererErrorContainer, this.nls.error);
                         }
                     }
                 },
@@ -224,7 +224,7 @@ define([
                             registry.byId("service_functions").addOption({label: data[i].name, value: data[i].name});
                         }
                     }
-                    registry.byId("service_functions").addOption({label: "Stretch", value: "Stretch"});
+                    registry.byId("service_functions").addOption({label: this.nls.stretch, value: "Stretch"});
                     if (this.imageServiceLayer.renderingRule) {
                         var rrule = new RasterFunction(this.imageServiceLayer.renderingRule);
                         registry.byId("service_functions").set("value", rrule.functionName);

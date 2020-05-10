@@ -50,10 +50,10 @@ define([
                     for (var a in this.ISLayers) {
                         var layerSetting = domConstruct.create("tbody", {
                             innerHTML: '<tr><br><td>' + this.ISLayers[a].title + '</td></tr>' +
-                                    '<tr><br /><td class="first"><input id="veg_' + a + '" /><label for="veg_' + a + '">Vegetation Index</label></td><td class="first">' +
-                                    '<input id="savi_' + a + '" /><label for="savi_' + a + '">Soil Adjusted Vegetation Index</label>' +
-                                    '</td><td class="first"><input id="water_' + a + '" /><label for="water_' + a + '">Water Index</label></td><td class="first">' +
-                                    '<input id="burn_' + a + '" /><label for="burn_' + a + '">Burn Index</label></td></tr>'
+                                    '<tr><br /><td class="first"><input id="veg_' + a + '" /><label for="veg_' + a + '">' + this.nls.veg + '</label></td><td class="first">' +
+                                    '<input id="savi_' + a + '" /><label for="savi_' + a + '">' + this.nls.savi + '</label>' +
+                                    '</td><td class="first"><input id="water_' + a + '" /><label for="water_' + a + '">' + this.nls.water + '</label></td><td class="first">' +
+                                    '<input id="burn_' + a + '" /><label for="burn_' + a + '">' + this.nls.burn + '</label></td></tr>'
                         });
                         domConstruct.place(layerSetting, dom.byId("setting-table"));
                         var vegIndex = new CheckBox({

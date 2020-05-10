@@ -2,23 +2,23 @@
 
     <div class="settings-section" data-dojo-attach-point="settingSection">
         <table id="setting-table" class="setting-table input-table" cellspacing="0">
-            <tr><td class="first">Display:</td>
+            <tr><td class="first">${nls.display}:</td>
                 <td class="second"><select id="userInterfaceOption" data-dojo-type='dijit/form/Select' style="width: 50px;margin-left: 10px;">
-                        <option value="slider">Slider</option>
-                        <option value="dropdown">DropDown List</option>
-                        <option value="both">Slider and DropDown List</option>
+                        <option value="slider">${nls.slider}</option>
+                        <option value="dropdown">${nls.dropdownList}</option>
+                        <option value="both">${nls.sliderAndDropdownList}</option>
                     </select></td>
-            <tr><td class="first">Minimum zoom level:</td>
+            <tr><td class="first">${nls.minimumZoomLevel}:</td>
                 <td class="second"><div data-dojo-attach-point="selectorZoomLevelInput"  data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="value:8,constraints:{min:0,max:23,places:0},style:{width:'100px',marginLeft:'10px'}"></div></td>
             </tr>
-            <tr><td class="first">Screen search extent(%):</td>
+            <tr><td class="first">${nls.screenSearchExtent}(%):</td>
                 <td class="second"><div data-dojo-attach-point="selectorSearchExtentInput"  data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="value:75,constraints:{min:0,max:100,places:0},style:{width:'100px',marginLeft:'10px'}"></div></td>
             </tr>
             <tr><td class="first"><input data-dojo-attach-point="listImagesSeparate" data-dojo-type="dijit/form/CheckBox" /></td>
-                <td class="second">List each image separately.</td>
+                <td class="second">${nls.listEachImageSeparately}</td>
             </tr>
             <tr><td class="first"><input data-dojo-attach-point="selectorAutoRefresh"  data-dojo-type="dijit/form/CheckBox" /></td>
-                <td class="second">Enable Auto Refresh</td>
+                <td class="second">${nls.enableAutoRefresh}</td>
             </tr>
         </table>
     </div>

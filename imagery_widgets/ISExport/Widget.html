@@ -1,9 +1,9 @@
 <div>
      <div id='selectExportDisplay' style='display: none;'>
          
-    <label for='saveAndExportOption'>Mode:  </label><select data-dojo-type="dijit/form/Select" style="height: 21px;" id="saveAndExportOption">
-           <option value='agol'>Save to Portal</option>
-           <option value='disk'>Save to Disk</option>
+    <label for='saveAndExportOption'>${nls.mode}:  </label><select data-dojo-type="dijit/form/Select" style="height: 21px;" id="saveAndExportOption">
+           <option value='agol'>${nls.saveToPortal}</option>
+           <option value='disk'>${nls.saveToDisk}</option>
          </select>
     <br /><br />
     </div>
@@ -12,30 +12,30 @@
         
  
     <table style="border: 0px solid transparent;">
-    <tr><td><label for="itemTitle" style="color: #0080C0;width:100px;">Title: </label></td><td><textarea id="itemTitle" rows="3" style="height: 40px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+    <tr><td><label for="itemTitle" style="color: #0080C0;width:100px;">${nls.title}: </label></td><td><textarea id="itemTitle" rows="3" style="height: 40px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
             </tr>
             <tr><td>
-                    <label for="itemDescription" style="color: #0080C0;width:100px;">Description: </label></td><td><textarea id="itemDescription"  rows="6" style="height: 80px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+                    <label for="itemDescription" style="color: #0080C0;width:100px;">${nls.description}: </label></td><td><textarea id="itemDescription"  rows="6" style="height: 80px;width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
             </tr>
-            <tr><td><label for="itemTags" style="color : #0080C0;width:100px;">Tags:  </label></td><td><textarea id="itemTags" rows="2" style="width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
+            <tr><td><label for="itemTags" style="color : #0080C0;width:100px;">${nls.tags}:  </label></td><td><textarea id="itemTags" rows="2" style="width: 200px;" data-dojo-type="dijit/form/SimpleTextarea"></textarea></td>
             </tr></table>
             <br />
-            <input data-dojo-type="dijit/form/CheckBox"  id="defineAgolExtent"/> <label for="defineAgolExtent">Define Extent</label><br />
-            <button id="submitAgolBtn" data-dojo-type="dijit/form/Button" type="button" style="margin-left: 40%;">Submit</button>
+            <input data-dojo-type="dijit/form/CheckBox"  id="defineAgolExtent"/> <label for="defineAgolExtent">${nls.defineExtent}</label><br />
+            <button id="submitAgolBtn" data-dojo-type="dijit/form/Button" type="button" style="margin-left: 40%;">${nls.submit}</button>
             <div data-dojo-attach-point="successNotification" style="color: #0080C0;"></div>
     </div>
     <div id="exportSaveContainer" style='display: none;'>
-        <label for="pixelSize">Pixel Size:&nbsp;</label>
+        <label for="pixelSize">${nls.pixelSize}:&nbsp;</label>
         <input type="text" id="pixelSize" data-dojo-type="dijit/form/TextBox" style="width: 100px;"/>&nbsp;&nbsp;m<br /><br />
-        <label for="outputSp">Output Spatial Reference:&nbsp;</label>
+        <label for="outputSp">${nls.outputSpatialReference}:&nbsp;</label>
         <select  id="outputSp" data-dojo-type="dijit/form/Select" style="width: 100px;"></select>
         <div id="errorPixelSize" style="color: #0080C0;"></div><br />
-         <input data-dojo-type="dijit/form/CheckBox"  id="renderer"/> <label for="renderer">Current Renderer</label>
+         <input data-dojo-type="dijit/form/CheckBox"  id="renderer"/> <label for="renderer">${nls.currentRenderer}</label>
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-         <input data-dojo-type="dijit/form/CheckBox"  id="defineExtent"/> <label for="defineExtent">Define Extent</label><br /><br />
-         <p style='text-align: justify;'><b>Note:</b> If Current Renderer is checked, the rendering<br /> is exported, else the original data values<br/>will be exported.</p>
+         <input data-dojo-type="dijit/form/CheckBox"  id="defineExtent"/> <label for="defineExtent">${nls.defineExtent}</label><br /><br />
+         <p style='text-align: justify;'><b>${nls.note}:</b> ${nls.currentRendererChecked}<br /> ${nls.originalDataValues}<br/>${nls.exported}</p>
          <br />
-    <button data-dojo-type="dijit/form/Button"  id="exportBtn" type="button" style="margin-left: 40%" >Export</button>
-    <a href="none" download id="linkDownload" style="display: none;">ExportImage</a>
+    <button data-dojo-type="dijit/form/Button"  id="exportBtn" type="button" style="margin-left: 40%" >${nls.export}</button>
+    <a href="none" download id="linkDownload" style="display: none;">${nls.exportImage}</a>
     </div>
 </div>

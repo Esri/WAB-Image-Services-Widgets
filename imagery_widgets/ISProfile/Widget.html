@@ -2,14 +2,14 @@
     <div data-dojo-attach-point="profileContainer">
     <div id="profileLayerTitle" style="line-height: 17px;"></div>
     <br /><div id="selectType">
-        <label for="type">Type : </label><select id="type" data-dojo-type="dijit/form/Select">
+        <label for="type">${nls.type} : </label><select id="type" data-dojo-type="dijit/form/Select">
         </select>
         <br /><br/>
         <div id="single-value" style="color:#007ac2; display:none;"></div><br />
-        <div data-dojo-attach-point="profileTypeInstruction">Click on the map for a Spectral Profile.</div>
+        <div data-dojo-attach-point="profileTypeInstruction">${nls.clickOnMapSpectral}</div>
     </div>
-    <div id="error-message" style="color:red; display:none;">Error! Cannot compute profile for primary layer.</div>
-    <div id="extent-error-message" style="color:red; display:none;">No data for the selected point.</div>
+    <div id="error-message" style="color:red; display:none;">${nls.cannotComputeProfile}</div>
+    <div id="extent-error-message" style="color:red; display:none;">${nls.noData}</div>
     <div id="identify-error" style="color: red; display:none;"></div>
     <div data-dojo-type="dijit/Dialog" id="chartDialog" title="Profile" style="background-color: white; /*height: 40%; width: 50%;*/ position:relative;" data-dojo-props='focus: function(){}'>
         

@@ -1,5 +1,5 @@
 <div>
-    <input data-dojo-type="dijit/form/CheckBox" id="imageSelector"/> <span id="imageSelectorLabel">Enable Image Selector</span>
+    <input data-dojo-type="dijit/form/CheckBox" id="imageSelector"/> <span id="imageSelectorLabel">${nls.enableImageSelector}</span>
     <div data-dojo-attach-point="selectorDiv" style="display:none;">
         <br />
         <div id="imageSelectorLayerTitle" style="line-height: 17px;"></div>
@@ -11,7 +11,7 @@
             
             <button data-dojo-type="dijit/form/Button" type="button" id="saveSceneBtn" style="float: right;margin-top: -10px;"><img id='savePushDownImage' src="./widgets/ISImageSelector/images/down.png" height="15"/></button>
                 <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'saveSceneBtn',position:['above']">
-                    Set Current as Secondary Layer.
+                    ${nls.setCurrentAsSecondaryLayer}
                 </div>
         </div>
         <div>
@@ -19,13 +19,13 @@
             <div  data-dojo-attach-point="imageSelectorContainer" style="float:left;display:none;margin-right: 5px;">
                 <button data-dojo-type="dijit/form/Button" type="button" id="dropDownImageList"><img src="./widgets/ISImageSelector/images/dropdownlist.png" id="switchDisplayImage" height="15"/></button>
                 <div data-dojo-type="dijit/Tooltip" id="switchDisplayTooltip" data-dojo-props="connectId:'dropDownImageList',position:['below']">
-                    Show images in drop down list.
+                    ${nls.showImageInDropdown}
                 </div>
             </div>
             <div  style="float:right;display:inline-block;">
                 <button data-dojo-type="dijit/form/Button" type="button" id="refreshImageSliderBtn"><img src="widgets/ISImageSelector/images/refresh.png" height="15"/></button>
                 <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'refreshImageSliderBtn',position:['below']">
-                    Refresh query based on current extent.
+                    ${nls.refreshQuery}
                 </div>
             </div>
             <div data-dojo-attach-point='imageSliderDiv'>
@@ -36,19 +36,19 @@
         </div>
         <div>
             <br/>
-            Show: 
+            ${nls.show}: 
             <select id="show" data-dojo-type="dijit/form/Select" style="width:50px;height:12px;">
-                <option value="image">Image</option>
-                <option value="footprint">Footprint</option>
+                <option value="image">${nls.image}</option>
+                <option value="footprint">${nls.footprint}</option>
             </select>
             <div id='ageDiv' style='display: inline-block;'>
-            &nbsp;Age: 
+            &nbsp;${nls.age}: 
             <input id="subtractValue" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="intermediateChanges:true, constraints:{min:0,max:31}, value:0" style="width:60px;height:28px;"/>
             <select id="subtractDateString" data-dojo-type="dijit/form/Select" style="width:50px;height:12px;">
-                <option value="days" selected>Day(s)</option>
-                <option value="weeks" selected>Week(s)</option>
-                <option value="months">Month(s)</option>
-                <option value="years">Year(s)</option>
+                <option value="days" selected>${nls.day}</option>
+                <option value="weeks" selected>${nls.week}</option>
+                <option value="months">${nls.month}</option>
+                <option value="years">${nls.year}</option>
             </select> </div>
         </div>
     </div>

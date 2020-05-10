@@ -80,7 +80,7 @@ define([
                         if (this.primaryLayer) {
                             domStyle.set(this.displayParametersContainer, "display", "block");
                             html.set(this.displayParametersErrorContainer, "");
-                            html.set(this.parametersLayerTitle, "Layer: <b>" + ((this.primaryLayer.arcgisProps && this.primaryLayer.arcgisProps.title) ? this.primaryLayer.arcgisProps.title : (this.primaryLayer.title || this.primaryLayer.name || this.primaryLayer.id)) + "</b>");
+                            html.set(this.parametersLayerTitle, this.nls.layer + ": <b>" + ((this.primaryLayer.arcgisProps && this.primaryLayer.arcgisProps.title) ? this.primaryLayer.arcgisProps.title : (this.primaryLayer.title || this.primaryLayer.name || this.primaryLayer.id)) + "</b>");
 
                             if (this.primaryLayer.interpolation) {
                                 registry.byId("interpolation").set("value", this.primaryLayer.interpolation);
@@ -100,7 +100,7 @@ define([
                             }
                         } else {
                             domStyle.set(this.displayParametersContainer, "display", "none");
-                            html.set(this.displayParametersErrorContainer, "No visible Imagery Layers in the map.");
+                            html.set(this.displayParametersErrorContainer, this.nls.error);
                         }
                     }
                 },
