@@ -27,8 +27,11 @@ define([
     "esri/layers/ArcGISImageServiceLayer", "esri/layers/RasterLayer",
     "esri/layers/ImageServiceParameters",
     "dojo/dom-construct",
-    "dojo/i18n!./nls/strings",
+    
     "dojo/dom-style",
+    "dijit/form/HorizontalRule",
+    "dijit/form/HorizontalRuleLabels",
+    "dijit/form/HorizontalSlider",
     "dijit/form/Select",
     "dijit/form/Button",
     "dijit/form/NumberSpinner",
@@ -51,7 +54,7 @@ define([
                 html, esriRequest, Query, geometryEngine, QueryTask,
                 ArcGISImageServiceLayer, RasterLayer,
                 ImageServiceParameters,
-                domConstruct, strings, domStyle) {
+                domConstruct, domStyle) {
 
             var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
                 templateString: template,
@@ -107,11 +110,11 @@ define([
                                 this.prevPrimaryLayer = this.primaryLayer.url;
                             } else {
                                 domStyle.set("changeDetectionDisplay", "display", "none");
-                                html.set(this.setPrimarySecondaryLayers, strings.error);
+                                html.set(this.setPrimarySecondaryLayers, this.nls.error);
                             }
                         } else {
                             domStyle.set("changeDetectionDisplay", "display", "none");
-                            html.set(this.setPrimarySecondaryLayers, strings.error);
+                            html.set(this.setPrimarySecondaryLayers, this.nls.error);
                         }
                     }
                 },
