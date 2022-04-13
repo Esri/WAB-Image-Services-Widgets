@@ -297,18 +297,21 @@ define([
             this.mapUpdateHandler = this.map.on("update-end", lang.hitch(this, function () {
                 var imageLayerArray = [];
                 if (this.map.primaryLayer) {
-                    for (var m in this.map.layerIds) {
-                        if (this.map.layerIds[m] === this.map.primaryLayer)
-                        {
-                            imageLayerArray.push(m);
-                            break;
+                    var layer = this.map.getLayer(this.map.primaryLayer);
+                    if (!layer.tileMode && !layer.virtualTileInfo) {
+                        for (var m in this.map.layerIds) {
+                            if (this.map.layerIds[m] === this.map.primaryLayer)
+                            {
+                                imageLayerArray.push(m);
+                                break;
+                            }
                         }
                     }
                 } else {
                     for (var d = this.map.layerIds.length - 1; d >= 0; d--) {
                         var layer = this.map.getLayer(this.map.layerIds[d]);
                         var title = layer.arcgisProps && layer.arcgisProps.title ? layer.arcgisProps.title : layer.title;
-                        if (layer && layer.visible && layer.serviceDataType && layer.serviceDataType.substr(0, 16) === "esriImageService" && layer.id !== this.map.resultLayer && layer.id !== "resultLayer" && layer.id !== "scatterResultLayer" && (!title || ((title).charAt(title.length - 1)) !== "_")) {
+                        if (layer && layer.visible && layer.serviceDataType && layer.serviceDataType.substr(0, 16) === "esriImageService" && layer.id !== this.map.resultLayer && layer.id !== "resultLayer" && layer.id !== "scatterResultLayer" && (!title || ((title).charAt(title.length - 1)) !== "_") && (!layer.tileMode && !layer.virtualTileInfo)) {
                             imageLayerArray.push(d);
                             break;
                         }
@@ -482,13 +485,16 @@ define([
                 domStyle.set(dom.byId('scatterplotNode'), 'display', 'block');
                 domStyle.set(dom.byId('noCanvasSupport'), 'display', 'none');
                 if (this.map.primaryLayer) {
-                    this.layer = this.map.getLayer(this.map.primaryLayer);
-                    this._populateDropDown();
+                    var layer = this.map.getLayer(this.map.primaryLayer);
+                    if (!layer.tileMode && !layer.virtualTileInfo) {
+                        this.layer = this.map.getLayer(this.map.primaryLayer);
+                        this._populateDropDown();
+                    }
                 } else {
                     for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
                         var layer = this.map.getLayer(this.map.layerIds[a]);
                         var title = layer.arcgisProps && layer.arcgisProps.title ? layer.arcgisProps.title : layer.title;
-                        if (layer && layer.visible && layer.serviceDataType && layer.serviceDataType.substr(0, 16) === "esriImageService" && layer.id !== this.map.resultLayer && layer.id !== "resultLayer" && layer.id !== "scatterResultLayer" && (!title || ((title).charAt(title.length - 1)) !== "_")) {
+                        if (layer && layer.visible && layer.serviceDataType && layer.serviceDataType.substr(0, 16) === "esriImageService" && layer.id !== this.map.resultLayer && layer.id !== "resultLayer" && layer.id !== "scatterResultLayer" && (!title || ((title).charAt(title.length - 1)) !== "_") && (!layer.tileMode && !layer.virtualTileInfo)) {
                             this.layer = layer;
                             this._populateDropDown();
                             break;
@@ -496,7 +502,7 @@ define([
                     }
                 }
                 if (this.layer) {
-                    html.set(this.scatterPlotLayerTitle, this.nls.layer +": <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
+                    html.set(this.scatterPlotLayerTitle, this.nls.layer + ": <b>" + (this.layer.title || this.layer.arcgisProps.title || this.layer.name || this.layer.id) + "</b>");
                     domStyle.set("scatterplotNode", "display", "block");
                     html.set(this.scatterplotErrorContainer, "");
                 } else {

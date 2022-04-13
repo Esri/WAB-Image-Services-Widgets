@@ -28,7 +28,5 @@ define({
 		noSceneInCurrentExtent: "No scenes in current extent.",
 		date: "Date(s)",
 		warning: "Number of footprints selected exceed 20. Only first 20 will be displayed. Press OK not to warn again."				
-    }),
-    "ar": 1,
-    "fr": 1
+    })
 });

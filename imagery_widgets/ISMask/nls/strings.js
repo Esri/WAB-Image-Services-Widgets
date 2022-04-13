@@ -20,7 +20,5 @@ define({
 		shortWaveInfraredBand: "Short-wave Infrared Band",
 		bandA: "Band A",
 		bandB: "Band B"
-    }),
-    "ar": 1,
-    "fr": 1
+    })
 });

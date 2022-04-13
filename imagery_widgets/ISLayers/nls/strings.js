@@ -14,7 +14,5 @@ define({
 		selectPrimaryLayer: "Select primary layer",
 		selectSecondaryLayer: "Select secondary layer",
 		noImageryLayer: "No Imagery layer"
-    }),
-    "ar": 1,
-    "fr": 1    
+    })  
 });

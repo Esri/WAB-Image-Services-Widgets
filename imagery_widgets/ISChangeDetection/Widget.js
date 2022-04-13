@@ -75,17 +75,25 @@ define([
                 refreshData: function () {
                     if (this.map.layerIds) {
                         if (this.map.primaryLayer) {
-                            this.primaryLayer = this.map.getLayer(this.map.primaryLayer);
-                            if (this.map.secondaryLayer)
-                                this.secondaryLayer = this.map.getLayer(this.map.secondaryLayer);
+                            var layer = this.map.getLayer(this.map.primaryLayer);
+                            if(!layer.tileMode && !layer.virtualTileInfo)
+                                this.primaryLayer = layer;
                             else
+                                this.primaryLayer = null;
+                            if (this.map.secondaryLayer) {
+                                var layer = this.map.getLayer(this.map.secondaryLayer);
+                                if(!layer.tileMode && !layer.virtualTileInfo)
+                                    this.secondaryLayer = layer;
+                                else
+                                    this.secondaryLayer =  null;
+                            } else
                                 this.secondaryLayer = null;
                         } else {
                             this.layersOnMap = [];
                             for (var a = 0; a < this.map.layerIds.length; a++) {
                                 var layerObject = this.map.getLayer(this.map.layerIds[a]);
                                 var title = layerObject.arcgisProps && layerObject.arcgisProps.title ? layerObject.arcgisProps.title : layerObject.title;
-                                if (layerObject && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_")) {
+                                if (layerObject && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_") && (!layerObject.tileMode && !layerObject.virtualTileInfo)) {
 
                                     this.layersOnMap.push({
                                         layer: layerObject,

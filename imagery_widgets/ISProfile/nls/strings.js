@@ -23,7 +23,5 @@ define({
 		ndmi: "NDMI Data Value on ",
 		urban: "Urban Data Value on ",
         ndvi: "NDVI Data Value on " 		
-    }),
-    "ar": 1,
-    "fr": 1
+    })
 });

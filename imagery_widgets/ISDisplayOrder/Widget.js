@@ -138,7 +138,7 @@ define([
                 },
                 populateAttributes: function () {
                     this.previousImageServiceLayerUrl = this.imageServiceLayer.url;
-                    if (this.imageServiceLayer.fields)
+                    if (this.imageServiceLayer.fields && this.imageServiceLayer.fields.length)
                     {
                         registry.byId("sortField").removeOption(registry.byId('sortField').getOptions());
                         this.saveFields = [];
@@ -173,13 +173,17 @@ define([
                                 registry.byId("sortField").addOption({label: data.fields[i].name, value: data.fields[i].name});
                                 this.saveFields[data.fields[i].name] = data.fields[i].type;
                             }
-
-                            if (this.saveFields[data.fields[0].name] === "esriFieldTypeDate") {
-                                domStyle.set(registry.byId("sortValueDate").domNode, "display", "inline-block");
-                                domStyle.set(registry.byId("sortValue").domNode, "display", "none");
+                            if (data.fields.length) {
+                                if (this.saveFields[data.fields[0].name] === "esriFieldTypeDate") {
+                                    domStyle.set(registry.byId("sortValueDate").domNode, "display", "inline-block");
+                                    domStyle.set(registry.byId("sortValue").domNode, "display", "none");
+                                } else {
+                                    domStyle.set(registry.byId("sortValueDate").domNode, "display", "none");
+                                    domStyle.set(registry.byId("sortValue").domNode, "display", "inline-block");
+                                }
                             } else {
                                 domStyle.set(registry.byId("sortValueDate").domNode, "display", "none");
-                                domStyle.set(registry.byId("sortValue").domNode, "display", "inline-block");
+                                domStyle.set(registry.byId("sortValue").domNode, "display", "none");
                             }
                             this.displaymosaic();
                         }), function (error) {

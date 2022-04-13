@@ -37,7 +37,7 @@ define([
                     this.inherited(arguments);
                     var operationalLayers = this.map.itemInfo.itemData.operationalLayers;
                     for (var a in operationalLayers) {
-                        if (operationalLayers[a].layerType === "ArcGISImageServiceLayer" || (operationalLayers[a].layerObject && operationalLayers[a].layerObject.serviceDataType && operationalLayers[a].layerObject.serviceDataType.indexOf("esriImageService") !== -1)) {
+                        if ((operationalLayers[a].layerType === "ArcGISImageServiceLayer" || (operationalLayers[a].layerObject && operationalLayers[a].layerObject.serviceDataType && operationalLayers[a].layerObject.serviceDataType.indexOf("esriImageService") !== -1)) && (!operationalLayers[a].layerObject.tileMode && !operationalLayers[a].layerObject.virtualTileInfo)) {
                          var title = (operationalLayers[a].title || (operationalLayers[a].layerObject ? operationalLayers[a].layerObject.name : operationalLayers[a].id) || "Layer" + a);
                             if(title.charAt(title.length - 1) !== "_"){
                              this.ISLayers[a] = this.map.getLayer(operationalLayers[a].id);
@@ -73,6 +73,15 @@ define([
                 },
                 setConfig: function (config) {
                     this.config = config;
+                    for (var a in this.ISLayers) {
+                        var label = this.ISLayers[a].id;
+                        if (config[label]) {
+                            registry.byId("veg_" + a).set('checked', config[label].veg);
+                            registry.byId("savi_" + a).set('checked', config[label].savi);
+                            registry.byId("water_" + a).set('checked', config[label].water);
+                            registry.byId("burn_" + a).set('checked', config[label].burn);
+                        }
+                    }
                 },
                 getConfig: function () {
                     for (var a in this.ISLayers) {

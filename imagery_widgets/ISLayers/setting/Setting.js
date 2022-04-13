@@ -46,6 +46,8 @@ define([
                 },
                 setConfig: function (config) {
                     this.config = config;
+                    registry.byId("primaryLayerSelect").set("value", config.primaryLayer);
+                    registry.byId("secondaryLayerSelect").set("value", config.secondaryLayer);
                 },
                 getConfig: function () {
                     this.config.primaryLayer = registry.byId("primaryLayerSelect").get("value");

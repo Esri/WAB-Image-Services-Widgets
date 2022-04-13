@@ -183,6 +183,7 @@ define([
                         rasterFunction.variableName = "Raster";
                         this.imageServiceLayer.setRenderingRule(rasterFunction, true);
                     } else {
+                        this.imageServiceLayer.setBandIds([], false);
                         this.imageServiceLayer.setRenderingRule('', true);
                     }
 
@@ -219,7 +220,7 @@ define([
 
                     registry.byId("service_functions").removeOption(registry.byId('service_functions').getOptions());
 
-                    if (this.imageServiceLayer) {
+                    if (this.imageServiceLayer && data) {
                         for (var i = 0; i < data.length; i++) {
                             registry.byId("service_functions").addOption({label: data[i].name, value: data[i].name});
                         }
