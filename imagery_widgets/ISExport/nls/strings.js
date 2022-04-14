@@ -29,7 +29,5 @@ define({
 		errorPixelSize: "Error! No Imagery Layer visible on the map.",
 		layer: "Layer",
 		exportLayerMsg: "No visible imagery layers on the map."		
-    }),
-    "ar": 1,
-    "fr": 1
+    })
 });

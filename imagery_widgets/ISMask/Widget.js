@@ -56,13 +56,15 @@ define([
                 refreshData: function () {
                     if (this.map.layerIds) {
                         if (this.map.primaryLayer) {
-                            this.primaryLayer = this.map.getLayer(this.map.primaryLayer);
+                            var layer = this.map.getLayer(this.map.primaryLayer);
+                            if(!layer.tileMode && !layer.virtualTileInfo)
+                            this.primaryLayer = layer;
                         } else {
                             this.layersOnMap = [];
                             for (var a = 0; a < this.map.layerIds.length; a++) {
                                 var layerObject = this.map.getLayer(this.map.layerIds[a]);
                                 var title = layerObject.arcgisProps && layerObject.arcgisProps.title ? layerObject.arcgisProps.title : layerObject.title;
-                                if (layerObject && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.indexOf("esriImageService") !== -1 && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_")) {
+                                if (layerObject && layerObject.visible && layerObject.serviceDataType && layerObject.serviceDataType.indexOf("esriImageService") !== -1 && layerObject.id !== "resultLayer" && layerObject.id !== "scatterResultLayer" && layerObject.id !== this.map.resultLayer && (!title || ((title).charAt(title.length - 1)) !== "_") && (!layerObject.tileMode && !layerObject.virtualTileInfo)) {
 
                                     this.layersOnMap.push({
                                         layer: layerObject,

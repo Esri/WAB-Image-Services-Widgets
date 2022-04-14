@@ -45,6 +45,7 @@ define([
                 },
                 setConfig: function (config) {
                     this.config = config;
+                    registry.byId("settingsSaveMode").set("value", config.exportMode);
                 },
                 getConfig: function () {
                     this.config.exportMode = registry.byId("settingsSaveMode").get("value");

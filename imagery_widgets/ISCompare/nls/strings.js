@@ -8,7 +8,5 @@ define({
 		horizontalSwipe: "Horizontal Swipe",
 		verticalSwipe: "Vertical Swipe",
 		noLayer: "No visible Imagery Layers available for comparison."
-    }),
-    "ar": 1,
-    "fr": 1
+    })
 });

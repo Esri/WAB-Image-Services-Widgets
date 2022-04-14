@@ -480,7 +480,7 @@ define([
 
                                 domAttr.set("linkDownload", "href", data.href);
 
-                                domAttr.set("linkDownload", "target", "_self");
+                                domAttr.set("linkDownload", "target", "_blank");
                                 (document.getElementById("linkDownload")).click();
                                 domStyle.set("loadingISExport", "display", "none");
 
@@ -659,13 +659,17 @@ define([
                         if ((this.map.resultLayer && this.map.getLayer(this.map.resultLayer).visible) || (this.map.getLayer("resultLayer") && this.map.getLayer("resultLayer").visible)) {
                             this.imageServiceLayer = this.map.resultLayer ? this.map.getLayer(this.map.resultLayer) : this.map.getLayer("resultLayer");
                         } else if (this.map.primaryLayer && this.map.getLayer(this.map.primaryLayer).visible) {
-                            this.imageServiceLayer = this.map.getLayer(this.map.primaryLayer);
+                            var layer = this.map.getLayer(this.map.primaryLayer);
+                            if(!layer.tileMode && !layer.virtualTileInfo)
+                            this.imageServiceLayer = layer;
                         } else if (this.map.secondaryLayer && this.map.getLayer(this.map.secondaryLayer).visible) {
-                            this.imageServiceLayer = this.map.getLayer(this.map.secondaryLayer);
+                            var layer = this.map.getLayer(this.map.secondaryLayer);;
+                            if(!layer.tileMode && !layer.virtualTileInfo)
+                            this.imageServiceLayer = layer;
                         } else {
                             for (var a = this.map.layerIds.length - 1; a >= 0; a--) {
                                 var layerObject = this.map.getLayer(this.map.layerIds[a]);
-                                if (layerObject && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.visible) {
+                                if (layerObject && layerObject.serviceDataType && layerObject.serviceDataType.substr(0, 16) === "esriImageService" && layerObject.visible && (!layerObject.tileMode && !layerObject.virtualTileInfo)) {
                                     this.imageServiceLayer = layerObject;
                                     break;
                                 }

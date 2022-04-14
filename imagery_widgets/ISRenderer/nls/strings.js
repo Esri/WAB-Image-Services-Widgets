@@ -20,7 +20,7 @@ define({
 		apply: "Apply",
         error: "No visible Imagery Layers in the map.",
         stretch: "Stretch"		
-    }),
-    "ar": 1,
-    "fr": 1
+    })
+    
+    
 });

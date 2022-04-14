@@ -87,6 +87,11 @@ define([
                             }
                         }
                     }
+                    registry.byId("userInterfaceOption").set("value",config.display);
+                    this.selectorZoomLevelInput.set("value",config.zoomLevel);
+                    this.selectorSearchExtentInput.set("value",config.searchExtent);
+                    this.listImagesSeparate.set("value",config.listImagesSeparate);
+                    this.selectorAutoRefresh.set("checked",config.autoRefresh);
                 },
                 getConfig: function () {
                     for (var a in this.ISLayers) {
@@ -101,7 +106,7 @@ define([
                     this.config.display = registry.byId("userInterfaceOption").get("value");
                     this.config.zoomLevel = this.selectorZoomLevelInput.get("value");
                     this.config.searchExtent = this.selectorSearchExtentInput.get("value");
-                    this.config.listImagesSeparate = this.listImagesSeparate.get("value");
+                    this.config.listImagesSeparate = this.listImagesSeparate.get("checked");
                     this.config.autoRefresh = this.selectorAutoRefresh.get("checked");
                     return this.config;
                 },

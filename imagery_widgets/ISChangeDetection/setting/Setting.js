@@ -37,7 +37,7 @@ define([
                     this.inherited(arguments);
                     var i = 0, j = 0;
                     for (var a in this.map.layerIds) {
-                        if (this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) {
+                        if ((this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) && (!this.map.getLayer(this.map.layerIds[a]).tileMode && !this.map.getLayer(this.map.layerIds[a]).virtualTileInfo)) {
                             var title = (this.map.getLayer(this.map.layerIds[a])).arcgisProps ? (this.map.getLayer(this.map.layerIds[a])).arcgisProps.title : "";
                            if(title.charAt(title.length - 1) !== "_"){// if (!((title.toLowerCase()).includes("_result"))) {
                                 this.ISLayers[i] = this.map.getLayer(this.map.layerIds[a]);
@@ -85,6 +85,15 @@ define([
                 },
                 setConfig: function (config) {
                     this.config = config;
+                    for (var a in this.ISLayers) {
+                        var label = this.ISLayers[a].url.split('//')[1];
+                        if (config[label]) {
+                            registry.byId("veg_" + a).set('checked', config[label].veg);
+                            registry.byId("savi_" + a).set('checked', config[label].savi);
+                            registry.byId("water_" + a).set('checked', config[label].water);
+                            registry.byId("burn_" + a).set('checked', config[label].burn);
+                        }
+                    }
                 },
                 getConfig: function () {
                     for (var a in this.ISLayers) {

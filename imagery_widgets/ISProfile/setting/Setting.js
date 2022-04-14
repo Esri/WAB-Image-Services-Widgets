@@ -66,7 +66,7 @@ define([
                     this.inherited(arguments);
                     var i = 0, j = 0;
                     for (var a in this.map.layerIds) {
-                        if (this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) {
+                        if ((this.map.getLayer(this.map.layerIds[a]).type === 'ArcGISImageServiceLayer' || (this.map.getLayer(this.map.layerIds[a]).serviceDataType && this.map.getLayer(this.map.layerIds[a]).serviceDataType.substr(0, 16) === "esriImageService")) && (!this.map.getLayer(this.map.layerIds[a]).tileMode && !this.map.getLayer(this.map.layerIds[a]).virtualTileInfo)) {
                             var title = (this.map.getLayer(this.map.layerIds[a])).arcgisProps ? (this.map.getLayer(this.map.layerIds[a])).arcgisProps.title : "";
                             if((title.charAt(title.length - 1)) !== "_"){//if (!((title.toLowerCase()).includes("_result"))) {
                             this.ISLayers[i] = this.map.getLayer(this.map.layerIds[a]);
@@ -102,22 +102,22 @@ define([
                                 registry.byId("bandCount_" + a).set('value', config[label].bandCount);
                             }
                             if (config[label].bandNames !== undefined) {
-                                var val;
+                                var val = "";
+                                
                                 for (var i in config[label].bandNames) {
-                                    if (registry.byId("bandNames_" + a).get('value')) {
-                                        val = registry.byId("bandNames_" + a).get('value') + "," + config[label].bandNames[i];
-                                    } else {
+                                    if(Number(i) === 0)
                                         val = config[label].bandNames[i];
-                                    }
-                                    registry.byId("bandNames_" + a).set('value', val);
+                                    else
+                                        val += ","+config[label].bandNames[i];
                                 }
-                                registry.byId("bandNames_" + a).set('value', config[label].bandNames);
+                                registry.byId("bandNames_" + a).set('value', val);
+                               // registry.byId("bandNames_" + a).set('value', config[label].bandNames);
                             }
                             if (config[label].category !== undefined) {
                                 registry.byId("category_" + a).set('value', config[label].category);
                             }
-                            if (config[label].acquisitionDate !== undefined) {
-                                registry.byId("acquisitionDate_" + a).set('value', config[label].acquisitionDate);
+                            if (config[label].field !== undefined) {
+                                registry.byId("acquisitionDate_" + a).set('value', config[label].field);
                             }
                             if (config[label].nirIndex !== undefined) {
                                 registry.byId("nirIndex_" + a).set('value', config[label].nirIndex);
@@ -128,6 +128,8 @@ define([
                             if (config[label].swirIndex !== undefined) {
                                 registry.byId("swirIndex_" + a).set('value', config[label].swirIndex);
                             }
+                            if(config[label].yAxisLabel !== undefined && config[label].yAxisLabel !== this.nls.dataValues)
+                                registry.byId("yAxisLabel_"+a).set("value", config[label].yAxisLabel || "");
                         }
                     }
                 },
@@ -389,7 +391,7 @@ define([
                         }
                     }
 
-                    if (this.ISLayers.length)
+                    if (this.ISLayers.length && !Object.keys(this.config).length)
                         this.loopRequest(0);
                 },
                 _populateDropDown: function (node, fields, dataType, regExpr) {
